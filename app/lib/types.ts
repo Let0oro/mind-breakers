@@ -4,6 +4,7 @@ export interface Profile {
   username: string
   level: number
   total_xp: number
+  is_admin: boolean
   created_at: string
 }
 
@@ -143,3 +144,29 @@ export interface BreadcrumbProps {
   items?: BreadcrumbItem[]
   autoGenerate?: boolean
 }
+
+// Admin system types
+export interface AdminRequest {
+  id: string
+  user_id: string
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  reviewed_at?: string
+  reviewed_by?: string
+  profiles?: Profile  // User who requested
+  reviewer?: Profile  // Admin who reviewed
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  type: 'exercise_approved' | 'exercise_rejected' | 'level_up' | 'achievement' | 'admin_request_approved' | 'admin_request_rejected' | 'new_admin_request'
+  link?: string
+  read: boolean
+  created_at: string
+  expires_at: string
+}
+
