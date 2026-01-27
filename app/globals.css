@@ -5,29 +5,122 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =================================================================
-   View Transitions API - Animación circular desde el botón
+   View Transitions API - Smooth theme transitions
    ================================================================= */
+/* 
+::view-transition-new(root) {
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="white"/></svg>')
+    center / 0 no-repeat;
+  animation: scale 1s;
+  animation-fill-mode: both;
+}
+
 ::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-}
-
-::view-transition-new(root) {
-  z-index: 999;
-}
-
 .dark::view-transition-old(root) {
-  z-index: 999;
+  animation: none;
+  animation-fill-mode: both;
+  z-index: -1;
+}
+.dark::view-transition-new(root) {
+  animation: scale 1s;
+  animation-fill-mode: both;
 }
 
-.dark::view-transition-new(root) {
-  z-index: 1;
+@keyframes scale {
+  to {
+    mask-size: 200vmax;
+  }
 }
+
+::view-transition-group(root) {
+  animation-duration: 0.7s;
+} */
+
+
+/* CUSTOM VIEW TRANSITION LINEAR */
+/* ::view-transition-group(root) {
+  animation-duration: 0.7s;
+  animation-timing-function: var(--expo-out);
+}
+      
+::view-transition-new(root) {
+  animation-name: reveal-light;
+  animation-fill-mode: both;
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  animation: none;
+  animation-fill-mode: both;
+  z-index: -1;
+}
+.dark::view-transition-new(root) {
+  animation-name: reveal-dark;
+  animation-fill-mode: both;
+}
+
+@keyframes reveal-dark {
+  from {
+    clip-path: polygon(50% -71%, -50% 71%, -50% 71%, 50% -71%);
+  }
+  to {
+    clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
+  }
+}
+
+@keyframes reveal-light {
+  from {
+    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+  }
+  to {
+    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+  }
+} */
+
+
+/* CUSTOM VIEW TRANSITION GIFT */
+::view-transition-group(root) {
+  animation-timing-function: var(--expo-in);
+}
+
+::view-transition-new(root) {
+
+  /* SKELETON */
+  /* --url: url('https://tenor.com/es/view/skeleton-dance-moves-dancing-skeleton-dance-steps-gif-17167276'); */
+  /* ANIME */
+  --url: url('https://media.tenor.com/cyORI7kwShQAAAAi/shigure-ui-dance.gif');
+  /* JOKE */
+  /* --url: url('https://media.tenor.com/Jz0aSpk9VIQAAAAi/i-love-you-love.gif'); */
+
+  @supports(-webkit-mask: var(--url)) 
+  or (mask: var(--url)) {
+    mask: var(--url) center / 0 no-repeat;
+  }
+  animation: scale 3s; /* 1.5s */
+  animation-fill-mode: both;
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  animation: scale 3s; /* 1.5s */
+  animation-fill-mode: both;
+}
+
+@keyframes scale {
+  0% {
+    mask-size: 0;
+  }
+  10%, 90% {
+    mask-size: 25vmax;
+  }
+  100% {
+    mask-size: 2000vmax;
+  }
+}
+
+
+
+
 
 /* =================================================================
    Theme Variables - Primary Color Tokens
@@ -37,7 +130,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  
+
   /* Sidebar Colors */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -47,14 +140,14 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  
+
   /* Chart Colors */
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
-  
+
   /* UI Element Colors */
   --color-ring: var(--ring);
   --color-input: var(--input);
@@ -72,7 +165,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  
+
   /* Border Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -95,11 +188,9 @@
 }
 
 .hero-gradient {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(37, 37, 244, 0.15) 0%,
-    rgba(10, 10, 10, 1) 70%
-  );
+  background: radial-gradient(circle at 50% 50%,
+      rgba(37, 37, 244, 0.15) 0%,
+      rgba(10, 10, 10, 1) 70%);
 }
 
 /* =================================================================
@@ -138,6 +229,25 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --expo-in: linear(
+    0 0%, 0.0085 31.26%, 0.0167 40.94%,
+    0.0289 48.86%, 0.0471 55.92%,
+    0.0717 61.99%, 0.1038 67.32%,
+    0.1443 72.07%, 0.1989 76.7%,
+    0.2659 80.89%, 0.3465 84.71%,
+    0.4419 88.22%, 0.554 91.48%,
+    0.6835 94.51%, 0.8316 97.34%, 1 100%
+  );
+  --expo-out: linear(
+    0 0%, 0.1684 2.66%, 0.3165 5.49%,
+    0.446 8.52%, 0.5581 11.78%,
+    0.6535 15.29%, 0.7341 19.11%,
+    0.8011 23.3%, 0.8557 27.93%,
+    0.8962 32.68%, 0.9283 38.01%,
+    0.9529 44.08%, 0.9711 51.14%,
+    0.9833 59.06%, 0.9915 68.74%, 1 100%
+  );
 }
 
 /* =================================================================

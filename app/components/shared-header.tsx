@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ThemeToggle } from './ThemeToggle'
 
 export default function SharedHeader() {
     const pathname = usePathname()
@@ -16,7 +17,7 @@ export default function SharedHeader() {
                         <h2 className="text-foreground text-2xl font-bold tracking-tight">MindBreaker</h2>
                     </Link>
 
-                    
+
 
                     {!isAuthPage && (
                         <nav className="hidden md:flex items-center gap-8">
@@ -43,24 +44,26 @@ export default function SharedHeader() {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <ThemeToggle />
+
                     {isAuthPage ? (
                         <div className="flex items-center gap-4">
-                        <Link
-                            href="/"
-                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            Back to Home
-                        </Link>
-                        {pathname?.startsWith('/login') ? (
-                            <Link href="/register" className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#137fec] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
-                                <span className="truncate">Create account</span>
+                            <Link
+                                href="/"
+                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                Back to Home
                             </Link>
-                        ) : (
-                            <Link href="/login" className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#137fec] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
-                                <span className="truncate">Login</span>
-                            </Link>
-                        )}
-                    </div>
+                            {pathname?.startsWith('/login') ? (
+                                <Link href="/register" className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#137fec] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
+                                    <span className="truncate">Create account</span>
+                                </Link>
+                            ) : (
+                                <Link href="/login" className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#137fec] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
+                                    <span className="truncate">Login</span>
+                                </Link>
+                            )}
+                        </div>
                     ) : (
                         <>
                             <Link

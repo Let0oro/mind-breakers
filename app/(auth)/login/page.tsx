@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
@@ -15,15 +15,17 @@ export default function LoginPage() {
   const supabase = createClient()
 
   // Load saved email on mount
-  useState(() => {
-    const savedEmail = localStorage.getItem('MindBreaker_email')
-    const rememberMeWasChecked = localStorage.getItem('MindBreaker_remember')
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedEmail = localStorage.getItem('MindBreaker_email')
+      const rememberMeWasChecked = localStorage.getItem('MindBreaker_remember')
 
-    if (savedEmail && rememberMeWasChecked === 'true') {
-      setEmail(savedEmail)
-      setRememberMe(true)
+      if (savedEmail && rememberMeWasChecked === 'true') {
+        setEmail(savedEmail)
+        setRememberMe(true)
+      }
     }
-  })
+  }, [])
 
   // Save email if remember me is checked
   const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +90,7 @@ export default function LoginPage() {
   return (
     <div>
       {/* Top Navigation Bar */}
-      
+
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden min-h-screen bg-[#f6f7f8] dark:bg-[#101922]">
