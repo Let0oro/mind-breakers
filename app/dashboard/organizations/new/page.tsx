@@ -17,13 +17,15 @@ export default function NewOrganizationPage() {
 
     const formData = new FormData(e.currentTarget)
 
-    const { error: insertError } = await supabase
+    const { data, error: insertError } = await supabase
       .from('organizations')
       .insert({
         name: formData.get('name') as string,
-        description: formData.get('description') as string,
-        website_url: formData.get('website_url') as string,
+        description: formData.get('description') as string || null,
+        website_url: formData.get('website_url') as string || null,
       })
+      .select()
+      .single()
 
     if (insertError) {
       setError(insertError.message)
@@ -31,83 +33,130 @@ export default function NewOrganizationPage() {
       return
     }
 
-    router.back()
+    router.push('/dashboard/organizations')
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-2xl px-4">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Crear organización
-          </h1>
+    <>
+      {/* Header */}
+      <header className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => router.back()}
+            className="text-[#9dabb9] hover:text-white transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2 className="text-white text-3xl font-black tracking-tight">Add Organization</h2>
+        </div>
+        <p className="text-[#9dabb9] text-base">
+          Register a content creator or educational organization
+        </p>
+      </header>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
+      {/* Form */}
+      <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
+              <p className="text-red-500 text-sm font-medium flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">error</span>
                 {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="ej: freeCodeCamp, Udemy, MIT"
-              />
+              </p>
             </div>
+          )}
 
-            <div>
-              <label htmlFor="website_url" className="block text-sm font-medium text-gray-700 mb-2">
-                Sitio web
-              </label>
+          {/* Name */}
+          <div className="space-y-2">
+            <label htmlFor="name" className="block text-white text-sm font-bold">
+              Organization Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              placeholder="e.g., Meta, Google, MIT, etc."
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <label htmlFor="description" className="block text-white text-sm font-bold">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={4}
+              className="w-full px-4 py-3 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+              placeholder="Brief overview of the organization and what they teach..."
+            />
+          </div>
+
+          {/* Website URL */}
+          <div className="space-y-2">
+            <label htmlFor="website_url" className="block text-white text-sm font-bold">
+              Website
+            </label>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9dabb9]">
+                language
+              </span>
               <input
                 type="url"
                 id="website_url"
                 name="website_url"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="https://..."
+                className="w-full h-12 pl-12 pr-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                placeholder="https://example.com"
               />
             </div>
+          </div>
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={4}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Breve descripción de la organización..."
-              />
-            </div>
-
+          {/* Info Box */}
+          <div className="bg-[#137fec]/10 border border-[#137fec]/30 rounded-lg p-4">
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {loading ? 'Creando...' : 'Crear'}
-              </button>
+              <span className="material-symbols-outlined text-[#137fec] mt-0.5">info</span>
+              <div>
+                <p className="text-[#137fec] text-sm font-bold mb-1">What's Next?</p>
+                <p className="text-white text-sm">
+                  After creating this organization, you can associate it with learning paths and courses when creating them.
+                </p>
+              </div>
             </div>
-          </form>
-        </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex-1 h-12 rounded-lg border border-[#3b4754] text-white font-medium hover:bg-[#283039] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 h-12 rounded-lg bg-[#137fec] text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-xl">add</span>
+                  Add Organization
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-    </div>
+    </>
   )
 }

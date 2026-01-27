@@ -16,7 +16,7 @@ export default function NewPathPage() {
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       router.push('/login')
@@ -44,79 +44,122 @@ export default function NewPathPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-2xl px-4">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Crear nuevo Learning Path
-          </h1>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Título *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="ej: Fundamentos de React"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="summary" className="block text-sm font-medium text-gray-700 mb-2">
-                Resumen
-              </label>
-              <input
-                type="text"
-                id="summary"
-                name="summary"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Descripción corta (1-2 líneas)"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción completa
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={6}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Describe en detalle qué aprenderá el usuario..."
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {loading ? 'Creando...' : 'Crear Path'}
-              </button>
-            </div>
-          </form>
+    <>
+      {/* Header */}
+      <header className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => router.back()}
+            className="text-[#9dabb9] hover:text-white transition-colors"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2 className="text-white text-3xl font-black tracking-tight">Create Learning Path</h2>
         </div>
+        <p className="text-[#9dabb9] text-base">
+          Define a structured learning journey for others to follow
+        </p>
+      </header>
+
+      {/* Form */}
+      <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 max-w-3xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
+              <p className="text-red-500 text-sm font-medium flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">error</span>
+                {error}
+              </p>
+            </div>
+          )}
+
+          {/* Title */}
+          <div className="space-y-2">
+            <label htmlFor="title" className="block text-white text-sm font-bold">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              required
+              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              placeholder="e.g., Full-Stack Web Development"
+            />
+          </div>
+
+          {/* Summary */}
+          <div className="space-y-2">
+            <label htmlFor="summary" className="block text-white text-sm font-bold">
+              Summary
+            </label>
+            <input
+              type="text"
+              id="summary"
+              name="summary"
+              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              placeholder="Brief description (1-2 lines)"
+            />
+            <p className="text-[#9dabb9] text-xs">This will appear in search results and path listings</p>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <label htmlFor="description" className="block text-white text-sm font-bold">
+              Full Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={6}
+              className="w-full px-4 py-3 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+              placeholder="Describe what learners will achieve, who it's for, and what makes this path unique..."
+            />
+          </div>
+
+          {/* Info Box */}
+          <div className="bg-[#137fec]/10 border border-[#137fec]/30 rounded-lg p-4">
+            <div className="flex gap-3">
+              <span className="material-symbols-outlined text-[#137fec] mt-0.5">info</span>
+              <div>
+                <p className="text-[#137fec] text-sm font-bold mb-1">Next Steps</p>
+                <p className="text-white text-sm">
+                  After creating your path, you'll be able to add courses and organize the learning sequence.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex-1 h-12 rounded-lg border border-[#3b4754] text-white font-medium hover:bg-[#283039] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 h-12 rounded-lg bg-[#137fec] text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-xl">add</span>
+                  Create Path
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </div>
-    </div>
+    </>
   )
 }

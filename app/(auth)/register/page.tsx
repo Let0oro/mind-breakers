@@ -131,7 +131,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="dark">
+    <div>
 
       <main className="flex-1 flex flex-col lg:flex-row mx-auto w-full min-h-screen bg-[#f6f7f8] dark:bg-[#101922]">
         {/* Sidebar: Benefits & Gamification */}

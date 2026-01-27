@@ -1,63 +1,35 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { PathCard } from '@/components/PathCard'
-import { SearchAndFilter } from '@/components/SearchAndFilter'
 import Link from 'next/link'
 import type { PathListItem } from '@/lib/types'
 
-export default async function PathsListPage({
-  searchParams,
-}: {
-  searchParams: { q?: string; org?: string; sort?: string }
-}) {
+export const metadata = {
+  title: 'Learning Paths - MindBreaker',
+  description: 'Browse and explore learning paths',
+}
+
+export default async function PathsListPage() {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const query = searchParams.q || ''
-  const orgFilter = searchParams.org || ''
-  const sortBy = searchParams.sort || 'recent'
-
-  // Query base
-  let pathsQuery = supabase
+  // Fetch all paths with related data
+  const { data: paths } = await supabase
     .from('learning_paths')
     .select(`
-      *,
+      id,
+      title,
+      summary,
+      description,
+      created_at,
       organizations (id, name),
       courses (id),
       saved_paths!saved_paths_path_id_fkey (user_id)
     `)
+    .order('created_at', { ascending: false })
 
-  // Filtro de búsqueda
-  if (query) {
-    pathsQuery = pathsQuery.or(`title.ilike.%${query}%,summary.ilike.%${query}%,description.ilike.%${query}%`)
-  }
-
-  // Filtro de organización
-  if (orgFilter) {
-    pathsQuery = pathsQuery.eq('author_id', orgFilter)
-  }
-
-  // Ordenamiento
-  if (sortBy === 'popular') {
-    // Ordenar por número de cursos (más cursos = más popular)
-    pathsQuery = pathsQuery.order('created_at', { ascending: false })
-  } else if (sortBy === 'name') {
-    pathsQuery = pathsQuery.order('title', { ascending: true })
-  } else {
-    pathsQuery = pathsQuery.order('created_at', { ascending: false })
-  }
-
-  const { data: paths } = await pathsQuery
-
-  // Obtener organizaciones para el filtro
-  const { data: organizations } = await supabase
-    .from('organizations')
-    .select('id, name')
-    .order('name')
-
-  // Obtener progreso del usuario
+  // Fetch user progress
   const { data: userProgress } = await supabase
     .from('user_course_progress')
     .select('course_id, completed')
@@ -67,74 +39,120 @@ export default async function PathsListPage({
   const completedCourseIds = new Set(userProgress?.map(p => p.course_id) || [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="border-b bg-white dark:bg-gray-800 dark:border-gray-700">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
+    <>
+      {/* Header Section */}
+      <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-white text-3xl font-black tracking-tight">Learning Paths</h2>
+          <p className="text-[#9dabb9] text-base">
+            {paths?.length || 0} learning paths available
+          </p>
+        </div>
+        <Link
+          href="/dashboard/paths/new"
+          className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+          </svg>
+          <span>Create Path</span>
+        </Link>
+      </header>
+
+      {/* Paths Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {paths && paths.length > 0 ? (
+          paths.map((path: PathListItem) => {
+            const courseCount = path.courses?.length || 0
+            const completedCount = path.courses?.filter((c) =>
+              completedCourseIds.has(c.id)
+            ).length || 0
+            const progressPercent = courseCount > 0 ? (completedCount / courseCount) * 100 : 0
+            const isSaved = path.saved_paths?.some(sp => sp.user_id === user.id) || false
+
+            // Supabase returns organizations as an array, get first one
+            const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
+
+            return (
               <Link
-                href="/dashboard"
-                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 mb-2 inline-block"
+                key={path.id}
+                href={`/dashboard/paths/${path.id}`}
+                className="group bg-[#1a232e] rounded-xl border border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
               >
-                ← Dashboard
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <h3 className="text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
+                      {path.title}
+                    </h3>
+                    {org && (
+                      <p className="text-[#9dabb9] text-sm mt-1">
+                        by {org.name}
+                      </p>
+                    )}
+                  </div>
+                  {isSaved && (
+                    <span className="material-symbols-outlined text-[#137fec]">
+                      bookmark
+                    </span>
+                  )}
+                </div>
+
+                {/* Summary */}
+                {path.summary && (
+                  <p className="text-[#9dabb9] text-sm line-clamp-2">
+                    {path.summary}
+                  </p>
+                )}
+
+                {/* Stats */}
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1 text-[#9dabb9]">
+                    <span className="material-symbols-outlined text-base">school</span>
+                    <span>{courseCount} courses</span>
+                  </div>
+                  {progressPercent > 0 && (
+                    <div className="flex items-center gap-1 text-green-500">
+                      <span className="material-symbols-outlined text-base">check_circle</span>
+                      <span>{completedCount} completed</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Progress Bar */}
+                {courseCount > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-[#9dabb9]">Progress</span>
+                      <span className="text-white font-medium">{Math.round(progressPercent)}%</span>
+                    </div>
+                    <div className="h-2 bg-[#3b4754] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#137fec] rounded-full transition-all"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Explorar Learning Paths
-              </h1>
-            </div>
+            )
+          })
+        ) : (
+          <div className="col-span-full bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+            <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">
+              route
+            </span>
+            <p className="text-[#9dabb9] text-lg mb-2">No learning paths yet</p>
+            <p className="text-[#9dabb9] text-sm mb-4">Create your first learning path</p>
             <Link
               href="/dashboard/paths/new"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
             >
-              + Crear nuevo path
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <SearchAndFilter organizations={organizations || []} />
-
-        {paths && paths.length > 0 ? (
-          <>
-            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-              {paths.length} path{paths.length !== 1 ? 's' : ''} encontrado{paths.length !== 1 ? 's' : ''}
-            </p>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {paths.map((path: PathListItem) => {
-                const courseCount = path.courses?.length || 0
-                const completedCount = path.courses?.filter((c) => 
-                  completedCourseIds.has(c.id)
-                ).length || 0
-
-                return (
-                  <PathCard
-                    key={path.id}
-                    id={path.id}
-                    title={path.title}
-                    summary={path.summary}
-                    organization={path.organizations?.name}
-                    courseCount={courseCount}
-                    completedCount={completedCount}
-                  />
-                )
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="rounded-lg bg-white p-12 text-center shadow dark:bg-gray-800">
-            <p className="text-gray-500 dark:text-gray-400 mb-4">
-              No se encontraron paths con esos criterios.
-            </p>
-            <Link
-              href="/dashboard/paths"
-              className="inline-block text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
-            >
-              Limpiar filtros →
+              Create Path
             </Link>
           </div>
         )}
       </div>
-    </div>
+    </>
   )
 }

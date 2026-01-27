@@ -33,6 +33,7 @@ export function ThemeToggle() {
 
   const toggleTheme = async () => {
     const newIsDark = !isDark
+    console.log(document.startViewTransition);
     
     if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setIsDark(newIsDark)
