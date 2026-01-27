@@ -1,0 +1,118 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import type { BreadcrumbItem } from '@/lib/types'
+
+interface BreadcrumbProps {
+    items?: BreadcrumbItem[]
+    autoGenerate?: boolean
+}
+
+// Mapeo de segmentos de URL a etiquetas legibles
+const SEGMENT_LABELS: Record<string, string> = {
+    dashboard: 'Dashboard',
+    courses: 'Courses',
+    paths: 'Learning Paths',
+    exercises: 'Exercises',
+    organizations: 'Organizations',
+    leaderboard: 'Leaderboard',
+    admin: 'Admin',
+    submissions: 'Submissions',
+    new: 'New',
+    edit: 'Edit',
+    submit: 'Submit',
+}
+
+export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbProps) {
+    const pathname = usePathname()
+
+    // Si se proporcionan items personalizados, usarlos
+    if (items && items.length > 0) {
+        return <BreadcrumbNav items={items} />
+    }
+
+    // Auto-generar breadcrumbs desde la ruta actual
+    if (autoGenerate && pathname) {
+        const segments = pathname.split('/').filter(Boolean)
+        const breadcrumbItems: BreadcrumbItem[] = []
+
+        segments.forEach((segment, index) => {
+            const path = '/' + segments.slice(0, index + 1).join('/')
+
+            // Intentar obtener label del mapeo o usar el segmento capitalizado
+            let label = SEGMENT_LABELS[segment] || segment
+
+            // Si es un UUID o ID (contiene guiones o solo números), tratarlo especialmente
+            if (segment.match(/^[0-9a-f-]+$/i) || segment.match(/^\d+$/)) {
+                // Para IDs, intentar usar un nombre más descriptivo basado en el contexto
+                const previousSegment = segments[index - 1]
+                if (previousSegment === 'courses') {
+                    label = 'Course Details'
+                } else if (previousSegment === 'paths') {
+                    label = 'Path Details'
+                } else if (previousSegment === 'exercises') {
+                    label = 'Exercise Details'
+                } else if (previousSegment === 'organizations') {
+                    label = 'Organization Details'
+                } else {
+                    label = 'Details'
+                }
+            } else {
+                // Capitalizar primera letra si no está en el mapeo
+                if (!SEGMENT_LABELS[segment]) {
+                    label = segment.charAt(0).toUpperCase() + segment.slice(1)
+                }
+            }
+
+            breadcrumbItems.push({
+                label,
+                href: path,
+            })
+        })
+
+        return <BreadcrumbNav items={breadcrumbItems} />
+    }
+
+    return null
+}
+
+function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
+    if (!items || items.length === 0) return null
+
+    return (
+        <nav className="flex items-center gap-2 text-sm font-medium mb-6">
+            {items.map((item, index) => {
+                const isLast = index === items.length - 1
+
+                return (
+                    <div key={index} className="flex items-center gap-2">
+                        {item.icon && (
+                            <span className="material-symbols-outlined text-sm text-muted-foreground">
+                                {item.icon}
+                            </span>
+                        )}
+
+                        {isLast ? (
+                            <span className="text-foreground dark:text-white">
+                                {item.label}
+                            </span>
+                        ) : (
+                            <>
+                                <Link
+                                    href={item.href || '#'}
+                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    {item.label}
+                                </Link>
+                                <span className="material-symbols-outlined text-sm text-muted-foreground">
+                                    chevron_right
+                                </span>
+                            </>
+                        )}
+                    </div>
+                )
+            })}
+        </nav>
+    )
+}

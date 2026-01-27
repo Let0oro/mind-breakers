@@ -7,31 +7,6 @@ import Link from 'next/link';
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-background-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3 text-primary">
-              <span className="material-symbols-outlined text-3xl">sports_esports</span>
-              <h2 className="text-white text-2xl font-bold tracking-tight">MindBreaker</h2>
-            </div>
-            <nav className="hidden md:flex items-center gap-8">
-              <Link className="dark:text-slate-400 text-slate-600 hover:text-white text-sm font-medium transition-colors" href="#">Explore</Link>
-              <Link className="text-white text-sm font-medium border-b-2 border-primary pb-1" href="#">Leaderboard</Link>
-              <Link className="dark:text-slate-400 text-slate-600 hover:text-white text-sm font-medium transition-colors" href="#">Quests</Link>
-              <Link className="dark:text-slate-400 text-slate-600 hover:text-white text-sm font-medium transition-colors" href="#">Marketplace</Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="hidden lg:flex bg-surface-dark rounded-xl px-4 py-2 border border-white/5 items-center gap-3">
-              <span className="material-symbols-outlined text-orange-500">local_fire_department</span>
-              <span className="text-white font-bold text-sm">12 Day Streak</span>
-            </div>
-            <Link href={"/login"} className="bg-primary hover:bg-blue-600 neon-glow text-white px-6 py-2 rounded-xl font-bold text-sm transition-all">
-              Enter Arena
-            </Link>
-          </div>
-        </div>
-      </header>
       <main className="relative">
         <section className="hero-gradient pt-20 pb-12 px-6 lg:px-20">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
@@ -68,7 +43,7 @@ export default function DashboardPage() {
                       <p className="dark:text-slate-400 text-slate-600 text-xs font-bold uppercase tracking-widest">Current Level</p>
                       <h3 className="text-2xl font-bold text-white">Lvl 42 Architect</h3>
                     </div>
-                    <p className="text-primary font-bold text-sm">2,450 / 3,000 XP</p>
+                    <p className="text-slate-300 font-bold text-sm">2,450 / 3,000 XP</p>
                   </div>
                   <div className="w-full h-4 bg-background-dark rounded-full border border-white/5 p-1">
                     <div className="h-full bg-primary rounded-full neon-glow w-[80%]"></div>
@@ -81,7 +56,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-white font-bold">Gold Trophy</p>
-                      <p className="text-slate-500 text-xs">Top 1% Learner</p>
+                      <p className="text-slate-300 text-xs">Top 1% Learner</p>
                     </div>
                   </div>
                   <div className="bg-background-dark/50 p-4 rounded-xl border border-white/5 flex items-center gap-3">
@@ -90,7 +65,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-white font-bold">Certified</p>
-                      <p className="text-slate-500 text-xs">Python Master</p>
+                      <p className="text-slate-300 text-xs">Python Master</p>
                     </div>
                   </div>
                 </div>
@@ -195,7 +170,7 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <div className="bg-linear-to-br from-primary to-purple-600 rounded-2xl p-8 text-white relative overflow-hidden group">
                   <div className="relative z-10">
                     <h3 className="text-2xl font-bold mb-4">Elite Tier Perks</h3>
@@ -233,7 +208,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>
@@ -309,7 +284,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3 text-primary">
                   <span className="material-symbols-outlined text-3xl">sports_esports</span>
-                  <h2 className="text-white text-2xl font-bold tracking-tight">EduQuest</h2>
+                  <h2 className="text-white text-2xl font-bold tracking-tight">MindBreaker</h2>
                 </div>
                 <p className="text-slate-500 text-sm max-w-xs">{"The world's first decentralized educational arena powered by players like you."}</p>
               </div>
@@ -342,7 +317,7 @@ export default function DashboardPage() {
                   Global XP Live Ticker: <span className="text-white">1,284,952,001 XP EARNED</span>
                 </p>
               </div>
-              <p className="text-slate-600 text-xs">© 2024 EduQuest Global. All rights reserved.</p>
+              <p className="text-slate-600 text-xs">© 2024 MindBreaker Global. All rights reserved.</p>
             </div>
           </div>
         </footer>

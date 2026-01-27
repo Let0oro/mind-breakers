@@ -114,17 +114,32 @@ export interface PathListItem {
   id: string
   title: string
   summary?: string
-  author_id?: string
-  created_by: string
+  description?: string
+  created_by?: string
   created_at: string
   organizations?: {
     id: string
     name: string
-  }
-  courses?: { id: string }[]
-  saved_paths?: { user_id: string }[]
+  } | Array<{
+    id: string
+    name: string
+  }> | null
+  courses?: Array<{ id: string }>
+  saved_paths?: Array<{ user_id: string }>
 }
 
 // Alias para compatibilidad con código anterior
 export type SavedPath = SavedPathItem
 export type RecentProgress = RecentProgressItem
+
+// Tipos para breadcrumbs
+export interface BreadcrumbItem {
+  label: string
+  href?: string
+  icon?: string
+}
+
+export interface BreadcrumbProps {
+  items?: BreadcrumbItem[]
+  autoGenerate?: boolean
+}
