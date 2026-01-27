@@ -1,0 +1,212 @@
+'use client'
+
+import { useState, useEffect, useEffectEvent } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import Link from 'next/link'
+
+interface Notification {
+  id: string
+  title: string
+  message: string
+  type: string
+  link?: string
+  read: boolean
+  created_at: string
+}
+
+export function NotificationBell({ userId }: { userId: string }) {
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [isOpen, setIsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const supabase = createClient()
+
+  // useEffectEvent para leer notificaciones sin agregar deps
+  const loadNotifications = useEffectEvent(async () => {
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (data) {
+      setNotifications(data)
+      setUnreadCount(data.filter((n) => !n.read).length)
+    }
+  })
+
+  useEffect(() => {
+    // Cargar datos iniciales
+    loadNotifications()
+    
+    // Suscribirse a notificaciones en tiempo real
+    const channel = supabase
+      .channel('notifications-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          setNotifications((prev) => [payload.new as Notification, ...prev])
+          setUnreadCount((prev) => prev + 1)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userId, supabase, loadNotifications])
+
+  const markAsRead = async (id: string) => {
+    await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('id', id)
+
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    )
+    setUnreadCount((prev) => Math.max(0, prev - 1))
+  }
+
+  const markAllAsRead = async () => {
+    await supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('user_id', userId)
+      .eq('read', false)
+
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    setUnreadCount(0)
+  }
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'exercise_approved':
+        return '✅'
+      case 'exercise_rejected':
+        return '❌'
+      case 'level_up':
+        return '🎉'
+      default:
+        return '🔔'
+    }
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+      >
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+          />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+            <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Notificaciones
+              </h3>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                >
+                  Marcar todas como leídas
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-96 overflow-y-auto">
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`border-b border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 ${
+                      !notification.read ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">
+                        {getNotificationIcon(notification.type)}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {notification.title}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                          {notification.message}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {new Date(notification.created_at).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        {notification.link && (
+                          <Link
+                            href={notification.link}
+                            onClick={() => {
+                              markAsRead(notification.id)
+                              setIsOpen(false)
+                            }}
+                            className="mt-2 inline-block text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                          >
+                            Ver detalles →
+                          </Link>
+                        )}
+                      </div>
+                      {!notification.read && (
+                        <button
+                          onClick={() => markAsRead(notification.id)}
+                          className="text-indigo-600 hover:text-indigo-700"
+                        >
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-gray-500">
+                  No tienes notificaciones
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
