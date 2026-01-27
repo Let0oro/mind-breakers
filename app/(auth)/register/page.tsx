@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -138,7 +140,7 @@ export default function RegisterPage() {
         <aside className="hidden lg:flex w-100 flex-col justify-between p-10 bg-white dark:bg-[#111418] border-r border-[#e5e7eb] dark:border-[#283039]">
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-3">
-              
+
               <h1 className="text-black dark:text-white text-3xl font-bold leading-tight">Unlock your potential.</h1>
               <p className="text-gray-600 dark:text-[#9dabb9] text-base leading-relaxed">Join 50,000+ learners building their future through community-driven paths and gamified challenges.</p>
             </div>
@@ -147,7 +149,7 @@ export default function RegisterPage() {
               <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
                 <div className="size-10 rounded-full bg-[#137fec] flex items-center justify-center text-white shrink-0">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10.5 1.5H3.75A2.25 2.25 0 001.5 3.75v12.5A2.25 2.25 0 003.75 18.5h12.5a2.25 2.25 0 002.25-2.25V9.5M6.5 6.5h7M6.5 10h4M6.5 13.5h7"/>
+                    <path d="M10.5 1.5H3.75A2.25 2.25 0 001.5 3.75v12.5A2.25 2.25 0 003.75 18.5h12.5a2.25 2.25 0 002.25-2.25V9.5M6.5 6.5h7M6.5 10h4M6.5 13.5h7" />
                   </svg>
                 </div>
                 <div>
@@ -159,7 +161,7 @@ export default function RegisterPage() {
               <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
                 <div className="size-10 rounded-full bg-orange-500 flex items-center justify-center text-white shrink-0">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 </div>
                 <div>
@@ -171,7 +173,7 @@ export default function RegisterPage() {
               <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
                 <div className="size-10 rounded-full bg-purple-500 flex items-center justify-center text-white shrink-0">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v4h8v-4zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/>
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v4h8v-4zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                   </svg>
                 </div>
                 <div>
@@ -217,25 +219,25 @@ export default function RegisterPage() {
 
             {/* Social Sign Up */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <button 
+              <button
                 type="button"
                 onClick={handleGoogleSignup}
                 className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#1c242c] transition-all"
               >
                 <svg className="size-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
                 <span className="text-sm font-bold dark:text-white">Google</span>
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={handleGitHubSignup}
                 className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#1c242c] transition-all"
               >
-                <svg className="size-5 dark:fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                <svg className="size-5 dark:fill-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
                 <span className="text-sm font-bold dark:text-white">GitHub</span>
               </button>
             </div>
@@ -264,7 +266,7 @@ export default function RegisterPage() {
             <form onSubmit={handleRegister} className="flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-bold text-black dark:text-white px-1">Full Name</label>
-                <input 
+                <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -276,7 +278,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-bold text-black dark:text-white px-1">Email Address</label>
-                  <input 
+                  <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -286,7 +288,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-bold text-black dark:text-white px-1">Username</label>
-                  <input 
+                  <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -303,7 +305,7 @@ export default function RegisterPage() {
                     {strengthLabels[passwordStrength] || 'Enter password'}
                   </span>
                 </div>
-                <input 
+                <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -315,9 +317,8 @@ export default function RegisterPage() {
                   {[1, 2, 3, 4].map((i) => (
                     <div
                       key={i}
-                      className={`h-1 flex-1 rounded-full transition-colors ${
-                        i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-gray-200 dark:bg-gray-700'
-                      }`}
+                      className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-gray-200 dark:bg-gray-700'
+                        }`}
                     />
                   ))}
                 </div>
@@ -325,7 +326,7 @@ export default function RegisterPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-bold text-black dark:text-white px-1">Confirm Password</label>
-                <input 
+                <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -342,18 +343,17 @@ export default function RegisterPage() {
                       key={interest.id}
                       type="button"
                       onClick={() => toggleInterest(interest.id)}
-                      className={`px-4 py-2 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${
-                        selectedInterests.includes(interest.id)
+                      className={`px-4 py-2 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${selectedInterests.includes(interest.id)
                           ? 'border-[#137fec] bg-[#137fec]/10 text-[#137fec]'
                           : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#9dabb9] hover:border-[#137fec]/50'
-                      }`}
+                        }`}
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        {interest.id === 'web-dev' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z"/>}
-                        {interest.id === 'data-science' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z"/>}
-                        {interest.id === 'digital-art' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z"/>}
-                        {interest.id === 'marketing' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z"/>}
-                        {interest.id === 'ai-ml' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z"/>}
+                        {interest.id === 'web-dev' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z" />}
+                        {interest.id === 'data-science' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z" />}
+                        {interest.id === 'digital-art' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z" />}
+                        {interest.id === 'marketing' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z" />}
+                        {interest.id === 'ai-ml' && <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 001 1h12a1 1 0 001-1v-2a1 1 0 00-1-1H4a1 1 0 00-1 1v2z" />}
                       </svg>
                       {interest.label}
                     </button>
@@ -362,7 +362,7 @@ export default function RegisterPage() {
               </div>
 
               <div className="mt-8 flex flex-col gap-4">
-                <button 
+                <button
                   type="submit"
                   disabled={loading}
                   className="w-full h-14 bg-[#137fec] hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-lg shadow-[#137fec]/20 transition-all active:scale-[0.98]"
@@ -370,8 +370,8 @@ export default function RegisterPage() {
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
                 <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                  By signing up, you agree to our 
-                  <Link className="text-[#137fec] hover:underline ml-1" href="#">Terms of Service</Link> and 
+                  By signing up, you agree to our
+                  <Link className="text-[#137fec] hover:underline ml-1" href="#">Terms of Service</Link> and
                   <Link className="text-[#137fec] hover:underline ml-1" href="#">Privacy Policy</Link>.
                 </p>
               </div>
