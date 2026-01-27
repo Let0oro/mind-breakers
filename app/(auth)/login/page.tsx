@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,6 +13,29 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  // Load saved email on mount
+  useState(() => {
+    const savedEmail = localStorage.getItem('edupath_email')
+    const rememberMeWasChecked = localStorage.getItem('edupath_remember')
+    
+    if (savedEmail && rememberMeWasChecked === 'true') {
+      setEmail(savedEmail)
+      setRememberMe(true)
+    }
+  })
+
+  // Save email if remember me is checked
+  const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRememberMe(e.target.checked)
+    if (e.target.checked) {
+      localStorage.setItem('edupath_email', email)
+      localStorage.setItem('edupath_remember', 'true')
+    } else {
+      localStorage.removeItem('edupath_email')
+      localStorage.removeItem('edupath_remember')
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,10 +58,11 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
+    setError(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
       },
     })
 
@@ -47,10 +72,11 @@ export default function LoginPage() {
   }
 
   const handleGitHubLogin = async () => {
+    setError(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
       },
     })
 
@@ -60,205 +86,196 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f1419] px-4">
-      <div className="w-full max-w-md">
-        {/* Logo y título */}
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-600">
-              <svg 
-                className="h-8 w-8 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                />
-              </svg>
-            </div>
+    <div className="dark">
+      {/* Top Navigation Bar */}
+      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-[#283039] px-6 md:px-10 py-3 bg-white dark:bg-[#101922]">
+        <div className="flex items-center gap-4 text-[#137fec] dark:text-white">
+          <div className="size-8 flex items-center justify-center bg-[#137fec] rounded-lg text-white">
+            <span className="w-full h-full material-symbols-outlined p-1 text-blue-900" >home</span>
           </div>
-          <h2 className="text-3xl font-bold text-white">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Enter your details to continue your educational journey.
-          </p>
+          <h2 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">EduPath</h2>
         </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">New to the platform?</span>
+          <Link href="/register" className="flex min-w-21 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#137fec] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
+            <span className="truncate">Create account</span>
+          </Link>
+        </div>
+      </header>
 
-        {/* Formulario */}
-        <div className="rounded-2xl border border-gray-700/50 bg-[#1a2332] p-8 shadow-xl">
-          <form className="space-y-5" onSubmit={handleLogin}>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden min-h-screen bg-[#f6f7f8] dark:bg-[#101922]">
+        {/* Abstract Background Decorative Elements */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#137fec]/10 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#137fec]/5 rounded-full blur-3xl -z-10"></div>
+
+        <div className="w-full max-w-120 bg-white dark:bg-[#1c2127] rounded-xl shadow-2xl border border-gray-100 dark:border-[#3b4754] p-8 md:p-10">
+          {/* Headline and Subtext */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="size-12 bg-[#137fec]/20 flex items-center justify-center rounded-full mb-4">
+              <span className='text-3xl material-symbols-outlined text-[#137fec]'>info</span>
+            </div>
+            <h1 className="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-tight text-center pb-2">Welcome back</h1>
+            <p className="text-gray-600 dark:text-[#9dabb9] text-base font-normal leading-normal text-center">Enter your details to continue your educational journey.</p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Error Message */}
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
-                {error}
+              <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
+                <p className="text-red-500 text-sm font-medium">{error}</p>
               </div>
             )}
 
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-300">
-                Email Address
+            {/* Email Field */}
+            <div className="flex flex-col gap-2">
+              <label className="flex flex-col">
+                <p className="text-gray-700 dark:text-white text-sm font-medium leading-normal pb-2">Email Address</p>
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#9dabb9] w-5 h-5" >
+                    mail
+                  </span>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="name@company.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"
+                  />
+                </div>
               </label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg 
-                    className="h-5 w-5 text-gray-500" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" 
-                    />
-                  </svg>
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-600 bg-[#0f1419] px-3 py-2.5 pl-10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="name@company.com"
-                />
-              </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                  Password
-                </label>
-                <a href="/forgot-password" className="text-sm font-medium text-blue-500 hover:text-blue-400">
-                  Forgot password?
-                </a>
+            {/* Password Field */}
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center mb-1">
+                <p className="text-gray-700 dark:text-white text-sm font-medium leading-normal">Password</p>
+                <a className="text-[#137fec] text-sm font-semibold hover:underline" href="/forgot-password">Forgot password?</a>
               </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg 
-                    className="h-5 w-5 text-gray-500" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
-                    />
-                  </svg>
+              <label className="flex flex-col">
+                <div className="relative">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#9dabb9] w-5 h-5" >
+                    lock
+                  </span>
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"
+                  />
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-600 bg-[#0f1419] px-3 py-2.5 pl-10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="••••••••"
-                />
-              </div>
+              </label>
             </div>
 
-            {/* Remember me */}
-            <div className="flex items-center">
+            {/* Remember Me */}
+            <div className="flex items-center gap-3">
               <input
                 id="remember"
-                name="remember"
                 type="checkbox"
                 checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-600 bg-[#0f1419] text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+                onChange={handleRememberMeChange}
+                className="w-5 h-5 rounded border-gray-300 dark:border-[#3b4754] text-[#137fec] focus:ring-[#137fec] dark:bg-[#111418]"
               />
-              <label htmlFor="remember" className="ml-2 block text-sm text-gray-300">
-                Remember me for 30 days
-              </label>
+              <label className="text-sm text-gray-600 dark:text-[#9dabb9] font-medium cursor-pointer" htmlFor="remember">Remember me for 30 days</label>
             </div>
 
-            {/* Submit button */}
+            {/* Primary Action Button */}
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-800 disabled:opacity-50"
+              className="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-14 px-4 bg-[#137fec] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 shadow-lg shadow-[#137fec]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Cargando...' : 'Log In to EduPath'}
+              <span>{loading ? 'Logging in...' : 'Log In to EduPath'}</span>
             </button>
 
             {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-[#1a2332] px-2 text-gray-400">OR LOGIN WITH</span>
-              </div>
+            <div className="relative flex py-4 items-center">
+              <div className="grow border-t border-gray-200 dark:border-[#3b4754]"></div>
+              <span className="shrink mx-4 text-gray-400 dark:text-[#9dabb9] text-xs font-semibold uppercase tracking-widest">Or login with</span>
+              <div className="grow border-t border-gray-200 dark:border-[#3b4754]"></div>
             </div>
 
-            {/* OAuth buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Social Logins */}
+            <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={handleGoogleLogin}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-600 bg-[#0f1419] px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-700"
+                className="flex items-center justify-center gap-2 h-12 rounded-lg border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-transparent text-gray-700 dark:text-white text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 Google
               </button>
-
               <button
                 type="button"
                 onClick={handleGitHubLogin}
-                className="flex items-center justify-center gap-2 rounded-lg border border-gray-600 bg-[#0f1419] px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-700"
+                className="flex items-center justify-center gap-2 h-12 rounded-lg border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-transparent text-gray-700 dark:text-white text-sm font-semibold hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                    clipRule="evenodd"
-                  />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd"/>
                 </svg>
                 GitHub
               </button>
             </div>
-
-            {/* Sign up link */}
-            <div className="text-center text-sm">
-              <span className="text-gray-400">{"Don't have an account yet? "}</span>
-              <a href="/register" className="font-medium text-blue-500 hover:text-blue-400">
-                Join the community
-              </a>
-            </div>
           </form>
+
+          {/* Footer Action */}
+          <div className="mt-10 text-center">
+            <p className="text-gray-600 dark:text-[#9dabb9] text-sm">
+              {"Don't have an account yet?"}
+              <a className="text-[#137fec] font-bold hover:underline ml-1" href="/register">Join the community</a>
+            </p>
+          </div>
         </div>
-      </div>
+
+        {/* Visual Elements representing Learning Paths */}
+        <div className="mt-12 flex items-center gap-6 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+          <div className="flex flex-col items-center">
+            <div className="p-3 bg-white dark:bg-[#1c2127] rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-[#3b4754]">
+              <svg className="w-6 h-6 text-[#137fec]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">Machine Learning</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="p-3 bg-white dark:bg-[#1c2127] rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-[#3b4754]">
+              <svg className="w-6 h-6 text-[#137fec]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">UI/UX Design</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="p-3 bg-white dark:bg-[#1c2127] rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-[#3b4754]">
+              <svg className="w-6 h-6 text-[#137fec]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">Web Development</span>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="py-6 px-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500 dark:text-gray-600 border-t border-gray-200 dark:border-[#283039] bg-white dark:bg-[#101922]">
+        <p>© 2024 EduPath Inc. All rights reserved.</p>
+        <div className="flex gap-6">
+          <a className="hover:text-[#137fec] transition-colors" href="#">Privacy Policy</a>
+          <a className="hover:text-[#137fec] transition-colors" href="#">Terms of Service</a>
+          <a className="hover:text-[#137fec] transition-colors" href="#">Help Center</a>
+        </div>
+      </footer>
     </div>
   )
 }

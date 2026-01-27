@@ -1,6 +1,4 @@
 // app/(auth)/layout.tsx
-import Link from "next/link";
-
 export default function AuthLayout({
   children,
 }: {
@@ -9,7 +7,7 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen flex bg-background text-foreground">
       {/* Columna izquierda - copy de marketing */}
-      <aside className="hidden lg:flex lg:flex-col lg:justify-between lg:w-105 bg-neutral-950 border-r border-neutral-800 px-10 py-8">
+      {/* <aside className="hidden lg:flex lg:flex-col lg:justify-between lg:w-105 bg-neutral-950 border-r border-neutral-800 px-10 py-8">
         <div className="space-y-6">
           <Link href="/" className="flex items-center gap-2">
               <div className="h-9 w-16 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold">
@@ -51,11 +49,11 @@ export default function AuthLayout({
           <p>© {new Date().getFullYear()} EduPlatform Inc.</p>
           <p>Empowering creators and learners worldwide.</p>
         </div>
-      </aside>
+      </aside> */}
 
       {/* Columna derecha - formularios auth */}
-      <main className="w-full flex items-center justify-center bg-[#0f1419] ">
-        <div className="w-full max-w-md">
+      <main className="w-full flex items-center justify-center bg-background font-display min-h-screen flex-col">
+        <div className="w-full">
           {children}
         </div>
       </main>

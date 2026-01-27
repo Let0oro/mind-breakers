@@ -28,8 +28,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      {/* <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/> */}
       <body className={`${inter.className} ${space_grotesk.className} bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-300`} suppressHydrationWarning>
         {children}
       </body>
