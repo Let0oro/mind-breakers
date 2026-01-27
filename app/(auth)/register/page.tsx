@@ -1,11 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-
-export const dynamic = 'force-dynamic'
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
@@ -19,7 +17,7 @@ export default function RegisterPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   const interests = [
     { id: 'web-dev', label: 'Web Dev', icon: 'code' },
@@ -344,8 +342,8 @@ export default function RegisterPage() {
                       type="button"
                       onClick={() => toggleInterest(interest.id)}
                       className={`px-4 py-2 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${selectedInterests.includes(interest.id)
-                          ? 'border-[#137fec] bg-[#137fec]/10 text-[#137fec]'
-                          : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#9dabb9] hover:border-[#137fec]/50'
+                        ? 'border-[#137fec] bg-[#137fec]/10 text-[#137fec]'
+                        : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#9dabb9] hover:border-[#137fec]/50'
                         }`}
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
