@@ -22,11 +22,26 @@ export async function updateSession(request: NextRequest) {
             value,
             ...options,
           })
+
+          // IMPORTANT: We must manually copy over any cookies that were set on the
+          // previous response object, otherwise they will be lost when we overwrite 'response'.
+          // This allows setting multiple cookies (like access + refresh tokens).
+          const oldResponseCookies = response.cookies.getAll()
+
+          // Create a new response with the updated request cookies
+          // This ensures Server Components have access to the fresh cookies
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
           })
+
+          // Copy over cookies from the old response
+          oldResponseCookies.forEach(cookie => {
+            response.cookies.set(cookie.name, cookie.value, cookie);
+          });
+
+          // Set the new cookie
           response.cookies.set({
             name,
             value,
@@ -39,11 +54,19 @@ export async function updateSession(request: NextRequest) {
             value: '',
             ...options,
           })
+
+          const oldResponseCookies = response.cookies.getAll()
+
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
           })
+
+          oldResponseCookies.forEach(cookie => {
+            response.cookies.set(cookie.name, cookie.value, cookie);
+          });
+
           response.cookies.set({
             name,
             value: '',
