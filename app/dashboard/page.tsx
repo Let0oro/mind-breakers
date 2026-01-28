@@ -236,7 +236,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 text-center">
               <p className="text-[#9dabb9] mb-4">You haven't enrolled in any courses yet.</p>
-              <Link href="/dashboard/courses" className="inline-block px-4 py-2 bg-[#137fec] text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
+              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-[#137fec] text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
             </div>
           )}
         </section>
@@ -250,39 +250,46 @@ export default async function DashboardPage() {
             </h3>
             <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/paths">View All</Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {learningPathsList.map((path) => (
-              <div key={path.id} className="p-6 rounded-xl bg-gradient-to-br from-[#1a232e] to-[#111827] border border-[#3b4754] flex gap-6 items-center">
-                <div className={`h-20 w-20 shrink-0 rounded-lg ${path.color === 'primary' ? 'bg-[#137fec]/20' : 'bg-purple-500/20'} flex items-center justify-center`}>
-                  {path.color === 'primary' ? (
-                    <span className="material-symbols-outlined w-8 h-8 text-[#137fec]">workspace_premium</span>
-                  ) : (
-                    <span className="material-symbols-outlined w-8 h-8 text-purple-400">workspace_premium</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-lg text-white mb-1">{path.title}</h4>
-                  <p className="text-[#9dabb9] text-xs mb-4">Path {path.completedCourses} of {path.totalCourses} courses completed</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex -space-x-2">
-                      {[...Array(path.completedCourses)].map((_, i) => (
-                        <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
-                          <span className="material-symbols-outlined w-3 h-3 text-white">check</span>
+          {learningPathsList.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {learningPathsList.map((path) => (
+                <div key={path.id} className="p-6 rounded-xl bg-gradient-to-br from-[#1a232e] to-[#111827] border border-[#3b4754] flex gap-6 items-center">
+                  <div className={`h-20 w-20 shrink-0 rounded-lg ${path.color === 'primary' ? 'bg-[#137fec]/20' : 'bg-purple-500/20'} flex items-center justify-center`}>
+                    {path.color === 'primary' ? (
+                      <span className="material-symbols-outlined w-8 h-8 text-[#137fec]">workspace_premium</span>
+                    ) : (
+                      <span className="material-symbols-outlined w-8 h-8 text-purple-400">workspace_premium</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-lg text-white mb-1">{path.title}</h4>
+                    <p className="text-[#9dabb9] text-xs mb-4">Path {path.completedCourses} of {path.totalCourses} courses completed</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-2">
+                        {[...Array(path.completedCourses)].map((_, i) => (
+                          <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
+                            <span className="material-symbols-outlined w-3 h-3 text-white">check</span>
+                          </div>
+                        ))}
+                        <div className="w-6 h-6 rounded-full bg-[#137fec] flex items-center justify-center border border-[#111827] animate-pulse">
+                          <span className="material-symbols-outlined w-3 h-3 text-white">play_arrow</span>
                         </div>
-                      ))}
-                      <div className="w-6 h-6 rounded-full bg-[#137fec] flex items-center justify-center border border-[#111827] animate-pulse">
-                        <span className="material-symbols-outlined w-3 h-3 text-white">play_arrow</span>
+                        {[...Array(path.totalCourses - path.completedCourses - 1)].map((_, i) => (
+                          <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-[#3b4754] border border-[#111827]"></div>
+                        ))}
                       </div>
-                      {[...Array(path.totalCourses - path.completedCourses - 1)].map((_, i) => (
-                        <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-[#3b4754] border border-[#111827]"></div>
-                      ))}
+                      <span className="text-[10px] text-[#9dabb9] ml-2">Next: {path.nextCourse}</span>
                     </div>
-                    <span className="text-[10px] text-[#9dabb9] ml-2">Next: {path.nextCourse}</span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 text-center">
+              <p className="text-[#9dabb9] mb-4">You haven't started any learning paths yet.</p>
+              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-[#137fec] text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Paths</Link>
+            </div>
+          )}
         </section>
 
         {/* Saved Courses Section */}
@@ -294,19 +301,19 @@ export default async function DashboardPage() {
             </h3>
           </div>
           {savedCourses.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {savedCourses.map((course) => (
-              <div key={course.id} className="p-3 bg-[#1a232e] rounded-lg border border-[#3b4754] hover:bg-[#283039] transition-colors cursor-pointer group">
-                <div className="aspect-video rounded bg-cover mb-2" style={{ backgroundImage: `url(${course.thumbnail_url || 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop'})` }}></div>
-                <p className="text-xs font-bold text-white truncate group-hover:text-[#137fec]">{course.title}</p>
-                <p className="text-[10px] text-[#9dabb9]">{course.xp_reward} XP</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {savedCourses.map((course) => (
+                <div key={course.id} className="p-3 bg-[#1a232e] rounded-lg border border-[#3b4754] hover:bg-[#283039] transition-colors cursor-pointer group">
+                  <div className="aspect-video rounded bg-cover mb-2" style={{ backgroundImage: `url(${course.thumbnail_url || 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop'})` }}></div>
+                  <p className="text-xs font-bold text-white truncate group-hover:text-[#137fec]">{course.title}</p>
+                  <p className="text-[10px] text-[#9dabb9]">{course.xp_reward} XP</p>
+                </div>
+              ))}
+              <div className="p-3 border border-dashed border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
+                <span className="material-symbols-outlined w-6 h-6 text-[#3b4754] mb-1">add</span>
+                <p className="text-[10px] text-[#9dabb9]">Explore More</p>
               </div>
-            ))}
-            <div className="p-3 border border-dashed border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
-              <span className="material-symbols-outlined w-6 h-6 text-[#3b4754] mb-1">add</span>
-              <p className="text-[10px] text-[#9dabb9]">Explore More</p>
-            </div>
-          </div>) : (
+            </div>) : (
             <p className="text-[#9dabb9] text-sm italic">You haven't saved any courses yet.</p>
           )}
         </section>

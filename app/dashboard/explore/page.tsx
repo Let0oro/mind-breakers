@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import Image from 'next/image'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 type SearchResult = {
     id: string
@@ -16,19 +16,64 @@ type SearchResult = {
     organization?: string
     courseCount?: number
     pathCount?: number
+    saved?: boolean
 }
 
-export default function ExplorePage() {
+function ExplorePageContent() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+
+    // Get initial tab from URL or default to 'all'
+    const initialTab = (searchParams.get('tab') as 'all' | 'paths' | 'courses' | 'organizations') || 'all'
+
     const [searchQuery, setSearchQuery] = useState('')
-    const [activeTab, setActiveTab] = useState<'all' | 'paths' | 'courses' | 'organizations'>('all')
+    const [activeTab, setActiveTab] = useState<'all' | 'paths' | 'courses' | 'organizations'>(initialTab)
     const [results, setResults] = useState<SearchResult[]>([])
     const [loading, setLoading] = useState(false)
+    const [savedCourseIds, setSavedCourseIds] = useState<Set<string>>(new Set())
 
     const supabase = createClient()
 
+    // Sync state with URL params when they change
+    useEffect(() => {
+        const tabFromUrl = searchParams.get('tab') as typeof activeTab
+        if (tabFromUrl && ['all', 'paths', 'courses', 'organizations'].includes(tabFromUrl)) {
+            if (tabFromUrl !== activeTab) {
+                setActiveTab(tabFromUrl)
+            }
+        }
+    }, [searchParams])
+
+    // Update URL when tab changes state (user click)
+    const handleTabChange = (newTab: typeof activeTab) => {
+        setActiveTab(newTab)
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('tab', newTab)
+        router.push(`/dashboard/explore?${params.toString()}`)
+    }
+
+    // Fetch saved courses once on mount
+    useEffect(() => {
+        const fetchSavedCourses = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            const { data } = await supabase
+                .from('saved_courses')
+                .select('course_id')
+                .eq('user_id', user.id)
+
+            if (data) {
+                setSavedCourseIds(new Set(data.map(item => item.course_id)))
+            }
+        }
+        fetchSavedCourses()
+    }, [])
+
     useEffect(() => {
         performSearch()
-    }, [searchQuery, activeTab])
+    }, [searchQuery, activeTab, savedCourseIds]) // re-run search/filter when saved IDs load/change to update icons? Actually just re-rendering result cards is enough if we pass set. 
+    // But performSearch builds the result list. We should ideally merge saved status there.
 
     const performSearch = async () => {
         setLoading(true)
@@ -99,6 +144,7 @@ export default function ExplorePage() {
                         thumbnail_url: course.thumbnail_url,
                         xp_reward: course.xp_reward,
                         organization: course.organizations?.[0]?.name,
+                        saved: savedCourseIds.has(course.id)
                     })
                 })
             }
@@ -177,7 +223,7 @@ export default function ExplorePage() {
                 ].map((tab) => (
                     <button
                         key={tab.key}
-                        onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                        onClick={() => handleTabChange(tab.key as typeof activeTab)}
                         className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.key
                             ? 'border-[#137fec] text-[#137fec]'
                             : 'border-transparent text-[#9dabb9] hover:text-white'
@@ -259,7 +305,7 @@ function ResultCard({ result }: { result: SearchResult }) {
     return (
         <Link
             href={getLink()}
-            className="group bg-[#1a232e] rounded-xl border border-[#3b4754] hover:border-[#137fec]/50 transition-all overflow-hidden"
+            className="group bg-[#1a232e] rounded-xl border border-[#3b4754] hover:border-[#137fec]/50 transition-all overflow-hidden relative"
         >
             {/* Type Badge & Icon */}
             <div className="p-5 border-b border-[#3b4754]">
@@ -267,9 +313,16 @@ function ResultCard({ result }: { result: SearchResult }) {
                     <span className="text-xs font-bold text-[#9dabb9] uppercase tracking-wider">
                         {getTypeLabel()}
                     </span>
-                    <span className="material-symbols-outlined text-[#137fec]">
-                        {getIcon()}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        {result.saved && (
+                            <span className="material-symbols-outlined text-yellow-500" title="Saved">
+                                bookmark
+                            </span>
+                        )}
+                        <span className="material-symbols-outlined text-[#137fec]">
+                            {getIcon()}
+                        </span>
+                    </div>
                 </div>
                 <h3 className="text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
                     {result.title}
@@ -319,5 +372,13 @@ function ResultCard({ result }: { result: SearchResult }) {
                 </div>
             </div>
         </Link>
+    )
+}
+
+export default function ExplorePage() {
+    return (
+        <Suspense fallback={<div className="text-white">Loading...</div>}>
+            <ExplorePageContent />
+        </Suspense>
     )
 }
