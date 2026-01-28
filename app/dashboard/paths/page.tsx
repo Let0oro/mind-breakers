@@ -14,7 +14,7 @@ export default async function PathsListPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch all paths with related data
+  // Fetch all validated paths (or user's own unvalidated paths)
   const { data: paths } = await supabase
     .from('learning_paths')
     .select(`
@@ -23,10 +23,13 @@ export default async function PathsListPage() {
       summary,
       description,
       created_at,
+      is_validated,
+      created_by,
       organizations (id, name),
       courses (id),
       saved_paths!saved_paths_path_id_fkey (user_id)
     `)
+    .or(`is_validated.eq.true,created_by.eq.${user.id}`)
     .order('created_at', { ascending: false })
 
   // Fetch user progress
@@ -89,11 +92,20 @@ export default async function PathsListPage() {
                       </p>
                     )}
                   </div>
-                  {isSaved && (
-                    <span className="material-symbols-outlined text-[#137fec]">
-                      bookmark
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {/* Pending Badge */}
+                    {!path.is_validated && path.created_by === user.id && (
+                      <span className="inline-flex items-center gap-1 bg-amber-500 text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold">
+                        <span className="material-symbols-outlined text-xs">pending</span>
+                        Pendiente
+                      </span>
+                    )}
+                    {isSaved && (
+                      <span className="material-symbols-outlined text-[#137fec]">
+                        bookmark
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Summary */}

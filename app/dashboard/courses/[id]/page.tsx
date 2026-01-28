@@ -33,6 +33,32 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   if (error || !course) notFound()
 
+  // Block access if not validated and not owner
+  const isOwner = course.created_by === user.id
+  const isValidated = course.is_validated === true
+
+  if (!isValidated && !isOwner) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+        <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">pending</span>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Contenido no disponible
+        </h1>
+        <p className="text-gray-600 dark:text-[#b0bfcc] max-w-md">
+          Este curso está pendiente de validación por un administrador.
+          Vuelve más tarde.
+        </p>
+        <Link
+          href="/dashboard/courses"
+          className="mt-6 inline-flex items-center gap-2 text-[#137fec] hover:underline"
+        >
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Volver a cursos
+        </Link>
+      </div>
+    )
+  }
+
   const progress = course.user_course_progress?.[0]
   const isCompleted = progress?.completed || false
 
@@ -58,6 +84,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   return (
     <>
+      {/* Pending Validation Banner */}
+      {!isValidated && isOwner && (
+        <div className="mb-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined text-amber-500">pending</span>
+          <div>
+            <p className="font-medium text-amber-500">Pendiente de validación</p>
+            <p className="text-sm text-amber-500/70">
+              Este curso solo es visible para ti hasta que un administrador lo apruebe.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="mb-8">
         <Link
