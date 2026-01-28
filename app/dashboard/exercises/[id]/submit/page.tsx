@@ -27,7 +27,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
   const [fileUrl, setFileUrl] = useState<string>('')
   const [textContent, setTextContent] = useState<string>('')
   const [driveUrl, setDriveUrl] = useState<string>('')
-  
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -38,7 +38,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
       .select('*, courses (id, title, learning_paths (id))')
       .eq('id', params.id)
       .single()
-    
+
     if (data) setExercise(data as Exercise)
   })
 
@@ -58,11 +58,11 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
     }
 
     let finalFileUrl = fileUrl
-    
+
     if (submissionType === 'text' && textContent) {
       const blob = new Blob([textContent], { type: 'text/plain' })
       const fileName = `submissions/${Date.now()}-${Math.random().toString(36).substring(2)}.txt`
-      
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('course-assets')
         .upload(fileName, blob)
@@ -76,7 +76,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
       const { data: { publicUrl } } = supabase.storage
         .from('course-assets')
         .getPublicUrl(uploadData.path)
-      
+
       finalFileUrl = publicUrl
     }
 
@@ -158,33 +158,30 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                 <button
                   type="button"
                   onClick={() => setSubmissionType('text')}
-                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
-                    submissionType === 'text'
+                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'text'
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                       : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                  }`}
+                    }`}
                 >
                   📝 Texto
                 </button>
                 <button
                   type="button"
                   onClick={() => setSubmissionType('zip')}
-                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
-                    submissionType === 'zip'
+                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'zip'
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                       : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                  }`}
+                    }`}
                 >
                   📦 Archivo ZIP
                 </button>
                 <button
                   type="button"
                   onClick={() => setSubmissionType('drive')}
-                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${
-                    submissionType === 'drive'
+                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'drive'
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                       : 'border-gray-300 text-gray-700 hover:border-gray-400'
-                  }`}
+                    }`}
                 >
                   ☁️ Google Drive
                 </button>
@@ -217,9 +214,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   <div className="rounded-lg border-2 border-green-300 bg-green-50 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <svg className="h-8 w-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
+                        <span className="material-symbols-outlined h-8 w-8 text-green-600">check_circle</span>
                         <span className="text-sm font-medium text-green-900">
                           Archivo subido correctamente
                         </span>
