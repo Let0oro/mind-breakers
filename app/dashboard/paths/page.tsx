@@ -43,14 +43,14 @@ export default async function PathsListPage() {
       {/* Header Section */}
       <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
         <div className="flex flex-col gap-2">
-          <h2 className="text-white text-3xl font-black tracking-tight">Learning Paths</h2>
-          <p className="text-[#9dabb9] text-base">
+          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Learning Paths</h2>
+          <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
             {paths?.length || 0} learning paths available
           </p>
         </div>
         <Link
           href="/dashboard/paths/new"
-          className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+          className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
         >
           <span className="material-symbols-outlined w-5 h-5">add_circle</span>
           <span>Create Path</span>
@@ -75,16 +75,16 @@ export default async function PathsListPage() {
               <Link
                 key={path.id}
                 href={`/dashboard/paths/${path.id}`}
-                className="group bg-[#1a232e] rounded-xl border border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
+                className="group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <h3 className="text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
+                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
                       {path.title}
                     </h3>
                     {org && (
-                      <p className="text-[#9dabb9] text-sm mt-1">
+                      <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mt-1">
                         by {org.name}
                       </p>
                     )}
@@ -98,14 +98,14 @@ export default async function PathsListPage() {
 
                 {/* Summary */}
                 {path.summary && (
-                  <p className="text-[#9dabb9] text-sm line-clamp-2">
+                  <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2">
                     {path.summary}
                   </p>
                 )}
 
                 {/* Stats */}
                 <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1 text-[#9dabb9]">
+                  <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
                     <span className="material-symbols-outlined text-base">school</span>
                     <span>{courseCount} courses</span>
                   </div>
@@ -121,8 +121,8 @@ export default async function PathsListPage() {
                 {courseCount > 0 && (
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
-                      <span className="text-[#9dabb9]">Progress</span>
-                      <span className="text-white font-medium">{Math.round(progressPercent)}%</span>
+                      <span className="text-gray-600 dark:text-[#b0bfcc]">Progress</span>
+                      <span className="text-gray-900 dark:text-white font-medium">{Math.round(progressPercent)}%</span>
                     </div>
                     <div className="h-2 bg-[#3b4754] rounded-full overflow-hidden">
                       <div
@@ -136,15 +136,15 @@ export default async function PathsListPage() {
             )
           })
         ) : (
-          <div className="col-span-full bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+          <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">
               route
             </span>
-            <p className="text-[#9dabb9] text-lg mb-2">No learning paths yet</p>
-            <p className="text-[#9dabb9] text-sm mb-4">Create your first learning path</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No learning paths yet</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Create your first learning path</p>
             <Link
               href="/dashboard/paths/new"
-              className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+              className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
             >
               Create Path
             </Link>

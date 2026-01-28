@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useEffectEvent } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { FileUpload } from '@/components/FileUpload'
@@ -19,7 +19,10 @@ interface Exercise {
   }
 }
 
-export default function SubmitExercisePage({ params }: { params: { id: string } }) {
+export default function SubmitExercisePage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap params Promise con React.use()
+  const { id } = use(params)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [exercise, setExercise] = useState<Exercise | null>(null)
@@ -31,20 +34,19 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
   const router = useRouter()
   const supabase = createClient()
 
-  // useEffectEvent para cargar ejercicio sin deps reactivas
-  const loadExercise = useEffectEvent(async () => {
+  const loadExercise = useCallback(async () => {
     const { data } = await supabase
       .from('course_exercises')
       .select('*, courses (id, title, learning_paths (id))')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (data) setExercise(data as Exercise)
-  })
+  }, [supabase, id])
 
   useEffect(() => {
     loadExercise()
-  }, [params.id, loadExercise])
+  }, [loadExercise])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,7 +86,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
       .from('exercise_submissions')
       .insert({
         user_id: user.id,
-        exercise_id: params.id,
+        exercise_id: id,
         submission_type: submissionType,
         file_path: submissionType !== 'drive' ? finalFileUrl : null,
         drive_url: submissionType === 'drive' ? driveUrl : null,
@@ -104,40 +106,49 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
 
   if (!exercise) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-gray-500">Cargando...</div>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <div className="text-gray-600 dark:text-[#b0bfcc]">Cargando...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-2xl px-4">
-        <div className="rounded-lg bg-white p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Entregar ejercicio
-          </h1>
-          <p className="text-gray-600 mb-6">
-            {exercise.title}
-          </p>
+    <>
+      <header className="mb-8">
+        <button
+          onClick={() => router.back()}
+          className="text-sm text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] mb-4 inline-flex items-center gap-1 transition-colors"
+        >
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Volver
+        </button>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Entregar ejercicio
+        </h1>
+        <p className="text-gray-600 dark:text-[#b0bfcc] mt-2">
+          {exercise.title}
+        </p>
+      </header>
 
+      <div className="max-w-2xl">
+        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
           {exercise.description && (
-            <div className="mb-6 rounded-lg bg-blue-50 p-4">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">
+            <div className="mb-6 rounded-lg bg-[#137fec]/10 border border-[#137fec]/30 p-4">
+              <h3 className="text-sm font-medium text-[#137fec] mb-2">
                 Descripción del ejercicio
               </h3>
-              <p className="text-sm text-blue-800 whitespace-pre-wrap">
+              <p className="text-sm text-gray-600 dark:text-[#b0bfcc] whitespace-pre-wrap">
                 {exercise.description}
               </p>
             </div>
           )}
 
           {exercise.requirements && (
-            <div className="mb-6 rounded-lg bg-amber-50 p-4">
-              <h3 className="text-sm font-medium text-amber-900 mb-2">
+            <div className="mb-6 rounded-lg bg-amber-500/10 border border-amber-500/30 p-4">
+              <h3 className="text-sm font-medium text-amber-400 mb-2">
                 Requisitos
               </h3>
-              <p className="text-sm text-amber-800 whitespace-pre-wrap">
+              <p className="text-sm text-gray-600 dark:text-[#b0bfcc] whitespace-pre-wrap">
                 {exercise.requirements}
               </p>
             </div>
@@ -145,13 +156,13 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="rounded-md bg-red-50 p-4 text-sm text-red-800">
+              <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4 text-sm text-red-400">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
                 Tipo de entrega
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -159,8 +170,8 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   type="button"
                   onClick={() => setSubmissionType('text')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'text'
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
+                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   📝 Texto
@@ -169,8 +180,8 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   type="button"
                   onClick={() => setSubmissionType('zip')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'zip'
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
+                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   📦 Archivo ZIP
@@ -179,8 +190,8 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   type="button"
                   onClick={() => setSubmissionType('drive')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'drive'
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                      : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
+                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   ☁️ Google Drive
@@ -190,7 +201,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
 
             {submissionType === 'text' && (
               <div>
-                <label htmlFor="text-content" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="text-content" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                   Tu solución (código, respuestas, etc.)
                 </label>
                 <textarea
@@ -199,7 +210,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   onChange={(e) => setTextContent(e.target.value)}
                   rows={12}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 font-mono text-sm text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
                   placeholder="Pega tu código o respuesta aquí..."
                 />
               </div>
@@ -207,22 +218,22 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
 
             {submissionType === 'zip' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                   Sube tu proyecto (ZIP)
                 </label>
                 {fileUrl ? (
-                  <div className="rounded-lg border-2 border-green-300 bg-green-50 p-4">
+                  <div className="rounded-lg border-2 border-green-500/50 bg-green-500/10 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined h-8 w-8 text-green-600">check_circle</span>
-                        <span className="text-sm font-medium text-green-900">
+                        <span className="material-symbols-outlined h-8 w-8 text-green-400">check_circle</span>
+                        <span className="text-sm font-medium text-green-400">
                           Archivo subido correctamente
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setFileUrl('')}
-                        className="text-sm text-red-600 hover:text-red-700"
+                        className="text-sm text-red-400 hover:text-red-300"
                       >
                         Cambiar
                       </button>
@@ -242,7 +253,7 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
 
             {submissionType === 'drive' && (
               <div>
-                <label htmlFor="drive-url" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="drive-url" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                   URL de Google Drive
                 </label>
                 <input
@@ -251,10 +262,10 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
                   value={driveUrl}
                   onChange={(e) => setDriveUrl(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                   placeholder="https://drive.google.com/..."
                 />
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-600 dark:text-[#b0bfcc]">
                   Asegúrate de que el archivo/carpeta tenga permisos de visualización para cualquiera con el enlace
                 </p>
               </div>
@@ -264,14 +275,14 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading || (submissionType === 'text' && !textContent) || (submissionType === 'zip' && !fileUrl) || (submissionType === 'drive' && !driveUrl)}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Enviando...' : 'Enviar ejercicio'}
               </button>
@@ -279,6 +290,6 @@ export default function SubmitExercisePage({ params }: { params: { id: string } 
           </form>
         </div>
       </div>
-    </div>
+    </>
   )
 }

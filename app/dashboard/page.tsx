@@ -30,6 +30,32 @@ interface DashboardSavedCourse {
   thumbnail_url?: string
 }
 
+// Calculate XP required for next level
+// Formula: Base XP * Level multiplier (escalates with level)
+function getXpForNextLevel(level: number): number {
+  const baseXP = 300
+  const multiplier = 1.5
+  return Math.round(baseXP * Math.pow(multiplier, level - 1))
+}
+
+// Get XP progress within current level
+function getXpProgress(totalXp: number, level: number): { current: number; required: number; percentage: number } {
+  // Calculate total XP needed to reach current level
+  let xpForPreviousLevels = 0
+  for (let i = 1; i < level; i++) {
+    xpForPreviousLevels += getXpForNextLevel(i)
+  }
+
+  const xpInCurrentLevel = totalXp - xpForPreviousLevels
+  const xpNeededForNextLevel = getXpForNextLevel(level)
+
+  return {
+    current: Math.max(0, xpInCurrentLevel),
+    required: xpNeededForNextLevel,
+    percentage: Math.min(100, Math.max(0, (xpInCurrentLevel / xpNeededForNextLevel) * 100))
+  }
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
 
@@ -153,7 +179,7 @@ export default async function DashboardPage() {
       id,
       title,
       summary,
-      courses (id)
+      courses (id, title, order_index)
     `)
     .limit(2)
 
@@ -165,9 +191,11 @@ export default async function DashboardPage() {
   const completedCourseIds = new Set(allUserProgress?.map(p => p.course_id))
 
   const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
-    const totalCourses = path.courses?.length || 0
-    const completedCourses = path.courses?.filter(c => completedCourseIds.has(c.id)).length || 0
-    const nextCourse = path.courses?.find(c => !completedCourseIds.has(c.id))
+    // Sort courses by order_index
+    const sortedCourses = [...(path.courses || [])].sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+    const totalCourses = sortedCourses.length
+    const completedCourses = sortedCourses.filter((c: any) => completedCourseIds.has(c.id)).length
+    const nextCourseData = sortedCourses.find((c: any) => !completedCourseIds.has(c.id))
 
     return {
       id: path.id,
@@ -175,7 +203,7 @@ export default async function DashboardPage() {
       summary: path.summary,
       completedCourses,
       totalCourses,
-      nextCourse: 'Start Path', // We'd need to fetch course titles to be precise
+      nextCourse: nextCourseData?.title || (completedCourses === totalCourses ? '✓ Completed!' : 'Start Path'),
       color: 'primary',
     }
   }) || []
@@ -208,13 +236,13 @@ export default async function DashboardPage() {
       {/* Header Section */}
       <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
         <div className="flex flex-col gap-2">
-          <h2 className="text-white text-3xl font-black tracking-tight">Welcome back, {profile?.username?.split(' ')[0] || 'Scholar'}!</h2>
-          <p className="text-[#9dabb9] text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
+          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Welcome back, {profile?.username?.split(' ')[0] || 'Scholar'}!</h2>
+          <p className="text-gray-600 dark:text-[#b0bfcc] text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
         </div>
         {resumeTarget && (
           <Link
             href={resumeTarget.href}
-            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
           >
             <span className="material-symbols-outlined w-5 h-5">play_arrow</span>
             <span>{resumeTarget.label}</span>
@@ -225,22 +253,37 @@ export default async function DashboardPage() {
       {/* Stats & Leveling Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* XP Card */}
-        <div className="lg:col-span-2 flex flex-col gap-4 p-6 rounded-xl border border-[#3b4754] bg-[#1a232e]">
+        <div className="lg:col-span-2 flex flex-col gap-4 p-6 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e]">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined w-8 h-8 text-[#137fec]">star</span>
               <div>
-                <p className="text-white text-sm font-medium">Level {profile?.level || 1} - {profile?.title || 'Scholar'}</p>
-                <p className="text-[#9dabb9] text-xs">{(profile?.xp_for_next_level || 300) - (profile?.total_xp || 0)} XP to Level {(profile?.level || 1) + 1}</p>
+                <p className="text-gray-900 dark:text-white text-sm font-medium">Level {profile?.level || 1} - {profile?.title || 'Scholar'}</p>
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+                  {(() => {
+                    const xpProgress = getXpProgress(profile?.total_xp || 0, profile?.level || 1)
+                    return `${xpProgress.required - xpProgress.current} XP to Level ${(profile?.level || 1) + 1}`
+                  })()}
+                </p>
               </div>
             </div>
-            <p className="text-white font-bold">{profile?.total_xp || 0} / {profile?.xp_for_next_level || 1500} XP</p>
+            <p className="text-gray-900 dark:text-white font-bold">
+              {(() => {
+                const xpProgress = getXpProgress(profile?.total_xp || 0, profile?.level || 1)
+                return `${xpProgress.current} / ${xpProgress.required} XP`
+              })()}
+            </p>
           </div>
-          <div className="h-3 w-full rounded-full bg-[#3b4754] overflow-hidden">
-            <div className="h-full bg-[#137fec] rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]" style={{ width: `${Math.min(((profile?.total_xp || 0) / (profile?.xp_for_next_level || 1500)) * 100, 100)}%` }}></div>
+          <div className="h-3 w-full rounded-full bg-gray-200 dark:bg-[#3b4754] overflow-hidden">
+            <div
+              className="h-full bg-[#137fec] rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]"
+              style={{
+                width: `${getXpProgress(profile?.total_xp || 0, profile?.level || 1).percentage}%`
+              }}
+            ></div>
           </div>
           {profile?.daily_xp && <div className="flex gap-4">
-            <div className="flex items-center gap-1.5 text-xs text-[#0bda5b]">
+            <div className="flex items-center gap-1.5 text-xs text-[#34d399]">
               <span className="material-symbols-outlined w-4 h-4">trending_up</span>
               <span>+{profile?.daily_xp} XP today</span>
             </div>
@@ -248,14 +291,14 @@ export default async function DashboardPage() {
         </div>
 
         {/* Streak Stats */}
-        <div className="flex flex-col justify-between p-6 rounded-xl border border-[#3b4754] bg-[#1a232e]">
+        <div className="flex flex-col justify-between p-6 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e]">
           <div className="flex justify-between items-start">
-            <p className="text-[#9dabb9] text-sm font-medium uppercase tracking-wider">Current Streak</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm font-medium uppercase tracking-wider">Current Streak</p>
             <span className="material-symbols-outlined w-6 h-6 text-orange-500">local_fire_department</span>
           </div>
           <div>
-            <p className="text-white text-4xl font-black">{profile?.streak_days || 0} Days</p>
-            <p className="text-[#0bda5b] text-sm font-medium mt-1">Keep it up!</p>
+            <p className="text-gray-900 dark:text-white text-4xl font-black">{profile?.streak_days || 0} Days</p>
+            <p className="text-[#34d399] text-sm font-medium mt-1">Keep it up!</p>
           </div>
         </div>
       </div>
@@ -265,7 +308,7 @@ export default async function DashboardPage() {
         {/* My Courses Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
               <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">library_books</span>
               My Enrolled Courses
             </h3>
@@ -275,15 +318,15 @@ export default async function DashboardPage() {
           {enrolledCourses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {enrolledCourses.map((course) => (
-                <div key={course.id} className="group bg-[#1a232e] rounded-xl overflow-hidden border border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer">
+                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer">
                   <div className="h-32 bg-cover bg-center relative" style={{ backgroundImage: `url(${course.thumbnail_url || '/course-placeholder.jpg'})` }}>
-                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white">{course.duration}</div>
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-900 dark:text-white">{course.duration}</div>
                   </div>
                   <div className="p-4 flex flex-col gap-3">
-                    <h4 className="font-bold text-sm line-clamp-1 text-white group-hover:text-[#137fec] transition-colors">{course.title}</h4>
-                    <p className="text-[#9dabb9] text-xs">Instructor: {course.instructor}</p>
+                    <h4 className="font-bold text-sm line-clamp-1 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">{course.title}</h4>
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Instructor: {course.instructor}</p>
                     <div className="space-y-1 mt-2">
-                      <div className="flex justify-between text-[10px] text-[#9dabb9]">
+                      <div className="flex justify-between text-[11px] text-gray-600 dark:text-[#b0bfcc]">
                         <span>Progress</span>
                         <span>{course.progress}%</span>
                       </div>
@@ -292,13 +335,13 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
-            <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 text-center">
-              <p className="text-[#9dabb9] mb-4">You haven't enrolled in any courses yet.</p>
-              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-[#137fec] text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
+              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven't enrolled in any courses yet.</p>
+              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
             </div>
           )}
         </section>
@@ -306,7 +349,7 @@ export default async function DashboardPage() {
         {/* My Learning Paths Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
               <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">hub</span>
               Learning Paths
             </h3>
@@ -315,41 +358,41 @@ export default async function DashboardPage() {
           {learningPathsList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {learningPathsList.map((path) => (
-                <div key={path.id} className="p-6 rounded-xl bg-gradient-to-br from-[#1a232e] to-[#111827] border border-[#3b4754] flex gap-6 items-center">
+                <Link key={path.id} href={`/dashboard/paths/${path.id}`} className="p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1a232e] dark:to-[#111827] border border-gray-200 dark:border-[#3b4754] flex gap-6 items-center hover:shadow-lg transition-all">
                   <div className={`h-20 w-20 shrink-0 rounded-lg ${path.color === 'primary' ? 'bg-[#137fec]/20' : 'bg-purple-500/20'} flex items-center justify-center`}>
                     {path.color === 'primary' ? (
-                      <span className="material-symbols-outlined w-8 h-8 text-[#137fec]">workspace_premium</span>
+                      <span className="material-symbols-outlined w-6.5 h-6.5 text-[#137fec]">workspace_premium</span>
                     ) : (
-                      <span className="material-symbols-outlined w-8 h-8 text-purple-400">workspace_premium</span>
+                      <span className="material-symbols-outlined w-6.5 h-6.5 text-purple-400">workspace_premium</span>
                     )}
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-lg text-white mb-1">{path.title}</h4>
-                    <p className="text-[#9dabb9] text-xs mb-4">Path {path.completedCourses} of {path.totalCourses} courses completed</p>
+                    <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{path.title}</h4>
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs mb-4">Path {path.completedCourses} of {path.totalCourses} courses completed</p>
                     <div className="flex items-center gap-2">
                       <div className="flex -space-x-2">
                         {[...Array(path.completedCourses)].map((_, i) => (
                           <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
-                            <span className="material-symbols-outlined w-3 h-3 text-white">check</span>
+                            <span className="material-symbols-outlined w-3 h-3 text-gray-900 dark:text-white">check</span>
                           </div>
                         ))}
                         <div className="w-6 h-6 rounded-full bg-[#137fec] flex items-center justify-center border border-[#111827] animate-pulse">
-                          <span className="material-symbols-outlined w-3 h-3 text-white">play_arrow</span>
+                          <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">play_arrow</span>
                         </div>
-                        {[...Array(path.totalCourses - path.completedCourses - 1)].map((_, i) => (
+                        {[...Array(path.totalCourses - path.completedCourses)].map((_, i) => (
                           <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-[#3b4754] border border-[#111827]"></div>
                         ))}
                       </div>
-                      <span className="text-[10px] text-[#9dabb9] ml-2">Next: {path.nextCourse}</span>
+                      <span className="text-[11px] text-gray-600 dark:text-[#b0bfcc] ml-2">Next: {path.nextCourse}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
-            <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 text-center">
-              <p className="text-[#9dabb9] mb-4">You haven't started any learning paths yet.</p>
-              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-[#137fec] text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Paths</Link>
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
+              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven't started any learning paths yet.</p>
+              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Paths</Link>
             </div>
           )}
         </section>
@@ -357,7 +400,7 @@ export default async function DashboardPage() {
         {/* Saved Courses Section */}
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-white">
+            <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
               <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">bookmark</span>
               Saved for Later
             </h3>
@@ -365,18 +408,18 @@ export default async function DashboardPage() {
           {savedCourses.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {savedCourses.map((course) => (
-                <div key={course.id} className="p-3 bg-[#1a232e] rounded-lg border border-[#3b4754] hover:bg-[#283039] transition-colors cursor-pointer group">
+                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="p-3 bg-white dark:bg-[#1a232e] rounded-lg border border-gray-200 dark:border-[#3b4754] hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors cursor-pointer group">
                   <div className="aspect-video rounded bg-cover mb-2" style={{ backgroundImage: `url(${course.thumbnail_url || 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop'})` }}></div>
-                  <p className="text-xs font-bold text-white truncate group-hover:text-[#137fec]">{course.title}</p>
-                  <p className="text-[10px] text-[#9dabb9]">{course.xp_reward} XP</p>
-                </div>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-[#137fec]">{course.title}</p>
+                  <p className="text-[11px] text-gray-600 dark:text-[#b0bfcc]">{course.xp_reward} XP</p>
+                </Link>
               ))}
-              <div className="p-3 border border-dashed border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
+              <div className="p-3 border border-dashed border-gray-200 dark:border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
                 <span className="material-symbols-outlined w-6 h-6 text-[#3b4754] mb-1">add</span>
-                <p className="text-[10px] text-[#9dabb9]">Explore More</p>
+                <Link href="/dashboard/explore" className="text-[11px] text-gray-600 dark:text-[#b0bfcc]">Explore More</Link>
               </div>
             </div>) : (
-            <p className="text-[#9dabb9] text-sm italic">You haven't saved any courses yet.</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm italic">You haven't saved any courses yet.</p>
           )}
         </section>
       </div>

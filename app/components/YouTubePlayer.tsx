@@ -42,7 +42,7 @@ export function YouTubePlayer({ url, onComplete }: YouTubePlayerProps) {
       {onComplete && (
         <button
           onClick={onComplete}
-          className="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          className="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 text-gray-900 dark:text-white hover:bg-green-700"
         >
           Marcar como completado
         </button>

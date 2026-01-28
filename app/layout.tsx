@@ -28,7 +28,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.className} ${space_grotesk.className} bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white transition-colors duration-300`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const theme = localStorage.getItem('theme');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                // Default to dark if no preference
+                if (theme === 'dark' || (!theme && systemDark) || !theme) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} ${space_grotesk.className} bg-[#f6f7f8] dark:bg-[#101922] font-display text-slate-900 dark:text-white transition-colors duration-300`} suppressHydrationWarning>
         {children}
       </body>
     </html>

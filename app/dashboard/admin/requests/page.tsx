@@ -28,8 +28,8 @@ export default async function AdminRequestsPage() {
     return (
         <>
             <header className="mb-8">
-                <h2 className="text-white text-3xl font-black tracking-tight mb-2">Admin Requests</h2>
-                <p className="text-[#9dabb9] text-base">
+                <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight mb-2">Admin Requests</h2>
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
                     Review and manage administrator access requests
                 </p>
             </header>

@@ -100,13 +100,13 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
     return (
         <>
             <header className="mb-8">
-                <h2 className="text-white text-3xl font-black tracking-tight mb-2">My Exercises</h2>
-                <p className="text-[#9dabb9] text-base mb-6">
+                <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight mb-2">My Exercises</h2>
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-base mb-6">
                     Practice and apply what you've learned
                 </p>
 
                 {/* Filter Tabs */}
-                <div className="flex gap-2 border-b border-[#3b4754]">
+                <div className="flex gap-2 border-b border-gray-200 dark:border-[#3b4754]">
                     {[
                         { key: 'all', label: 'All Exercises' },
                         { key: 'in_progress', label: 'To Do' },
@@ -118,7 +118,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
                             href={`/dashboard/exercises?filter=${tab.key}`}
                             className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${filter === tab.key
                                 ? 'border-[#137fec] text-[#137fec]'
-                                : 'border-transparent text-[#9dabb9] hover:text-white'
+                                : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white'
                                 }`}
                         >
                             {tab.label}

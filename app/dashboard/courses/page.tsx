@@ -44,14 +44,14 @@ export default async function CoursesPage() {
             {/* Header Section */}
             <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
                 <div className="flex flex-col gap-2">
-                    <h2 className="text-white text-3xl font-black tracking-tight">All Courses</h2>
-                    <p className="text-[#9dabb9] text-base">
+                    <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">All Courses</h2>
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
                         {courses?.length || 0} courses available
                     </p>
                 </div>
                 <Link
                     href="/dashboard/courses/new"
-                    className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+                    className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
                 >
                     <span className="material-symbols-outlined w-5 h-5">add_circle</span>
                     <span>Create Course</span>
@@ -69,7 +69,7 @@ export default async function CoursesPage() {
                             <Link
                                 key={course.id}
                                 href={`/dashboard/courses/${course.id}`}
-                                className="group bg-[#1a232e] rounded-xl overflow-hidden border border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer"
+                                className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer"
                             >
                                 {/* Thumbnail */}
                                 <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden">
@@ -88,13 +88,13 @@ export default async function CoursesPage() {
 
                                     {/* Status Badge */}
                                     {isCompleted && (
-                                        <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                        <div className="absolute top-2 right-2 bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                                             <span className="material-symbols-outlined w-3 h-3">check</span>
                                             Completed
                                         </div>
                                     )}
                                     {!isCompleted && isEnrolled && (
-                                        <div className="absolute top-2 right-2 bg-[#137fec] text-white px-3 py-1 rounded-full text-xs font-bold">
+                                        <div className="absolute top-2 right-2 bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold">
                                             In Progress
                                         </div>
                                     )}
@@ -102,24 +102,24 @@ export default async function CoursesPage() {
 
                                 {/* Content */}
                                 <div className="p-5 flex flex-col gap-3">
-                                    <h4 className="font-bold text-base line-clamp-2 text-white group-hover:text-[#137fec] transition-colors">
+                                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
                                         {course.title}
                                     </h4>
 
                                     {course.summary && (
-                                        <p className="text-[#9dabb9] text-sm line-clamp-2">
+                                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2">
                                             {course.summary}
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#3b4754]">
+                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
                                         <div className="flex items-center gap-2">
                                             <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
-                                            <span className="text-[#9dabb9] text-xs font-medium">{course.xp_reward} XP</span>
+                                            <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium">{course.xp_reward} XP</span>
                                         </div>
 
                                         {course.organizations && course.organizations.length > 0 && (
-                                            <span className="text-[#9dabb9] text-xs">{course.organizations[0].name}</span>
+                                            <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">{course.organizations[0].name}</span>
                                         )}
                                     </div>
                                 </div>
@@ -127,13 +127,13 @@ export default async function CoursesPage() {
                         )
                     })
                 ) : (
-                    <div className="col-span-full bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+                    <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                         <span className="material-symbols-outlined w-16 h-16 text-[#3b4754] mx-auto mb-4">school</span>
-                        <p className="text-[#9dabb9] text-lg mb-2">No courses available</p>
-                        <p className="text-[#9dabb9] text-sm mb-4">Be the first to create a course</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No courses available</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Be the first to create a course</p>
                         <Link
                             href="/dashboard/courses/new"
-                            className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+                            className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
                         >
                             Create Course
                         </Link>

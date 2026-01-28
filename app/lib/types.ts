@@ -13,6 +13,7 @@ export interface Organization {
   name: string
   description?: string
   website_url?: string
+  is_validated?: boolean
 }
 
 // Tipos de curso y ejercicios
@@ -46,6 +47,7 @@ export interface Course {
   order_index: number
   xp_reward: number
   created_at: string
+  is_validated?: boolean
   organizations?: Organization
   course_exercises?: CourseExercise[]
   user_course_progress?: UserCourseProgress[]
@@ -59,6 +61,7 @@ export interface LearningPath {
   author_id?: string
   created_by: string
   created_at: string
+  is_validated?: boolean
   organizations?: Organization
   courses?: Course[]
 }

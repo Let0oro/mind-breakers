@@ -75,14 +75,14 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
     return (
         <div className="space-y-6">
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-[#3b4754]">
+            <div className="flex gap-2 border-b border-gray-200 dark:border-[#3b4754]">
                 {(['pending', 'approved', 'rejected'] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors capitalize ${activeTab === tab
                             ? 'border-[#137fec] text-[#137fec]'
-                            : 'border-transparent text-[#9dabb9] hover:text-white'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white'
                             }`}
                     >
                         {tab} ({requests.filter(r => r.status === tab).length})
@@ -96,7 +96,7 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                     {filteredRequests.map((request) => (
                         <div
                             key={request.id}
-                            className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6"
+                            className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
@@ -105,22 +105,22 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                                             <span className="material-symbols-outlined text-[#137fec]">person</span>
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold">{request.profiles?.username || 'Unknown User'}</h3>
-                                            <p className="text-[#9dabb9] text-xs">
+                                            <h3 className="text-gray-900 dark:text-white font-bold">{request.profiles?.username || 'Unknown User'}</h3>
+                                            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
                                                 Requested on {new Date(request.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="mt-4">
-                                        <p className="text-[#9dabb9] text-sm font-medium mb-1">Reason:</p>
-                                        <p className="text-white text-sm bg-[#111418] rounded-lg p-3 border border-[#3b4754]">
+                                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-1">Reason:</p>
+                                        <p className="text-gray-900 dark:text-white text-sm bg-gray-50 dark:bg-[#111418] rounded-lg p-3 border border-gray-200 dark:border-[#3b4754]">
                                             {request.reason}
                                         </p>
                                     </div>
 
                                     {request.reviewed_at && (
-                                        <p className="text-[#9dabb9] text-xs mt-3">
+                                        <p className="text-gray-600 dark:text-[#b0bfcc] text-xs mt-3">
                                             Reviewed on {new Date(request.reviewed_at).toLocaleDateString()}
                                         </p>
                                     )}
@@ -169,9 +169,9 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                     ))}
                 </div>
             ) : (
-                <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+                <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                     <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">inbox</span>
-                    <p className="text-[#9dabb9] text-lg">No {activeTab} requests</p>
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-lg">No {activeTab} requests</p>
                 </div>
             )}
         </div>

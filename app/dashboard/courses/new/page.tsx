@@ -27,8 +27,12 @@ export default function NewCoursePage() {
   }, [])
 
   const fetchData = async () => {
+    // Obtener el usuario actual desde Supabase Auth
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     const [pathsRes, orgsRes] = await Promise.all([
-      supabase.from('learning_paths').select('id, title').order('title'),
+      supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
       supabase.from('organizations').select('id, name').order('name'),
     ])
 
@@ -82,19 +86,19 @@ export default function NewCoursePage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.back()}
-            className="text-[#9dabb9] hover:text-white transition-colors"
+            className="text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2 className="text-white text-3xl font-black tracking-tight">Create Course</h2>
+          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Create Course</h2>
         </div>
-        <p className="text-[#9dabb9] text-base">
+        <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
           Add a new course to an existing learning path
         </p>
       </header>
 
       {/* Form */}
-      <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-8 max-w-3xl">
+      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Message */}
           {error && (
@@ -108,14 +112,14 @@ export default function NewCoursePage() {
 
           {/* Learning Path */}
           <div className="space-y-2">
-            <label htmlFor="path_id" className="block text-white text-sm font-bold">
+            <label htmlFor="path_id" className="block text-gray-900 dark:text-white text-sm font-bold">
               Learning Path <span className="text-red-500">*</span>
             </label>
             <select
               id="path_id"
               name="path_id"
               required
-              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
             >
               <option value="">Select a learning path</option>
               {paths.map((path) => (
@@ -128,7 +132,7 @@ export default function NewCoursePage() {
 
           {/* Title */}
           <div className="space-y-2">
-            <label htmlFor="title" className="block text-white text-sm font-bold">
+            <label htmlFor="title" className="block text-gray-900 dark:text-white text-sm font-bold">
               Course Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -136,73 +140,73 @@ export default function NewCoursePage() {
               id="title"
               name="title"
               required
-              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="e.g., Introduction to React Hooks"
             />
           </div>
 
           {/* Summary */}
           <div className="space-y-2">
-            <label htmlFor="summary" className="block text-white text-sm font-bold">
+            <label htmlFor="summary" className="block text-gray-900 dark:text-white text-sm font-bold">
               Summary
             </label>
             <input
               type="text"
               id="summary"
               name="summary"
-              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="Brief one-liner about the course"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <label htmlFor="description" className="block text-white text-sm font-bold">
+            <label htmlFor="description" className="block text-gray-900 dark:text-white text-sm font-bold">
               Description
             </label>
             <textarea
               id="description"
               name="description"
               rows={4}
-              className="w-full px-4 py-3 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
               placeholder="What will students learn?"
             />
           </div>
 
           {/* Link URL */}
           <div className="space-y-2">
-            <label htmlFor="link_url" className="block text-white text-sm font-bold">
+            <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
               Course URL
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9dabb9]">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
                 link
               </span>
               <input
                 type="url"
                 id="link_url"
                 name="link_url"
-                className="w-full h-12 pl-12 pr-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 placeholder="https://example.com/course"
               />
             </div>
-            <p className="text-[#9dabb9] text-xs">YouTube, Udemy, or any external course link</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">YouTube, Udemy, or any external course link</p>
           </div>
 
           {/* Thumbnail URL */}
           <div className="space-y-2">
-            <label htmlFor="thumbnail_url" className="block text-white text-sm font-bold">
+            <label htmlFor="thumbnail_url" className="block text-gray-900 dark:text-white text-sm font-bold">
               Thumbnail URL
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9dabb9]">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
                 image
               </span>
               <input
                 type="url"
                 id="thumbnail_url"
                 name="thumbnail_url"
-                className="w-full h-12 pl-12 pr-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 placeholder="https://example.com/image.jpg"
               />
             </div>
@@ -211,13 +215,13 @@ export default function NewCoursePage() {
           {/* Row: Organization & XP Reward */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="organization_id" className="block text-white text-sm font-bold">
+              <label htmlFor="organization_id" className="block text-gray-900 dark:text-white text-sm font-bold">
                 Organization
               </label>
               <select
                 id="organization_id"
                 name="organization_id"
-                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               >
                 <option value="">None</option>
                 {organizations.map((org) => (
@@ -229,7 +233,7 @@ export default function NewCoursePage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="xp_reward" className="block text-white text-sm font-bold">
+              <label htmlFor="xp_reward" className="block text-gray-900 dark:text-white text-sm font-bold">
                 XP Reward
               </label>
               <input
@@ -239,14 +243,14 @@ export default function NewCoursePage() {
                 defaultValue={100}
                 min={0}
                 step={10}
-                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               />
             </div>
           </div>
 
           {/* Order Index */}
           <div className="space-y-2">
-            <label htmlFor="order_index" className="block text-white text-sm font-bold">
+            <label htmlFor="order_index" className="block text-gray-900 dark:text-white text-sm font-bold">
               Order in Path
             </label>
             <input
@@ -255,10 +259,10 @@ export default function NewCoursePage() {
               name="order_index"
               defaultValue={0}
               min={0}
-              className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white placeholder:text-[#9dabb9] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="0"
             />
-            <p className="text-[#9dabb9] text-xs">Lower numbers appear first (0 = first)</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Lower numbers appear first (0 = first)</p>
           </div>
 
           {/* Actions */}
@@ -266,14 +270,14 @@ export default function NewCoursePage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 h-12 rounded-lg border border-[#3b4754] text-white font-medium hover:bg-[#283039] transition-colors"
+              className="flex-1 h-12 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 h-12 rounded-lg bg-[#137fec] text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="flex-1 h-12 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
