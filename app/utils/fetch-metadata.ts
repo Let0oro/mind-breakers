@@ -4,14 +4,53 @@ export interface MetadataResponse {
     title: string
     description: string
     thumbnail: string
-    // YouTube-specific fields
+    // Duration fields
     duration?: string
+    durationHours?: number
+    // YouTube-specific fields
     channelTitle?: string
 }
 
 export interface FetchMetadataResult {
     data: MetadataResponse | null
     error: string | null
+}
+
+/**
+ * XP tiers based on course duration
+ */
+const XP_TIERS = [
+    { maxHours: 2, xp: 25 },
+    { maxHours: 4, xp: 50 },
+    { maxHours: 8, xp: 100 },
+    { maxHours: 20, xp: 150 },
+    { maxHours: 40, xp: 200 },
+    { maxHours: Infinity, xp: 300 },
+]
+
+/**
+ * Calculate XP reward based on course duration in hours
+ * Returns 0 if duration is not available (user should set manually)
+ */
+export function calculateXPFromDuration(durationHours?: number): number {
+    if (!durationHours || durationHours <= 0) {
+        return 0 // No duration = user must set manually
+    }
+
+    for (const tier of XP_TIERS) {
+        if (durationHours < tier.maxHours) {
+            return tier.xp
+        }
+    }
+
+    return 300 // Max XP
+}
+
+/**
+ * Get XP tier description for tooltip
+ */
+export function getXPTierDescription(): string {
+    return `< 2h → 25 XP | 2-4h → 50 XP | 4-8h → 100 XP | 8-20h → 150 XP | 20-40h → 200 XP | 40h+ → 300 XP`
 }
 
 /**
@@ -48,6 +87,7 @@ export async function fetchUrlMetadata(url: string): Promise<FetchMetadataResult
                 description: data.description || '',
                 thumbnail: data.thumbnail || '',
                 duration: data.duration,
+                durationHours: data.durationHours,
                 channelTitle: data.channelTitle,
             },
             error: null
@@ -67,3 +107,4 @@ export async function fetchUrlMetadata(url: string): Promise<FetchMetadataResult
 export function isYouTubeUrl(url: string): boolean {
     return url.includes('youtube.com/watch') || url.includes('youtu.be/')
 }
+

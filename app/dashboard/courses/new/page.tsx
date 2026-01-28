@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { fetchUrlMetadata, isYouTubeUrl, type MetadataResponse } from '@/utils/fetch-metadata'
+import { fetchUrlMetadata, calculateXPFromDuration, type MetadataResponse } from '@/utils/fetch-metadata'
 
 interface LearningPath {
   id: string
@@ -31,6 +31,10 @@ export default function NewCoursePage() {
   const [summary, setSummary] = useState('')
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [xpReward, setXpReward] = useState(100)
+  const [showXpTooltip, setShowXpTooltip] = useState(false)
+  const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
+  const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch metadata from URL
   const handleFetchMetadata = useCallback(async () => {
@@ -57,6 +61,24 @@ export default function NewCoursePage() {
       }
       if (!description || metadataFetched === false) setDescription(data.description)
       if (!thumbnailUrl || metadataFetched === false) setThumbnailUrl(data.thumbnail)
+
+      // Calculate XP from duration
+      const calculatedXP = calculateXPFromDuration(data.durationHours)
+      setXpReward(calculatedXP)
+
+      // If XP is 0 (no duration found), show tooltip and visual feedback
+      if (calculatedXP === 0) {
+        setXpNeedsAttention(true)
+        setShowXpTooltip(true)
+        // Auto-hide tooltip after 4 seconds
+        if (xpTooltipTimeout.current) clearTimeout(xpTooltipTimeout.current)
+        xpTooltipTimeout.current = setTimeout(() => {
+          setShowXpTooltip(false)
+        }, 4000)
+      } else {
+        setXpNeedsAttention(false)
+      }
+
       setMetadataFetched(true)
     }
 
@@ -337,18 +359,57 @@ export default function NewCoursePage() {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="xp_reward" className="block text-gray-900 dark:text-white text-sm font-bold">
+            <div className="space-y-2 relative">
+              <label htmlFor="xp_reward" className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-bold">
                 XP Reward
+                {metadataFetched && xpReward > 0 && (
+                  <span className="text-xs font-normal text-green-500">Auto-calculated</span>
+                )}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onMouseEnter={() => setShowXpTooltip(true)}
+                    onMouseLeave={() => !xpNeedsAttention && setShowXpTooltip(false)}
+                    onClick={() => setShowXpTooltip(!showXpTooltip)}
+                    className="text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">info</span>
+                  </button>
+                  {showXpTooltip && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl z-50 animate-fade-in">
+                      <p className="font-bold mb-2">📊 XP by Duration:</p>
+                      <ul className="space-y-1">
+                        <li>&lt; 2h → 25 XP</li>
+                        <li>2-4h → 50 XP</li>
+                        <li>4-8h → 100 XP</li>
+                        <li>8-20h → 150 XP</li>
+                        <li>20-40h → 200 XP</li>
+                        <li>40h+ → 300 XP (max)</li>
+                      </ul>
+                      {xpNeedsAttention && (
+                        <p className="mt-2 text-amber-400 font-medium">⚠️ Duration not found. Please set XP manually.</p>
+                      )}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                    </div>
+                  )}
+                </div>
               </label>
               <input
                 type="number"
                 id="xp_reward"
                 name="xp_reward"
-                defaultValue={100}
+                value={xpReward}
+                onChange={(e) => {
+                  setXpReward(parseInt(e.target.value) || 0)
+                  setXpNeedsAttention(false)
+                }}
                 min={0}
-                step={10}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                max={300}
+                step={25}
+                className={`w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all ${xpNeedsAttention
+                    ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
+                    : 'border-gray-200 dark:border-[#3b4754]'
+                  }`}
               />
             </div>
           </div>
