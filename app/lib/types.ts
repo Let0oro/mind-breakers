@@ -102,6 +102,7 @@ export interface ExerciseSubmission {
   submission_type: string
   file_path?: string
   drive_url?: string
+  github_repo_url?: string
   submitted_at: string
   status: string
   course_exercises: {

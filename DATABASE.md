@@ -67,9 +67,10 @@ CREATE TABLE exercise_submissions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES profiles(id),
   exercise_id UUID REFERENCES course_exercises(id),
-  submission_type TEXT, -- 'zip', 'text', 'drive_link'
+  submission_type TEXT, -- 'zip', 'text', 'drive_link', 'github'
   file_path TEXT, -- ruta en Supabase Storage
   drive_url TEXT, -- si usa Google Drive
+  github_repo_url TEXT, -- si usa repositorio de GitHub
   submitted_at TIMESTAMPTZ DEFAULT NOW(),
   status TEXT DEFAULT 'pending' -- pending, approved, rejected
 );

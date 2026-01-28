@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { FileUpload } from '@/components/FileUpload'
+import { GitHubRepoSelector } from '@/components/GitHubRepoSelector'
 
 interface Exercise {
   id: string
@@ -26,10 +27,11 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [exercise, setExercise] = useState<Exercise | null>(null)
-  const [submissionType, setSubmissionType] = useState<'text' | 'zip' | 'drive'>('text')
+  const [submissionType, setSubmissionType] = useState<'text' | 'zip' | 'drive' | 'github'>('text')
   const [fileUrl, setFileUrl] = useState<string>('')
   const [textContent, setTextContent] = useState<string>('')
   const [driveUrl, setDriveUrl] = useState<string>('')
+  const [githubRepoUrl, setGithubRepoUrl] = useState<string>('')
 
   const router = useRouter()
   const supabase = createClient()
@@ -88,8 +90,9 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
         user_id: user.id,
         exercise_id: id,
         submission_type: submissionType,
-        file_path: submissionType !== 'drive' ? finalFileUrl : null,
+        file_path: (submissionType === 'text' || submissionType === 'zip') ? finalFileUrl : null,
         drive_url: submissionType === 'drive' ? driveUrl : null,
+        github_repo_url: submissionType === 'github' ? githubRepoUrl : null,
         status: 'pending',
       })
 
@@ -165,7 +168,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
                 Tipo de entrega
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <button
                   type="button"
                   onClick={() => setSubmissionType('text')}
@@ -195,6 +198,19 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                     }`}
                 >
                   ☁️ Google Drive
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSubmissionType('github')}
+                  className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${submissionType === 'github'
+                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
+                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
+                    }`}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                  </svg>
+                  GitHub
                 </button>
               </div>
             </div>
@@ -271,6 +287,34 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               </div>
             )}
 
+            {submissionType === 'github' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Selecciona un repositorio de GitHub
+                </label>
+                <GitHubRepoSelector
+                  onSelect={setGithubRepoUrl}
+                  selectedUrl={githubRepoUrl}
+                />
+                {githubRepoUrl && (
+                  <div className="mt-3 rounded-lg border-2 border-green-500/50 bg-green-500/10 p-3">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-green-400">check_circle</span>
+                      <span className="text-sm font-medium text-green-400">Repositorio seleccionado</span>
+                    </div>
+                    <a
+                      href={githubRepoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[#137fec] hover:underline mt-1 block truncate"
+                    >
+                      {githubRepoUrl}
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
                 type="button"
@@ -281,7 +325,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               </button>
               <button
                 type="submit"
-                disabled={loading || (submissionType === 'text' && !textContent) || (submissionType === 'zip' && !fileUrl) || (submissionType === 'drive' && !driveUrl)}
+                disabled={loading || (submissionType === 'text' && !textContent) || (submissionType === 'zip' && !fileUrl) || (submissionType === 'drive' && !driveUrl) || (submissionType === 'github' && !githubRepoUrl)}
                 className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Enviando...' : 'Enviar ejercicio'}
