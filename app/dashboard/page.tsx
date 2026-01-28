@@ -62,6 +62,63 @@ export default async function DashboardPage() {
   // Supabase join types can be tricky. Safely cast or access.
   const lastCourse = recentActivity?.courses ? (Array.isArray(recentActivity.courses) ? recentActivity.courses[0] : recentActivity.courses) : null
 
+  // --- Resume Logic ---
+  let resumeTarget = null
+
+  if (lastCourse) {
+    if (!recentActivity!.completed) {
+      // Caso 1: Último curso visto no está completado -> Ir a ese curso
+      resumeTarget = {
+        href: `/dashboard/courses/${lastCourse.id}`,
+        label: `Resume: ${lastCourse.title}`,
+      }
+    } else {
+      // Caso 2: Último curso completado -> Buscar el siguiente del mismo path
+      // Necesitamos saber el path_id del curso. 
+      // Hacemos una query extra ligera para obtener el path y el siguiente curso.
+      const { data: courseWithPath } = await supabase
+        .from('courses')
+        .select('path_id, order_index')
+        .eq('id', lastCourse.id)
+        .single()
+
+      if (courseWithPath?.path_id) {
+        // Buscar el siguiente curso en el path
+        const { data: nextCourseInPath } = await supabase
+          .from('courses')
+          .select('id, title')
+          .eq('path_id', courseWithPath.path_id)
+          .gt('order_index', courseWithPath.order_index)
+          .order('order_index', { ascending: true })
+          .limit(1)
+          .maybeSingle()
+
+        // Verificar si YA está completado (aunque sea "siguiente" en orden, podría haberlo hecho saltado? Asumimos linealidad normal)
+        // Mejor verificar user_course_progress para ese nextCourse
+        if (nextCourseInPath) {
+          const { data: nextProgress } = await supabase
+            .from('user_course_progress')
+            .select('completed')
+            .eq('user_id', user.id)
+            .eq('course_id', nextCourseInPath.id)
+            .single()
+
+          if (!nextProgress?.completed) {
+            resumeTarget = {
+              href: `/dashboard/courses/${nextCourseInPath.id}`,
+              label: `Start: ${nextCourseInPath.title}`,
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Fallback: Si no hay resumeTarget aún, buscar algún path activo incompleto? 
+  // Por simplicidad y performance, y siguiendo requerimientos ("si tiene todos... terminados... no aparezca"), lo dejamos así.
+  // Si quisiéramos ser más agresivos, buscaríamos en 'enrolled_paths' el primero incompleto.
+
+
   // Fetch enrolled courses with progress
   const { data: coursesWithProgress } = await supabase
     .from('courses')
@@ -154,10 +211,15 @@ export default async function DashboardPage() {
           <h2 className="text-white text-3xl font-black tracking-tight">Welcome back, {profile?.username?.split(' ')[0] || 'Scholar'}!</h2>
           <p className="text-[#9dabb9] text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
         </div>
-        <button className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80">
-          <span className="material-symbols-outlined w-5 h-5">play_arrow</span>
-          <span>Resume: Advanced UI Design</span>
-        </button>
+        {resumeTarget && (
+          <Link
+            href={resumeTarget.href}
+            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+          >
+            <span className="material-symbols-outlined w-5 h-5">play_arrow</span>
+            <span>{resumeTarget.label}</span>
+          </Link>
+        )}
       </header>
 
       {/* Stats & Leveling Row */}
