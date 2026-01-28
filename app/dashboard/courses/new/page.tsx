@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { fetchUrlMetadata, isYouTubeUrl, type MetadataResponse } from '@/utils/fetch-metadata'
 
 interface LearningPath {
   id: string
@@ -21,6 +22,46 @@ export default function NewCoursePage() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const router = useRouter()
   const supabase = createClient()
+
+  // Metadata auto-fill states
+  const [linkUrl, setLinkUrl] = useState('')
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false)
+  const [metadataFetched, setMetadataFetched] = useState(false)
+  const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
+  const [description, setDescription] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState('')
+
+  // Fetch metadata from URL
+  const handleFetchMetadata = useCallback(async () => {
+    if (!linkUrl.trim()) return
+
+    setIsFetchingMetadata(true)
+    setError(null)
+
+    const { data, error: fetchError } = await fetchUrlMetadata(linkUrl)
+
+    if (fetchError) {
+      setError(`Error fetching metadata: ${fetchError}`)
+      setIsFetchingMetadata(false)
+      return
+    }
+
+    if (data) {
+      // Only update fields that are empty or if this is fresh metadata
+      if (!title || metadataFetched === false) setTitle(data.title)
+      if (!summary || metadataFetched === false) {
+        // Use description as summary, truncated if too long
+        const desc = data.description || ''
+        setSummary(desc.length > 200 ? desc.substring(0, 197) + '...' : desc)
+      }
+      if (!description || metadataFetched === false) setDescription(data.description)
+      if (!thumbnailUrl || metadataFetched === false) setThumbnailUrl(data.thumbnail)
+      setMetadataFetched(true)
+    }
+
+    setIsFetchingMetadata(false)
+  }, [linkUrl, title, summary, description, thumbnailUrl, metadataFetched])
 
   useEffect(() => {
     fetchData()
@@ -110,6 +151,53 @@ export default function NewCoursePage() {
             </div>
           )}
 
+          {/* Course URL - First input with auto-fill */}
+          <div className="space-y-2">
+            <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
+              Course URL
+              {metadataFetched && (
+                <span className="ml-2 text-xs font-normal text-green-500">✓ Metadata loaded</span>
+              )}
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
+                  link
+                </span>
+                <input
+                  type="url"
+                  id="link_url"
+                  name="link_url"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                  placeholder="https://youtube.com/watch?v=... or any URL"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleFetchMetadata}
+                disabled={!linkUrl.trim() || isFetchingMetadata}
+                className="h-12 px-4 rounded-lg bg-[#137fec]/20 text-[#137fec] font-medium hover:bg-[#137fec]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                {isFetchingMetadata ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#137fec] border-t-transparent"></div>
+                    <span>Fetching...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                    <span>Auto-fill</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+              Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail
+            </p>
+          </div>
+
           {/* Learning Path */}
           <div className="space-y-2">
             <label htmlFor="path_id" className="block text-gray-900 dark:text-white text-sm font-bold">
@@ -134,13 +222,18 @@ export default function NewCoursePage() {
           <div className="space-y-2">
             <label htmlFor="title" className="block text-gray-900 dark:text-white text-sm font-bold">
               Course Title <span className="text-red-500">*</span>
+              {metadataFetched && title && (
+                <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
+              )}
             </label>
             <input
               type="text"
               id="title"
               name="title"
               required
-              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="e.g., Introduction to React Hooks"
             />
           </div>
@@ -149,12 +242,17 @@ export default function NewCoursePage() {
           <div className="space-y-2">
             <label htmlFor="summary" className="block text-gray-900 dark:text-white text-sm font-bold">
               Summary
+              {metadataFetched && summary && (
+                <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
+              )}
             </label>
             <input
               type="text"
               id="summary"
               name="summary"
-              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="Brief one-liner about the course"
             />
           </div>
@@ -163,52 +261,56 @@ export default function NewCoursePage() {
           <div className="space-y-2">
             <label htmlFor="description" className="block text-gray-900 dark:text-white text-sm font-bold">
               Description
+              {metadataFetched && description && (
+                <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
+              )}
             </label>
             <textarea
               id="description"
               name="description"
               rows={4}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
               placeholder="What will students learn?"
             />
-          </div>
-
-          {/* Link URL */}
-          <div className="space-y-2">
-            <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
-              Course URL
-            </label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
-                link
-              </span>
-              <input
-                type="url"
-                id="link_url"
-                name="link_url"
-                className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
-                placeholder="https://example.com/course"
-              />
-            </div>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">YouTube, Udemy, or any external course link</p>
           </div>
 
           {/* Thumbnail URL */}
           <div className="space-y-2">
             <label htmlFor="thumbnail_url" className="block text-gray-900 dark:text-white text-sm font-bold">
               Thumbnail URL
+              {metadataFetched && thumbnailUrl && (
+                <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
+              )}
             </label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
-                image
-              </span>
-              <input
-                type="url"
-                id="thumbnail_url"
-                name="thumbnail_url"
-                className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
-                placeholder="https://example.com/image.jpg"
-              />
+            <div className="flex gap-4">
+              <div className="relative flex-1">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
+                  image
+                </span>
+                <input
+                  type="url"
+                  id="thumbnail_url"
+                  name="thumbnail_url"
+                  value={thumbnailUrl}
+                  onChange={(e) => setThumbnailUrl(e.target.value)}
+                  className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              {thumbnailUrl && (
+                <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-[#3b4754] flex-shrink-0">
+                  <img
+                    src={thumbnailUrl}
+                    alt="Thumbnail preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
