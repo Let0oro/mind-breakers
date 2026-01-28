@@ -4,6 +4,7 @@ import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
 import type { PathWithCourses, Course } from '@/lib/types'
 import Image from 'next/image'
+import RecommendedCourses from './RecommendedCourses'
 
 export default async function PathDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -101,8 +102,8 @@ export default async function PathDetailPage({ params }: { params: { id: string 
                 <button
                   type="submit"
                   className={`rounded-lg px-4 py-2 text-sm font-medium ${isSaved
-                      ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                 >
                   {isSaved ? '★ Guardado' : '☆ Guardar'}
@@ -188,8 +189,8 @@ export default async function PathDetailPage({ params }: { params: { id: string 
                       className="block"
                     >
                       <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${isCompleted
-                          ? 'border-green-300 bg-green-50'
-                          : 'border-gray-200 bg-white hover:border-indigo-300'
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-indigo-300'
                         }`}>
                         <div className="flex gap-4">
                           {/* Thumbnail */}
@@ -264,6 +265,9 @@ export default async function PathDetailPage({ params }: { params: { id: string 
                 </div>
               )}
             </div>
+          </div>
+          <div className="lg:col-span-3">
+            <RecommendedCourses pathId={params.id} />
           </div>
         </div>
       </div>
