@@ -36,6 +36,32 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
   if (error || !path) notFound()
 
+  // Block access if not validated and not owner
+  const isOwner = path.created_by === user.id
+  const isValidated = path.is_validated === true
+
+  if (!isValidated && !isOwner) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+        <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">pending</span>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Contenido no disponible
+        </h1>
+        <p className="text-gray-600 dark:text-[#b0bfcc] max-w-md">
+          Este learning path está pendiente de validación por un administrador.
+          Vuelve más tarde.
+        </p>
+        <Link
+          href="/dashboard/paths"
+          className="mt-6 inline-flex items-center gap-2 text-[#137fec] hover:underline"
+        >
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Volver a paths
+        </Link>
+      </div>
+    )
+  }
+
   // Calcular progreso
   const totalCourses = path.courses?.length || 0
   const completedCourses = path.courses?.filter((c: Course) =>
@@ -54,6 +80,19 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <>
+      {/* Pending Validation Banner */}
+      {!isValidated && isOwner && (
+        <div className="mb-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined text-amber-500">pending</span>
+          <div>
+            <p className="font-medium text-amber-500">Pendiente de validación</p>
+            <p className="text-sm text-amber-500/70">
+              Este learning path solo es visible para ti hasta que un administrador lo apruebe.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="mb-8">
         <Link

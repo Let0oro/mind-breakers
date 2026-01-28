@@ -13,7 +13,7 @@ export default async function OrganizationsPage() {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) redirect('/login')
 
-    // Fetch organizations with course/path counts
+    // Fetch validated organizations (or user's own unvalidated)
     const { data: organizations } = await supabase
         .from('organizations')
         .select(`
@@ -21,9 +21,12 @@ export default async function OrganizationsPage() {
       name,
       description,
       website_url,
+      is_validated,
+      created_by,
       learning_paths (id),
       courses (id)
     `)
+        .or(`is_validated.eq.true,created_by.eq.${user.id}`)
         .order('name')
 
     return (

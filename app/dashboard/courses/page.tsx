@@ -14,7 +14,7 @@ export default async function CoursesPage() {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) redirect('/login')
 
-    // Fetch all courses
+    // Fetch all validated courses (or user's own unvalidated courses)
     const { data: courses } = await supabase
         .from('courses')
         .select(`
@@ -23,12 +23,15 @@ export default async function CoursesPage() {
       summary,
       thumbnail_url,
       xp_reward,
+      is_validated,
+      created_by,
       organizations (name),
       user_course_progress (
         completed,
         xp_earned
       )
     `)
+        .or(`is_validated.eq.true,created_by.eq.${user.id}`)
         .order('created_at', { ascending: false })
 
     // Fetch user progress
@@ -95,6 +98,13 @@ export default async function CoursesPage() {
                                     {!isCompleted && isEnrolled && (
                                         <div className="absolute top-2 right-2 bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold">
                                             In Progress
+                                        </div>
+                                    )}
+                                    {/* Pending Badge */}
+                                    {!course.is_validated && course.created_by === user.id && (
+                                        <div className="absolute top-2 left-2 bg-amber-500 text-gray-900 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                                            <span className="material-symbols-outlined w-3 h-3">pending</span>
+                                            Pendiente
                                         </div>
                                     )}
                                 </div>
