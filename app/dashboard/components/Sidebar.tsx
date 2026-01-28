@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 
 interface SidebarProps {
     user: any
@@ -12,6 +13,13 @@ interface SidebarProps {
 export function Sidebar({ user, profile }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
+    const router = useRouter()
+    const supabase = createClient()
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut()
+        router.push('/login')
+    }
 
     const isActive = (path: string) => {
         if (path === '/dashboard') {
@@ -23,8 +31,8 @@ export function Sidebar({ user, profile }: SidebarProps) {
     const getLinkClassName = (path: string) => {
         const active = isActive(path)
         return `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active
-                ? 'bg-[#283039] text-white'
-                : 'text-[#9dabb9] hover:text-white hover:bg-white/5'
+            ? 'bg-[#283039] text-white'
+            : 'text-[#9dabb9] hover:text-white hover:bg-white/5'
             }`
     }
 
@@ -154,6 +162,16 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                 </Link>
                             </>
                         )}
+
+                        <div className="h-px bg-[#3b4754] my-4"></div>
+
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-[#9dabb9] hover:text-white hover:bg-white/5 w-full text-left"
+                        >
+                            <span className="material-symbols-outlined w-6 h-6">logout</span>
+                            <span className="text-sm font-medium">Log Out</span>
+                        </button>
                     </nav>
                 </div>
 
