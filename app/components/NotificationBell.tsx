@@ -38,7 +38,7 @@ export function NotificationBell({ userId }: { userId: string }) {
   useEffect(() => {
     // Cargar datos iniciales
     loadNotifications()
-    
+
     // Suscribirse a notificaciones en tiempo real
     const channel = supabase
       .channel('notifications-channel')
@@ -104,14 +104,7 @@ export function NotificationBell({ userId }: { userId: string }) {
         onClick={() => setIsOpen(!isOpen)}
         className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
       >
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-          />
-        </svg>
+        <span className="material-symbols-outlined">notifications</span>
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -145,9 +138,8 @@ export function NotificationBell({ userId }: { userId: string }) {
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`border-b border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 ${
-                      !notification.read ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-                    }`}
+                    className={`border-b border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 ${!notification.read ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">
@@ -186,13 +178,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                           onClick={() => markAsRead(notification.id)}
                           className="text-indigo-600 hover:text-indigo-700"
                         >
-                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <span className="material-symbols-outlined text-[20px]">check</span>
                         </button>
                       )}
                     </div>

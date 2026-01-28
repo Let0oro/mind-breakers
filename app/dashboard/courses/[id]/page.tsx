@@ -7,7 +7,7 @@ import type { CourseExercise } from '@/lib/types'
 
 export default async function CourseDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -52,7 +52,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
   const isSaved = !!savedCourse
 
-  const isYouTube = course.link_url && 
+  const isYouTube = course.link_url &&
     (course.link_url.includes('youtube.com') || course.link_url.includes('youtu.be'))
 
   return (
@@ -66,7 +66,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
           >
             ← Volver a {course.learning_paths.title}
           </Link>
-          
+
           <div className="flex items-start justify-between mt-2">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900">
@@ -88,7 +88,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
               </div>
             </div>
 
-            <CourseActions 
+            <CourseActions
               courseId={course.id}
               userId={user.id}
               isSaved={isSaved}
@@ -124,9 +124,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                   <span className="font-medium text-indigo-900">
                     🔗 Ir al curso externo
                   </span>
-                  <svg className="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
+                  <span className="material-symbols-outlined h-5 w-5 text-indigo-600">open_in_new</span>
                 </a>
               </div>
             )}
@@ -156,17 +154,16 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                 <div className="space-y-4">
                   {course.course_exercises.map((exercise: CourseExercise) => {
                     const submission = submissions?.find(s => s.exercise_id === exercise.id)
-                    
+
                     return (
                       <div
                         key={exercise.id}
-                        className={`rounded-lg border-2 p-4 ${
-                          submission?.status === 'approved'
+                        className={`rounded-lg border-2 p-4 ${submission?.status === 'approved'
                             ? 'border-green-300 bg-green-50'
                             : submission
-                            ? 'border-yellow-300 bg-yellow-50'
-                            : 'border-gray-200 bg-gray-50'
-                        }`}
+                              ? 'border-yellow-300 bg-yellow-50'
+                              : 'border-gray-200 bg-gray-50'
+                          }`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -230,13 +227,11 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
               <h3 className="text-sm font-semibold text-gray-900 mb-4">
                 Estado del curso
               </h3>
-              
+
               {isCompleted ? (
                 <div className="space-y-3">
                   <div className="rounded-lg bg-green-100 p-4 text-center">
-                    <svg className="mx-auto h-12 w-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                    <span className="mx-auto material-symbols-outlined h-12 w-12 text-green-600">check_circle</span>
                     <p className="mt-2 font-medium text-green-900">
                       ¡Completado!
                     </p>
@@ -276,7 +271,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                 <div>
                   <dt className="text-gray-600">Learning Path</dt>
                   <dd className="mt-1 font-medium text-gray-900">
-                    <Link 
+                    <Link
                       href={`/dashboard/paths/${course.learning_paths.id}`}
                       className="hover:text-indigo-600"
                     >

@@ -231,9 +231,7 @@ export default function LoginPage() {
         <div className="mt-12 flex items-center gap-6 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
           <div className="flex flex-col items-center">
             <div className="p-3 bg-white dark:bg-[#1c2127] rounded-lg shadow-sm mb-2 border border-gray-100 dark:border-[#3b4754]">
-              <svg className="w-6 h-6 text-[#137fec]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-              </svg>
+              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">check_circle</span>
             </div>
             <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter">Machine Learning</span>
           </div>

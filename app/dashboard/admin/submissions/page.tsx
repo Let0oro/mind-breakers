@@ -20,7 +20,7 @@ interface Submission {
 
 export default async function AdminSubmissionsPage() {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -65,13 +65,12 @@ export default async function AdminSubmissionsPage() {
             submissions.map((submission: Submission) => (
               <div
                 key={submission.id}
-                className={`rounded-lg border-2 bg-white p-6 ${
-                  submission.status === 'pending'
+                className={`rounded-lg border-2 bg-white p-6 ${submission.status === 'pending'
                     ? 'border-yellow-300'
                     : submission.status === 'approved'
-                    ? 'border-green-300'
-                    : 'border-red-300'
-                }`}
+                      ? 'border-green-300'
+                      : 'border-red-300'
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -80,13 +79,12 @@ export default async function AdminSubmissionsPage() {
                         {submission.course_exercises.title}
                       </h3>
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          submission.status === 'pending'
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${submission.status === 'pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : submission.status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
                       >
                         {submission.status === 'pending' && '⏱ Pendiente'}
                         {submission.status === 'approved' && '✓ Aprobado'}
@@ -119,9 +117,7 @@ export default async function AdminSubmissionsPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
                         >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
+                          <span className="material-symbols-outlined h-4 w-4">download</span>
                           Descargar archivo
                         </a>
                       )}
@@ -132,9 +128,7 @@ export default async function AdminSubmissionsPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
                         >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
+                          <span className="material-symbols-outlined h-4 w-4">open_in_new</span>
                           Ver en Drive
                         </a>
                       )}
