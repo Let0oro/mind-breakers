@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { AdminRequestForm } from './AdminRequestForm'
+import { SettingsForm } from './SettingsForm'
 
 export const metadata = {
     title: 'Settings - MindBreaker',
@@ -40,63 +41,7 @@ export default async function SettingsPage() {
 
             <div className="max-w-3xl space-y-6">
                 {/* Profile Section */}
-                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#137fec]">person</span>
-                        Profile Information
-                    </h3>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                                Username
-                            </label>
-                            <div className="h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] flex items-center text-white">
-                                {profile?.username || 'Not set'}
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                                Email
-                            </label>
-                            <div className="h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] flex items-center text-white">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                                    Level
-                                </label>
-                                <div className="h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] flex items-center text-white font-bold">
-                                    Level {profile?.level || 1}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                                    Total XP
-                                </label>
-                                <div className="h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] flex items-center text-[#137fec] font-bold">
-                                    {profile?.total_xp || 0} XP
-                                </div>
-                            </div>
-                        </div>
-
-                        {profile?.is_admin && (
-                            <div className="mt-4 p-4 rounded-lg bg-[#137fec]/10 border border-[#137fec]/30">
-                                <div className="flex items-center gap-2 text-[#137fec]">
-                                    <span className="material-symbols-outlined">admin_panel_settings</span>
-                                    <span className="font-bold">Admin Account</span>
-                                </div>
-                                <p className="text-white text-sm mt-1">
-                                    You have administrator privileges
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                <SettingsForm user={user} profile={profile} />
 
                 {/* Admin Request Section - Only show if not admin */}
                 {!profile?.is_admin && (
@@ -132,24 +77,6 @@ export default async function SettingsPage() {
                         )}
                     </section>
                 )}
-
-                {/* Account Section */}
-                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#137fec]">security</span>
-                        Account Security
-                    </h3>
-
-                    <div className="space-y-3">
-                        <a
-                            href="/auth/reset-password"
-                            className="flex items-center justify-between h-12 px-4 rounded-lg border border-[#3b4754] hover:border-[#137fec]/50 text-white hover:bg-[#283039] transition-colors"
-                        >
-                            <span>Change Password</span>
-                            <span className="material-symbols-outlined">arrow_forward</span>
-                        </a>
-                    </div>
-                </section>
 
                 {/* Danger Zone */}
                 <section className="bg-red-500/10 rounded-xl border border-red-500/30 p-6">

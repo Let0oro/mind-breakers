@@ -100,3 +100,47 @@ CREATE TABLE notifications (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days')
 );
+
+<!-- Changes post -->
+
+
+-- 1. Add is_admin field to profiles
+-- ================================================
+ALTER TABLE profiles
+ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+
+-- Create index for admin queries
+CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin) WHERE is_admin = TRUE;
+
+-- 2. Create admin_requests table
+-- ================================================
+CREATE TABLE IF NOT EXISTS admin_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  reason TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ,
+  reviewed_by UUID REFERENCES profiles(id)
+);
+
+-- 3. Add avatar_url to profiles and storage bucket
+-- ================================================
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
+-- Create avatars bucket (Run this in Supabase SQL editor or Storage UI)
+-- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+
+-- Policy to allow authenticated users to upload avatars
+-- CREATE POLICY "Avatar images are publicly accessible"
+--   ON storage.objects FOR SELECT
+--   USING ( bucket_id = 'avatars' );
+
+-- CREATE POLICY "Anyone can upload an avatar"
+--   ON storage.objects FOR INSERT
+--   WITH CHECK ( bucket_id = 'avatars' );
+  
+-- CREATE POLICY "Anyone can update their own avatar"
+--   ON storage.objects FOR UPDATE
+--   USING ( auth.uid() = owner )
+--   WITH CHECK ( bucket_id = 'avatars' );

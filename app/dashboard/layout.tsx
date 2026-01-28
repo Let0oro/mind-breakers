@@ -36,7 +36,7 @@ export default async function DashboardLayout({
                 <div className="flex flex-col gap-8">
                     {/* User Profile */}
                     <div className="flex items-center gap-3 px-2">
-                        <div className="h-10 w-10 rounded-full bg-cover bg-center border-2 border-[#137fec]" style={{ backgroundImage: `url("https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}")` }} />
+                        <div className="h-10 w-10 rounded-full bg-cover bg-center border-2 border-[#137fec]" style={{ backgroundImage: `url("${profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}")` }} />
                         <div className="flex flex-col">
                             <h1 className="text-sm font-bold text-black dark:text-white truncate">{profile?.username || user.email}</h1>
                             <p className="text-[#9dabb9] text-xs">Scholar • Lvl {profile?.level || 1}</p>
