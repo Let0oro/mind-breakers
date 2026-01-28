@@ -239,12 +239,12 @@ export default async function DashboardPage() {
           <div className="h-3 w-full rounded-full bg-[#3b4754] overflow-hidden">
             <div className="h-full bg-[#137fec] rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]" style={{ width: `${Math.min(((profile?.total_xp || 0) / (profile?.xp_for_next_level || 1500)) * 100, 100)}%` }}></div>
           </div>
-          <div className="flex gap-4">
+          {profile?.daily_xp && <div className="flex gap-4">
             <div className="flex items-center gap-1.5 text-xs text-[#0bda5b]">
               <span className="material-symbols-outlined w-4 h-4">trending_up</span>
-              <span>+{profile?.daily_xp || 150} XP today</span>
+              <span>+{profile?.daily_xp} XP today</span>
             </div>
-          </div>
+          </div>}
         </div>
 
         {/* Streak Stats */}

@@ -156,50 +156,63 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             </section>
 
             {/* Change Password Form */}
-            <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#137fec]">lock</span>
-                    Change Password
-                </h3>
+            {user?.app_metadata?.provider === 'email' ? (
+                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
+                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#137fec]">lock</span>
+                        Change Password
+                    </h3>
 
-                <form onSubmit={handleChangePassword} className="space-y-4">
-                    <div>
-                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                            New Password
-                        </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
-                            placeholder="Enter new password"
-                        />
-                    </div>
+                    <form onSubmit={handleChangePassword} className="space-y-4">
+                        <div>
+                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                                New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="Enter new password"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
-                            Confirm New Password
-                        </label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
-                            placeholder="Confirm new password"
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                                Confirm New Password
+                            </label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="Confirm new password"
+                            />
+                        </div>
 
-                    <div className="flex justify-end">
-                        <button
-                            type="submit"
-                            disabled={isLoading || !password}
-                            className="h-10 px-6 rounded-lg bg-[#137fec] text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isLoading ? 'Updating...' : 'Update Password'}
-                        </button>
-                    </div>
-                </form>
-            </section>
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={isLoading || !password}
+                                className="h-10 px-6 rounded-lg bg-[#137fec] text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            ) : (
+                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
+                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#137fec]">lock</span>
+                        Security
+                    </h3>
+                    <p className="text-[#9dabb9]">
+                        You are logged in via <span className="text-white font-semibold capitalize">{user?.app_metadata?.provider}</span>.
+                        Please manage your password and security settings directly through their platform.
+                    </p>
+                </section>
+            )}
         </div>
     )
 }
