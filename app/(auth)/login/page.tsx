@@ -105,7 +105,7 @@ export default function LoginPage() {
               <span className='text-3xl material-symbols-outlined text-[#137fec]'>info</span>
             </div>
             <h1 className="text-gray-900 dark:text-white tracking-tight text-3xl font-bold leading-tight text-center pb-2">Welcome back</h1>
-            <p className="text-gray-600 dark:text-[#9dabb9] text-base font-normal leading-normal text-center">Enter your details to continue your educational journey.</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-base font-normal leading-normal text-center">Enter your details to continue your educational journey.</p>
           </div>
 
           {/* Login Form */}
@@ -122,7 +122,7 @@ export default function LoginPage() {
               <label className="flex flex-col">
                 <p className="text-gray-700 dark:text-white text-sm font-medium leading-normal pb-2">Email Address</p>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#9dabb9] w-5 h-5" >
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#b0bfcc] w-5 h-5" >
                     mail
                   </span>
                   <input
@@ -133,7 +133,7 @@ export default function LoginPage() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"
+                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#b0bfcc] pl-12 pr-4 text-base font-normal leading-normal"
                   />
                 </div>
               </label>
@@ -147,7 +147,7 @@ export default function LoginPage() {
               </div>
               <label className="flex flex-col">
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#9dabb9] w-5 h-5" >
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-[#b0bfcc] w-5 h-5" >
                     lock
                   </span>
                   <input
@@ -158,7 +158,7 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"
+                    className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#b0bfcc] pl-12 pr-4 text-base font-normal leading-normal"
                   />
                 </div>
               </label>
@@ -173,7 +173,7 @@ export default function LoginPage() {
                 onChange={handleRememberMeChange}
                 className="w-5 h-5 rounded border-gray-300 dark:border-[#3b4754] text-[#137fec] focus:ring-[#137fec] dark:bg-[#111418]"
               />
-              <label className="text-sm text-gray-600 dark:text-[#9dabb9] font-medium cursor-pointer" htmlFor="remember">Remember me for 30 days</label>
+              <label className="text-sm text-gray-600 dark:text-[#b0bfcc] font-medium cursor-pointer" htmlFor="remember">Remember me for 30 days</label>
             </div>
 
             {/* Primary Action Button */}
@@ -188,7 +188,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative flex py-4 items-center">
               <div className="grow border-t border-gray-200 dark:border-[#3b4754]"></div>
-              <span className="shrink mx-4 text-gray-400 dark:text-[#9dabb9] text-xs font-semibold uppercase tracking-widest">Or login with</span>
+              <span className="shrink mx-4 text-gray-400 dark:text-[#b0bfcc] text-xs font-semibold uppercase tracking-widest">Or login with</span>
               <div className="grow border-t border-gray-200 dark:border-[#3b4754]"></div>
             </div>
 
@@ -222,7 +222,7 @@ export default function LoginPage() {
 
           {/* Footer Action */}
           <div className="mt-10 text-center">
-            <p className="text-gray-600 dark:text-[#9dabb9] text-sm">
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm">
               {"Don't have an account yet?"}
               <a className="text-[#137fec] font-bold hover:underline ml-1" href="/register">Join the community</a>
             </p>

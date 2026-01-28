@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useEffectEvent } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 
@@ -18,10 +18,11 @@ export function NotificationBell({ userId }: { userId: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
-  const supabase = createClient()
 
-  // useEffectEvent para leer notificaciones sin agregar deps
-  const loadNotifications = useEffectEvent(async () => {
+  // Estabilizar la referencia del cliente de Supabase
+  const supabase = useMemo(() => createClient(), [])
+
+  const loadNotifications = useCallback(async () => {
     const { data } = await supabase
       .from('notifications')
       .select('*')
@@ -33,7 +34,7 @@ export function NotificationBell({ userId }: { userId: string }) {
       setNotifications(data)
       setUnreadCount(data.filter((n) => !n.read).length)
     }
-  })
+  }, [supabase, userId])
 
   useEffect(() => {
     // Cargar datos iniciales
@@ -106,7 +107,7 @@ export function NotificationBell({ userId }: { userId: string }) {
       >
         <span className="material-symbols-outlined">notifications</span>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-gray-900 dark:text-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}

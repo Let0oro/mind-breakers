@@ -140,7 +140,7 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-3">
 
               <h1 className="text-black dark:text-white text-3xl font-bold leading-tight">Unlock your potential.</h1>
-              <p className="text-gray-600 dark:text-[#9dabb9] text-base leading-relaxed">Join 50,000+ learners building their future through community-driven paths and gamified challenges.</p>
+              <p className="text-gray-600 dark:text-[#b0bfcc] text-base leading-relaxed">Join 50,000+ learners building their future through community-driven paths and gamified challenges.</p>
             </div>
             <div className="flex flex-col gap-4">
               {/* Benefit 1 */}
@@ -150,7 +150,7 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">10k+ Learning Paths</p>
-                  <p className="text-gray-500 dark:text-[#9dabb9] text-xs">User-generated curriculum for every skill</p>
+                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">User-generated curriculum for every skill</p>
                 </div>
               </div>
               {/* Benefit 2 */}
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">Earn XP & Badges</p>
-                  <p className="text-gray-500 dark:text-[#9dabb9] text-xs">Get recognized for your consistency</p>
+                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">Get recognized for your consistency</p>
                 </div>
               </div>
               {/* Benefit 3 */}
@@ -170,7 +170,7 @@ export default function RegisterPage() {
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">Global Leaderboard</p>
-                  <p className="text-gray-500 dark:text-[#9dabb9] text-xs">Compete with learners worldwide</p>
+                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">Compete with learners worldwide</p>
                 </div>
               </div>
             </div>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
             {/* Headline */}
             <div className="mb-8">
               <h2 className="text-black dark:text-white text-3xl font-bold mb-2">Create your account</h2>
-              <p className="text-gray-600 dark:text-[#9dabb9] text-base">Enter your details to start your learning journey.</p>
+              <p className="text-gray-600 dark:text-[#b0bfcc] text-base">Enter your details to start your learning journey.</p>
             </div>
 
             {/* Social Sign Up */}
@@ -341,7 +341,7 @@ export default function RegisterPage() {
                       onClick={() => toggleInterest(interest.id)}
                       className={`px-4 py-2 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${selectedInterests.includes(interest.id)
                         ? 'border-[#137fec] bg-[#137fec]/10 text-[#137fec]'
-                        : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#9dabb9] hover:border-[#137fec]/50'
+                        : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#b0bfcc] hover:border-[#137fec]/50'
                         }`}
                     >
                       <span className="material-symbols-outlined w-4 h-4">

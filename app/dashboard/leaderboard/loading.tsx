@@ -5,15 +5,15 @@ export default function LeaderboardLoading() {
             <div className="flex flex-col gap-4 mb-8">
                 <div className="flex flex-wrap justify-between items-end gap-6">
                     <div className="flex flex-col gap-2">
-                        <div className="h-8 w-48 bg-[#1a232e] rounded-lg"></div>
-                        <div className="h-4 w-64 bg-[#1a232e] rounded-lg"></div>
+                        <div className="h-8 w-48 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                        <div className="h-4 w-64 bg-white dark:bg-[#1a232e] rounded-lg"></div>
                     </div>
-                    <div className="h-9 w-32 bg-[#1a232e] rounded-lg"></div>
+                    <div className="h-9 w-32 bg-white dark:bg-[#1a232e] rounded-lg"></div>
                 </div>
             </div>
 
             {/* Leaderboard Table Skeleton */}
-            <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] overflow-hidden">
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-[#283039]">

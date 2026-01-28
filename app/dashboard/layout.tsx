@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Breadcrumb from '@/components/breadcrumb'
 import { NotificationBell } from '@/components/NotificationBell'
 import { Sidebar } from './components/Sidebar'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default async function DashboardLayout({
     children,
@@ -23,7 +24,7 @@ export default async function DashboardLayout({
         .single()
 
     return (
-        <div className="dark flex h-screen overflow-hidden bg-[#101922]">
+        <div className="flex h-screen overflow-hidden bg-[#f6f7f8] dark:bg-[#101922]">
             <style>{`
         :root {
           --primary: #137fec;
@@ -37,8 +38,12 @@ export default async function DashboardLayout({
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-6">
                 {/* Breadcrumb Navigation - Add spacing for mobile toggle */}
-                <div className="md:mt-0 mt-8">
+                <div className="flex justify-between md:mt-0 mt-8">
                     <Breadcrumb />
+                    <div className='flex gap-2 items-center'>
+                        <NotificationBell userId={user.id} />
+                        <ThemeToggle />
+                    </div>
                 </div>
 
                 {children}

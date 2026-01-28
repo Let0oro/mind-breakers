@@ -102,15 +102,15 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             )}
 
             {/* Profile Information Form */}
-            <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+            <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+                <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-[#137fec]">person</span>
                     Profile Information
                 </h3>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                     <div>
-                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
                             Profile Image
                         </label>
                         <div className="flex items-center gap-4">
@@ -118,42 +118,42 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                                 <img
                                     src={profile.avatar_url}
                                     alt="Current Avatar"
-                                    className="w-12 h-12 rounded-full object-cover border border-[#3b4754]"
+                                    className="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-[#3b4754]"
                                 />
                             )}
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-                                className="block w-full text-sm text-[#9dabb9] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#137fec] file:text-white hover:file:bg-[#137fec]/90 cursor-pointer"
+                                className="block w-full text-sm text-gray-600 dark:text-[#b0bfcc] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#137fec] file:text-gray-900 dark:text-white hover:file:bg-[#137fec]/90 cursor-pointer"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
                             Email
                         </label>
                         <input
                             type="email"
                             value={user.email}
                             disabled
-                            className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-[#9dabb9] cursor-not-allowed opacity-70"
+                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] cursor-not-allowed opacity-70"
                         />
-                        <p className="text-xs text-[#9dabb9] mt-1">
+                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
                             To change your email, please contact support or use the auth provider settings.
                         </p>
                     </div>
 
                     <div>
-                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
                             Username
                         </label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
                             placeholder="Enter username"
                         />
                     </div>
@@ -162,7 +162,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="h-10 px-6 rounded-lg bg-[#137fec] text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-10 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Saving...' : 'Save Changes'}
                         </button>
@@ -172,35 +172,35 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
 
             {/* Change Password Form */}
             {user?.app_metadata?.provider === 'email' ? (
-                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+                    <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#137fec]">lock</span>
                         Change Password
                     </h3>
 
                     <form onSubmit={handleChangePassword} className="space-y-4">
                         <div>
-                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                            <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
                                 New Password
                             </label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
                                 placeholder="Enter new password"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                            <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
                                 Confirm New Password
                             </label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
                                 placeholder="Confirm new password"
                             />
                         </div>
@@ -209,7 +209,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                             <button
                                 type="submit"
                                 disabled={isLoading || !password}
-                                className="h-10 px-6 rounded-lg bg-[#137fec] text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-10 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? 'Updating...' : 'Update Password'}
                             </button>
@@ -217,13 +217,13 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                     </form>
                 </section>
             ) : (
-                <section className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6">
-                    <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+                    <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#137fec]">lock</span>
                         Security
                     </h3>
-                    <p className="text-[#9dabb9]">
-                        You are logged in via <span className="text-white font-semibold capitalize">{user?.app_metadata?.provider}</span>.
+                    <p className="text-gray-600 dark:text-[#b0bfcc]">
+                        You are logged in via <span className="text-gray-900 dark:text-white font-semibold capitalize">{user?.app_metadata?.provider}</span>.
                         Please manage your password and security settings directly through their platform.
                     </p>
                 </section>

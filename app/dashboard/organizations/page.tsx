@@ -31,14 +31,14 @@ export default async function OrganizationsPage() {
             {/* Header Section */}
             <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
                 <div className="flex flex-col gap-2">
-                    <h2 className="text-white text-3xl font-black tracking-tight">Organizations</h2>
-                    <p className="text-[#9dabb9] text-base">
+                    <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Organizations</h2>
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
                         {organizations?.length || 0} organizations creating content
                     </p>
                 </div>
                 <Link
                     href="/dashboard/organizations/new"
-                    className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-white font-bold transition-all hover:bg-[#137fec]/80"
+                    className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
                 >
                     <span className="material-symbols-outlined w-5 h-5">add_circle</span>
                     <span>Add Organization</span>
@@ -55,7 +55,7 @@ export default async function OrganizationsPage() {
                         return (
                             <div
                                 key={org.id}
-                                className="bg-[#1a232e] rounded-xl border border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
+                                className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
                             >
                                 {/* Avatar */}
                                 <div className="flex items-start gap-4">
@@ -65,7 +65,7 @@ export default async function OrganizationsPage() {
                                         </span>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-white font-bold text-lg truncate">{org.name}</h3>
+                                        <h3 className="text-gray-900 dark:text-white font-bold text-lg truncate">{org.name}</h3>
                                         {org.website_url && (
                                             <a
                                                 href={org.website_url}
@@ -82,29 +82,29 @@ export default async function OrganizationsPage() {
 
                                 {/* Description */}
                                 {org.description && (
-                                    <p className="text-[#9dabb9] text-sm line-clamp-3">
+                                    <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-3">
                                         {org.description}
                                     </p>
                                 )}
 
                                 {/* Stats */}
-                                <div className="flex gap-4 pt-4 border-t border-[#3b4754]">
+                                <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-[#3b4754]">
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined w-5 h-5 text-[#137fec]">route</span>
-                                        <span className="text-white text-sm font-medium">{pathCount}</span>
-                                        <span className="text-[#9dabb9] text-xs">paths</span>
+                                        <span className="text-gray-900 dark:text-white text-sm font-medium">{pathCount}</span>
+                                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">paths</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined w-5 h-5 text-[#137fec]">school</span>
-                                        <span className="text-white text-sm font-medium">{courseCount}</span>
-                                        <span className="text-[#9dabb9] text-xs">courses</span>
+                                        <span className="text-gray-900 dark:text-white text-sm font-medium">{courseCount}</span>
+                                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">courses</span>
                                     </div>
                                 </div>
 
                                 {/* Actions */}
                                 <Link
                                     href={`/dashboard/paths?org=${org.id}`}
-                                    className="mt-2 w-full text-center bg-[#283039] hover:bg-[#3b4754] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    className="mt-2 w-full text-center bg-[#283039] hover:bg-gray-100 dark:hover:bg-[#3b4754] text-gray-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                                 >
                                     View Paths
                                 </Link>
@@ -112,13 +112,13 @@ export default async function OrganizationsPage() {
                         )
                     })
                 ) : (
-                    <div className="col-span-full bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+                    <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                         <span className="material-symbols-outlined w-16 h-16 text-[#3b4754] mx-auto mb-4">business</span>
-                        <p className="text-[#9dabb9] text-lg mb-2">No organizations yet</p>
-                        <p className="text-[#9dabb9] text-sm mb-4">Create an organization to start publishing content</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No organizations yet</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Create an organization to start publishing content</p>
                         <Link
                             href="/dashboard/organizations/new"
-                            className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+                            className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
                         >
                             Add Organization
                         </Link>

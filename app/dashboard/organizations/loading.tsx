@@ -4,16 +4,16 @@ export default function OrganizationsLoading() {
             {/* Header Section */}
             <div className="flex flex-wrap justify-between items-end gap-6 mb-8">
                 <div className="flex flex-col gap-2">
-                    <div className="h-8 w-48 bg-[#1a232e] rounded-lg"></div>
-                    <div className="h-4 w-32 bg-[#1a232e] rounded-lg"></div>
+                    <div className="h-8 w-48 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                    <div className="h-4 w-32 bg-white dark:bg-[#1a232e] rounded-lg"></div>
                 </div>
-                <div className="h-11 w-40 bg-[#1a232e] rounded-lg"></div>
+                <div className="h-11 w-40 bg-white dark:bg-[#1a232e] rounded-lg"></div>
             </div>
 
             {/* Organizations Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-6 flex flex-col gap-4">
+                    <div key={i} className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 flex flex-col gap-4">
                         {/* Header */}
                         <div className="flex items-start gap-4">
                             <div className="w-14 h-14 rounded-lg bg-[#3b4754] shrink-0"></div>
@@ -31,7 +31,7 @@ export default function OrganizationsLoading() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-4 pt-4 border-t border-[#3b4754]">
+                        <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-[#3b4754]">
                             <div className="h-4 w-16 bg-[#3b4754] rounded"></div>
                             <div className="h-4 w-16 bg-[#3b4754] rounded"></div>
                         </div>

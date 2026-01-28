@@ -14,12 +14,12 @@ interface Exercise {
 export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
     if (!exercises.length) {
         return (
-            <div className="bg-[#1a232e] rounded-xl border border-[#3b4754] p-12 text-center">
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                 <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">
                     assignment
                 </span>
-                <p className="text-[#9dabb9] text-lg mb-2">No exercises found</p>
-                <p className="text-[#9dabb9] text-sm">
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No exercises found</p>
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-sm">
                     Enroll in courses to find new exercises
                 </p>
             </div>
@@ -31,7 +31,7 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
             {exercises.map((exercise) => (
                 <div
                     key={exercise.id}
-                    className="group bg-[#1a232e] rounded-xl border border-[#3b4754] p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-[#137fec]/50 transition-all"
+                    className="group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-[#137fec]/50 transition-all"
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -43,24 +43,24 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
                                 {exercise.status.replace('_', ' ')}
                             </span>
                             {exercise.course_title && (
-                                <span className="text-[#9dabb9] text-xs">
+                                <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">
                                     in {exercise.course_title}
                                 </span>
                             )}
                         </div>
 
-                        <h3 className="text-white font-bold text-lg mb-2 group-hover:text-[#137fec] transition-colors">
+                        <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-2 group-hover:text-[#137fec] transition-colors">
                             {exercise.title}
                         </h3>
 
                         {exercise.description && (
-                            <p className="text-[#9dabb9] text-sm line-clamp-2">
+                            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2">
                                 {exercise.description}
                             </p>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4 md:border-l md:border-[#3b4754] md:pl-6">
+                    <div className="flex items-center gap-4 md:border-l md:border-gray-200 dark:border-[#3b4754] md:pl-6">
                         {exercise.xp_reward && (
                             <div className="flex items-center gap-1 text-[#137fec] font-bold whitespace-nowrap">
                                 <span className="material-symbols-outlined text-sm">star</span>
@@ -71,8 +71,8 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
                         <Link
                             href={`/dashboard/exercises/${exercise.id}/submit`}
                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors whitespace-nowrap ${exercise.status === 'completed' || exercise.status === 'pending_review'
-                                    ? 'bg-[#283039] text-white hover:bg-[#3b4754]'
-                                    : 'bg-[#137fec] text-white hover:bg-[#137fec]/80'
+                                    ? 'bg-[#283039] text-gray-900 dark:text-white hover:bg-[#3b4754]'
+                                    : 'bg-[#137fec] text-gray-900 dark:text-white hover:bg-[#137fec]/80'
                                 }`}
                         >
                             {exercise.status === 'completed' ? 'View Submission' :

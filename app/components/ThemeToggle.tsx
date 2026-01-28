@@ -1,57 +1,57 @@
 'use client'
 
-import { useState, useEffect, useEffectEvent } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export function ThemeToggle() {
-  // Inicializar isDark correctamente desde el principio
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return false
-    const theme = localStorage.getItem('theme')
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    return theme === 'dark' || (!theme && systemPrefersDark)
-  })
+  const [isDark, setIsDark] = useState(true) // Default to dark
   const [mounted, setMounted] = useState(false)
 
-
-  // Lógica externa (DOM) - USO CORRECTO de useEffectEvent
-  const initializeTheme = useEffectEvent(() => {
+  // Initialize theme on mount
+  useEffect(() => {
     const theme = localStorage.getItem('theme')
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const shouldBeDark = theme === 'dark' || (!theme && systemPrefersDark)
+    // Default to dark if no preference is set
+    const shouldBeDark = theme === 'dark' || (!theme && systemPrefersDark) || !theme
 
+    // Apply theme to document
     if (shouldBeDark) {
       document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
 
     setIsDark(shouldBeDark)
-    setMounted(true) // Ahora setMounted está dentro de useEffectEvent que hace más cosas
-  })
-
-  useEffect(() => {
-    initializeTheme()
+    setMounted(true)
   }, [])
 
-  const toggleTheme = async () => {
+  const toggleTheme = useCallback(async () => {
     const newIsDark = !isDark
-    console.log(document.startViewTransition);
 
-    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setIsDark(newIsDark)
-      document.documentElement.classList.toggle('dark')
+    const updateTheme = () => {
+      if (newIsDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
       localStorage.setItem('theme', newIsDark ? 'dark' : 'light')
+      setIsDark(newIsDark)
+    }
+
+    // Check if View Transitions API is supported and motion is allowed
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      updateTheme()
       return
     }
 
+    // Use View Transitions for smooth animation
     const transition = document.startViewTransition(() => {
-      setIsDark(newIsDark)
-      document.documentElement.classList.toggle('dark')
-      localStorage.setItem('theme', newIsDark ? 'dark' : 'light')
+      updateTheme()
     })
 
     await transition.ready
-  }
+  }, [isDark])
 
-  // Evitar hydration mismatch
+  // Prevent hydration mismatch
   if (!mounted) {
     return <div className="h-10 w-10" />
   }
@@ -59,7 +59,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+      className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
       aria-label="Toggle theme"
     >
       {isDark ? (
