@@ -90,15 +90,6 @@ export default async function DashboardLayout({
                                 </Link>
                             </>
                         )}
-
-                        <Link className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:text-white hover:bg-white/5 transition-colors" href="/dashboard/profile">
-                            <span className="material-symbols-outlined w-6 h-6">person</span>
-                            <span className="text-sm font-medium">Profile</span>
-                        </Link>
-                        <Link className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:text-white hover:bg-white/5 transition-colors" href="/dashboard/settings">
-                            <span className="material-symbols-outlined w-6 h-6">settings</span>
-                            <span className="text-sm font-medium">Settings</span>
-                        </Link>
                     </nav>
                 </div>
 
