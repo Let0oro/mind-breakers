@@ -132,6 +132,21 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
 
                     <div>
                         <label className="block text-[#9dabb9] text-sm font-medium mb-2">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            value={user.email}
+                            disabled
+                            className="w-full h-12 px-4 rounded-lg bg-[#111418] border border-[#3b4754] text-[#9dabb9] cursor-not-allowed opacity-70"
+                        />
+                        <p className="text-xs text-[#9dabb9] mt-1">
+                            To change your email, please contact support or use the auth provider settings.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-[#9dabb9] text-sm font-medium mb-2">
                             Username
                         </label>
                         <input

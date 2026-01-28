@@ -130,6 +130,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="name@company.com"
                     required
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"
@@ -154,6 +155,7 @@ export default function LoginPage() {
                     type="password"
                     placeholder="••••••••"
                     required
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#137fec]/50 border border-gray-300 dark:border-[#3b4754] bg-gray-50 dark:bg-[#111418] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9dabb9] pl-12 pr-4 text-base font-normal leading-normal"

@@ -260,6 +260,7 @@ export default function RegisterPage() {
                 <label className="text-sm font-bold text-black dark:text-white px-1">Full Name</label>
                 <input
                   type="text"
+                  autoComplete="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full h-12 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-[#1c242c] text-black dark:text-white focus:ring-2 focus:ring-[#137fec] focus:border-transparent outline-none transition-all placeholder:text-gray-400"
@@ -272,6 +273,7 @@ export default function RegisterPage() {
                   <label className="text-sm font-bold text-black dark:text-white px-1">Email Address</label>
                   <input
                     type="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full h-12 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-[#1c242c] text-black dark:text-white focus:ring-2 focus:ring-[#137fec] focus:border-transparent outline-none placeholder:text-gray-400"
@@ -282,6 +284,7 @@ export default function RegisterPage() {
                   <label className="text-sm font-bold text-black dark:text-white px-1">Username</label>
                   <input
                     type="text"
+                    autoComplete="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full h-12 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-[#1c242c] text-black dark:text-white focus:ring-2 focus:ring-[#137fec] focus:border-transparent outline-none placeholder:text-gray-400"
@@ -299,6 +302,7 @@ export default function RegisterPage() {
                 </div>
                 <input
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-12 px-4 rounded-xl border border-gray-200 dark:border-[#283039] bg-white dark:bg-[#1c242c] text-black dark:text-white focus:ring-2 focus:ring-[#137fec] focus:border-transparent outline-none"
