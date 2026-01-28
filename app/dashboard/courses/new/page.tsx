@@ -194,7 +194,10 @@ export default function NewCoursePage() {
               </button>
             </div>
             <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
-              Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail
+              Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
+              <span className="block mt-1 text-amber-600 dark:text-amber-400">
+                💡 Use public URLs (without login). If auto-fill doesn't work, you can enter the data manually.
+              </span>
             </p>
           </div>
 
