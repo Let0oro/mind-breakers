@@ -29,12 +29,6 @@ export default function SharedHeader() {
                             </Link>
                             <Link
                                 className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
-                                href="/#leaderboard"
-                            >
-                                Leaderboard
-                            </Link>
-                            <Link
-                                className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
                                 href="/#quests"
                             >
                                 Quests

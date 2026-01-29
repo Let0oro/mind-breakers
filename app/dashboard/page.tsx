@@ -19,6 +19,7 @@ interface DashboardLearningPath {
   completedCourses: number
   totalCourses: number
   nextCourse: string
+  nextCourseId?: string
   color: string
   summary?: string
 }
@@ -88,6 +89,50 @@ export default async function DashboardPage() {
   // Supabase join types can be tricky. Safely cast or access.
   const lastCourse = recentActivity?.courses ? (Array.isArray(recentActivity.courses) ? recentActivity.courses[0] : recentActivity.courses) : null
 
+  // Fetch Saved Paths for the dashboard summary
+  // We prioritize saved paths to show active intent
+  const { data: savedDashboardPaths } = await supabase
+    .from('saved_paths')
+    .select(`
+      path:learning_paths (
+        id,
+        title,
+        summary,
+        courses (id, title, order_index)
+      )
+    `)
+    .eq('user_id', user.id)
+    .limit(5)
+
+  // Handle Supabase relation returning array or object
+  const learningPathsData = savedDashboardPaths?.map(p => Array.isArray(p.path) ? p.path[0] : p.path) || []
+
+  // Calculate progress for paths
+  // Note: accurate path progress calculation requires fetching all user progress which might be heavy. 
+  // For now we will check simplified progress or mocking it to 0 if not easily available without N+1.
+  // We can do a second query for cached progress if available or fetch user progress for all courses.
+  const { data: allUserProgress } = await supabase.from('user_course_progress').select('course_id').eq('user_id', user.id)
+  const completedCourseIds = new Set(allUserProgress?.map(p => p.course_id))
+
+  const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
+    // Sort courses by order_index
+    const sortedCourses = [...(path.courses || [])].sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+    const totalCourses = sortedCourses.length
+    const completedCourses = sortedCourses.filter((c: any) => completedCourseIds.has(c.id)).length
+    const nextCourseData = sortedCourses.find((c: any) => !completedCourseIds.has(c.id))
+
+    return {
+      id: path.id,
+      title: path.title,
+      summary: path.summary,
+      completedCourses,
+      totalCourses,
+      nextCourse: nextCourseData?.title || (completedCourses === totalCourses ? '✓ Completed!' : 'Start Path'),
+      nextCourseId: nextCourseData?.id,
+      color: 'primary',
+    }
+  }) || []
+
   // --- Resume Logic ---
   let resumeTarget = null
 
@@ -140,9 +185,16 @@ export default async function DashboardPage() {
     }
   }
 
-  // Fallback: Si no hay resumeTarget aún, buscar algún path activo incompleto? 
-  // Por simplicidad y performance, y siguiendo requerimientos ("si tiene todos... terminados... no aparezca"), lo dejamos así.
-  // Si quisiéramos ser más agresivos, buscaríamos en 'enrolled_paths' el primero incompleto.
+  // Fallback: Si no hay resumeTarget aún, buscar en 'enrolled_paths' el primero incompleto.
+  if (!resumeTarget) {
+    const firstIncompletePath = learningPathsList.find(path => path.completedCourses < path.totalCourses && path.nextCourseId);
+    if (firstIncompletePath) {
+      resumeTarget = {
+        href: `/dashboard/courses/${firstIncompletePath.nextCourseId}`,
+        label: `Continue: ${firstIncompletePath.title}`
+      }
+    }
+  }
 
 
   // Fetch enrolled courses with progress
@@ -172,52 +224,7 @@ export default async function DashboardPage() {
     instructor: Array.isArray(course.organization) ? course.organization[0]?.name : course.organization?.name || 'Unknown Organization',
   })) || []
 
-  // Fetch Saved Paths for the dashboard summary
-  // We prioritize saved paths to show active intent
-  const { data: savedDashboardPaths } = await supabase
-    .from('saved_paths')
-    .select(`
-      path:learning_paths (
-        id,
-        title,
-        summary,
-        courses (id, title, order_index)
-      )
-    `)
-    .eq('user_id', user.id)
-    .limit(2)
 
-  // Handle Supabase relation returning array or object
-  const learningPathsData = savedDashboardPaths?.map(p => Array.isArray(p.path) ? p.path[0] : p.path) || []
-
-  // If we have fewer than 2, maybe fill with "active via course progress" if we can efficiently?
-  // For now, showing Saved Paths in this widget is a good start. 
-  // If empty, we might want to suggest "Explore Paths".
-
-  // Calculate progress for paths
-  // Note: accurate path progress calculation requires fetching all user progress which might be heavy. 
-  // For now we will check simplified progress or mocking it to 0 if not easily available without N+1.
-  // We can do a second query for cached progress if available or fetch user progress for all courses.
-  const { data: allUserProgress } = await supabase.from('user_course_progress').select('course_id').eq('user_id', user.id)
-  const completedCourseIds = new Set(allUserProgress?.map(p => p.course_id))
-
-  const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
-    // Sort courses by order_index
-    const sortedCourses = [...(path.courses || [])].sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
-    const totalCourses = sortedCourses.length
-    const completedCourses = sortedCourses.filter((c: any) => completedCourseIds.has(c.id)).length
-    const nextCourseData = sortedCourses.find((c: any) => !completedCourseIds.has(c.id))
-
-    return {
-      id: path.id,
-      title: path.title,
-      summary: path.summary,
-      completedCourses,
-      totalCourses,
-      nextCourse: nextCourseData?.title || (completedCourses === totalCourses ? '✓ Completed!' : 'Start Path'),
-      color: 'primary',
-    }
-  }) || []
 
   // Fetch saved courses
   // The schema showed 'saved_courses' table.
@@ -384,7 +391,7 @@ export default async function DashboardPage() {
                       <div className="flex -space-x-2">
                         {[...Array(path.completedCourses)].map((_, i) => (
                           <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
-                            <span className="material-symbols-outlined w-3 h-3 text-gray-900 dark:text-white">check</span>
+                            <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">check</span>
                           </div>
                         ))}
                         <div className="w-6 h-6 rounded-full bg-[#137fec] flex items-center justify-center border border-[#111827] animate-pulse">
