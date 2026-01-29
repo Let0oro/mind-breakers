@@ -148,7 +148,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
 
           <div className="flex items-center gap-3">
-            {(isOwner && profile?.is_admin) && (
+            {(isOwner || profile?.is_admin) && (
               <Link
                 href={`/dashboard/courses/${course.id}/edit`}
                 className="rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors flex items-center gap-2"
