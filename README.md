@@ -47,34 +47,6 @@ mind-breaker/
 -   npm or pnpm
 -   Supabase project (for environment variables)
 
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/mind-breaker.git
-    cd mind-breaker
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Environment Setup:**
-    Duplicate `.env.example` to `.env.local` and fill in your Supabase credentials:
-    ```bash
-    cp .env.example .env.local
-    ```
-    *Required variables:*
-    -   `NEXT_PUBLIC_SUPABASE_URL`
-    -   `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    -   `SUPABASE_SERVICE_ROLE_KEY` (for admin tasks)
-
-4.  **Run Development Server:**
-    ```bash
-    npm run dev
-    ```
-    Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## Database Schema 🗄️
 
