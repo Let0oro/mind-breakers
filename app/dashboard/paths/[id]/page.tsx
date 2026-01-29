@@ -1,4 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
@@ -138,6 +139,9 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                     .from('saved_paths')
                     .insert({ user_id: user!.id, path_id: id })
                 }
+
+                revalidatePath(`/dashboard/paths/${id}`)
+                revalidatePath(`/dashboard/paths`)
               }}
             >
               <button

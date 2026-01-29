@@ -21,14 +21,23 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
 
     const filter = searchParams?.filter || 'all'
 
-    // Fetch all exercises from courses the user is enrolled in
-    // First get enrolled course IDs
+    // Fetch exercises relevant to the user:
+    // 1. From courses they are enrolled in (progress)
     const { data: enrolledCourses } = await supabase
         .from('user_course_progress')
         .select('course_id')
         .eq('user_id', user.id)
 
-    const enrolledCourseIds = enrolledCourses?.map(c => c.course_id) || []
+    // 2. From courses they created
+    const { data: createdCourses } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('created_by', user.id)
+
+    const relevantCourseIds = new Set([
+        ...(enrolledCourses?.map(c => c.course_id) || []),
+        ...(createdCourses?.map(c => c.id) || [])
+    ])
 
     // Fetch exercises for these courses
     let exercisesQuery = supabase
@@ -39,7 +48,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
       description,
       courses (id, title)
     `)
-        .in('course_id', enrolledCourseIds)
+        .in('course_id', Array.from(relevantCourseIds))
 
     const { data: exercises } = await exercisesQuery
 

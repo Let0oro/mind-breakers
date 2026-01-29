@@ -26,7 +26,7 @@ export default async function AdminValidationsPage() {
     }
 
     // Fetch unvalidated items
-    const [coursesRes, orgsRes, pathsRes] = await Promise.all([
+    const [coursesRes, orgsRes, pathsRes, editRequestsRes] = await Promise.all([
         supabase
             .from('courses')
             .select(`
@@ -58,6 +58,12 @@ export default async function AdminValidationsPage() {
       `)
             .eq('is_validated', false)
             .order('created_at', { ascending: false }),
+
+        supabase
+            .from('edit_requests')
+            .select('*')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false })
     ])
 
     // Fetch all existing validated items for fuzzy matching
@@ -71,6 +77,7 @@ export default async function AdminValidationsPage() {
         courses: coursesRes.data || [],
         organizations: orgsRes.data || [],
         paths: pathsRes.data || [],
+        edits: (editRequestsRes.data || []) as any[], // Typing cast for quick fix, better to match interface
     }
 
     const existingItems = {
@@ -82,7 +89,8 @@ export default async function AdminValidationsPage() {
     const totalPending =
         pendingItems.courses.length +
         pendingItems.organizations.length +
-        pendingItems.paths.length
+        pendingItems.paths.length +
+        pendingItems.edits.length
 
     return (
         <>
