@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'Juan Manuel Montero' }],
   icons: {
     icon: '/icon.png',
+    apple: '/icon.png',
+  },
+  appleWebApp: {
+    title: 'MindBreaker',
+    statusBarStyle: 'default',
   },
   description: 'Plataforma de seguimiento de cursos y learning paths con gamificación',
   keywords: ['learning', 'courses', 'education', 'tracking', 'gamification'],

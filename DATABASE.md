@@ -1,147 +1,188 @@
--- Usuarios (gestionado por Supabase Auth, solo extends profile)
-CREATE TABLE profiles (
-  id UUID REFERENCES auth.users PRIMARY KEY,
-  username TEXT UNIQUE,
-  level INTEGER DEFAULT 1,
-  total_xp INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+# MindBreaker Database Schema
 
--- Organizaciones/Autores
-CREATE TABLE organizations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
-  description TEXT,
-  website_url TEXT
-);
+## Overview
+This document serves as the source of truth for the MindBreaker database schema, managed via Supabase (PostgreSQL).
 
--- Paths de aprendizaje
-CREATE TABLE learning_paths (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  summary TEXT,
-  description TEXT,
-  author_id UUID REFERENCES organizations(id),
-  created_by UUID REFERENCES profiles(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+## ER Diagram
 
--- Cursos
-CREATE TABLE courses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  path_id UUID REFERENCES learning_paths(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  summary TEXT,
-  description TEXT,
-  link_url TEXT, -- YouTube/web
-  thumbnail_url TEXT, -- captura o meta OG
-  organization_id UUID REFERENCES organizations(id),
-  order_index INTEGER, -- orden en el path
-  xp_reward INTEGER DEFAULT 100,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+```mermaid
+erDiagram
+    PROFILES ||--o{ LEARNING_PATHS : "creates"
+    PROFILES ||--o{ USER_COURSE_PROGRESS : "tracks"
+    PROFILES ||--o{ EXERCISE_SUBMISSIONS : "submits"
+    PROFILES ||--o{ EDIT_REQUESTS : "requests"
+    ORGANIZATIONS ||--o{ LEARNING_PATHS : "authors"
+    ORGANIZATIONS ||--o{ COURSES : "authors"
+    LEARNING_PATHS ||--|{ COURSES : "contains"
+    COURSES ||--o{ COURSE_EXERCISES : "has"
+    COURSES ||--o{ USER_COURSE_PROGRESS : "tracked_in"
+    COURSE_EXERCISES ||--o{ EXERCISE_SUBMISSIONS : "receives"
 
--- Ejercicios/Proyectos
-CREATE TABLE course_exercises (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  description TEXT,
-  requirements TEXT, -- qué debe hacer el usuario
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+    PROFILES {
+        uuid id PK
+        text username
+        int level
+        int total_xp
+        text avatar_url
+        boolean is_admin
+    }
 
--- Progreso del usuario
-CREATE TABLE user_course_progress (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-  course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-  completed BOOLEAN DEFAULT FALSE,
-  completed_at TIMESTAMPTZ,
-  xp_earned INTEGER DEFAULT 0,
-  UNIQUE(user_id, course_id)
-);
+    LEARNING_PATHS {
+        uuid id PK
+        text title
+        uuid author_id FK
+    }
 
--- Submissions de ejercicios
-CREATE TABLE exercise_submissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id),
-  exercise_id UUID REFERENCES course_exercises(id),
-  submission_type TEXT, -- 'zip', 'text', 'drive_link', 'github'
-  file_path TEXT, -- ruta en Supabase Storage
-  drive_url TEXT, -- si usa Google Drive
-  github_repo_url TEXT, -- si usa repositorio de GitHub
-  submitted_at TIMESTAMPTZ DEFAULT NOW(),
-  status TEXT DEFAULT 'pending' -- pending, approved, rejected
-);
+    COURSES {
+        uuid id PK
+        text title
+        uuid path_id FK
+    }
 
--- Guardados/Favoritos
-CREATE TABLE saved_courses (
-  user_id UUID REFERENCES profiles(id),
-  course_id UUID REFERENCES courses(id),
-  saved_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (user_id, course_id)
-);
+    EDIT_REQUESTS {
+        uuid id PK
+        text resource_type
+        jsonb data
+        text status
+    }
+```
 
-CREATE TABLE saved_paths (
-  user_id UUID REFERENCES profiles(id),
-  path_id UUID REFERENCES learning_paths(id),
-  saved_at TIMESTAMPTZ DEFAULT NOW(),
-  PRIMARY KEY (user_id, path_id)
-);
+## Tables
 
-CREATE TABLE notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  title TEXT NOT NULL,
-  message TEXT NOT NULL,
-  type TEXT NOT NULL, -- 'exercise_approved', 'exercise_rejected', 'level_up', 'achievement'
-  link TEXT, -- URL para redirigir al hacer click
-  read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days')
-);
+### Core Users
+**`profiles`**
+Extension of Supabase `auth.users`.
+- `id`: UUID (PK, FK to `auth.users.id`)
+- `username`: TEXT (Unique)
+- `level`: INTEGER (Default: 1)
+- `total_xp`: INTEGER (Default: 0)
+- `avatar_url`: TEXT
+- `is_admin`: BOOLEAN (Default: FALSE)
+- `created_at`: TIMESTAMPTZ
 
-<!-- Changes post -->
+### Content Organization
+**`organizations`**
+Entities that author content.
+- `id`: UUID (PK)
+- `name`: TEXT
+- `description`: TEXT
+- `website_url`: TEXT
 
+**`learning_paths`**
+Collections of courses.
+- `id`: UUID (PK)
+- `title`: TEXT
+- `summary`: TEXT
+- `description`: TEXT
+- `author_id`: UUID (FK `organizations.id`)
+- `created_by`: UUID (FK `profiles.id`)
+- `created_at`: TIMESTAMPTZ
 
--- 1. Add is_admin field to profiles
--- ================================================
-ALTER TABLE profiles
-ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
+**`courses`**
+Individual modules within a path.
+- `id`: UUID (PK)
+- `path_id`: UUID (FK `learning_paths.id`)
+- `title`: TEXT
+- `summary`: TEXT
+- `description`: TEXT
+- `link_url`: TEXT
+- `thumbnail_url`: TEXT
+- `organization_id`: UUID (FK `organizations.id`)
+- `order_index`: INTEGER
+- `xp_reward`: INTEGER (Default: 100)
+- `created_at`: TIMESTAMPTZ
 
--- Create index for admin queries
-CREATE INDEX IF NOT EXISTS idx_profiles_is_admin ON profiles(is_admin) WHERE is_admin = TRUE;
+### Learning & Progress
+**`course_exercises`**
+Tasks associated with courses.
+- `id`: UUID (PK)
+- `course_id`: UUID (FK `courses.id`)
+- `title`: TEXT
+- `description`: TEXT
+- `requirements`: TEXT
 
--- 2. Create admin_requests table
--- ================================================
-CREATE TABLE IF NOT EXISTS admin_requests (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
-  reason TEXT NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  reviewed_at TIMESTAMPTZ,
-  reviewed_by UUID REFERENCES profiles(id)
-);
+**`user_course_progress`**
+Tracks completion of courses.
+- `id`: UUID (PK)
+- `user_id`: UUID (FK `profiles.id`)
+- `course_id`: UUID (FK `courses.id`)
+- `completed`: BOOLEAN
+- `completed_at`: TIMESTAMPTZ
+- `xp_earned`: INTEGER
 
--- 3. Add avatar_url to profiles and storage bucket
--- ================================================
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+**`exercise_submissions`**
+User submissions for exercises.
+- `id`: UUID (PK)
+- `user_id`: UUID (FK `profiles.id`)
+- `exercise_id`: UUID (FK `course_exercises.id`)
+- `submission_type`: TEXT ('zip', 'text', 'drive', 'github')
+- `file_path`: TEXT
+- `drive_url`: TEXT
+- `github_repo_url`: TEXT
+- `status`: TEXT ('pending', 'approved', 'rejected')
+- `submitted_at`: TIMESTAMPTZ
 
--- Create avatars bucket (Run this in Supabase SQL editor or Storage UI)
--- INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+### Meta & System
+**`notifications`**
+- `id`: UUID (PK)
+- `user_id`: UUID (FK `auth.users.id`)
+- `title`: TEXT
+- `message`: TEXT
+- `type`: TEXT
+- `link`: TEXT
+- `read`: BOOLEAN
 
--- Policy to allow authenticated users to upload avatars
--- CREATE POLICY "Avatar images are publicly accessible"
---   ON storage.objects FOR SELECT
---   USING ( bucket_id = 'avatars' );
+**`saved_courses` / `saved_paths`**
+Bookmarks for users.
 
--- CREATE POLICY "Anyone can upload an avatar"
---   ON storage.objects FOR INSERT
---   WITH CHECK ( bucket_id = 'avatars' );
-  
--- CREATE POLICY "Anyone can update their own avatar"
---   ON storage.objects FOR UPDATE
---   USING ( auth.uid() = owner )
---   WITH CHECK ( bucket_id = 'avatars' );
+**`edit_requests`** (New/Proposed)
+Generic table for content updates suggestions.
+- `id`: UUID (PK)
+- `resource_type`: TEXT ('course', 'path')
+- `resource_id`: UUID
+- `user_id`: UUID (FK `auth.users.id`)
+- `data`: JSONB (The proposed changes)
+- `reason`: TEXT
+- `status`: TEXT ('pending', 'approved', 'rejected')
+
+## Proposed Improvements & Optimizations
+
+### 1. Row Level Security (RLS) Policies
+Ensure all tables have RLS enabled.
+
+```sql
+-- Profiles: Public read, User update own
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public profiles" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Progress: User read/write own
+ALTER TABLE user_course_progress ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users view own progress" ON user_course_progress FOR SELECT USING (auth.uid() = user_id);
+-- ...
+```
+
+### 2. Indexes
+Add indexes to foreign keys and frequently queried fields to improve performance.
+
+```sql
+-- Foreign Keys
+CREATE INDEX idx_courses_path ON courses(path_id);
+CREATE INDEX idx_progress_user ON user_course_progress(user_id);
+CREATE INDEX idx_progress_course ON user_course_progress(course_id);
+
+-- Status/Filtering
+CREATE INDEX idx_submissions_status ON exercise_submissions(status);
+CREATE INDEX idx_edit_requests_status ON edit_requests(status);
+```
+
+### 3. Triggers for `updated_at`
+Add an automatic trigger to update timestamps.
+
+```sql
+CREATE EXTENSION IF NOT EXISTS moddatetime;
+
+CREATE TRIGGER handle_updated_at BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE PROCEDURE moddatetime (updated_at);
+-- Apply to other tables
+```
