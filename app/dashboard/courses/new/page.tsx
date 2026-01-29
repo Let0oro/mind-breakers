@@ -349,10 +349,9 @@ export default function NewCoursePage() {
               </div>
               {thumbnailUrl && (
                 <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-[#3b4754] flex-shrink-0">
-                  <Image
+                  <img
                     src={thumbnailUrl}
                     alt="Thumbnail preview"
-                    fill
                     className="object-cover"
                     onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                       (e.target as HTMLImageElement).style.display = 'none'

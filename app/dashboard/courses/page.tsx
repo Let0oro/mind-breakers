@@ -139,10 +139,9 @@ export default async function CoursesPage() {
                                 {/* Thumbnail */}
                                 <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
                                     {course.thumbnail_url ? (
-                                        <Image
+                                        <img
                                             src={course.thumbnail_url}
                                             alt={course.title}
-                                            fill
                                             className="object-cover"
                                         />
                                     ) : (

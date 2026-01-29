@@ -238,7 +238,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                       <div className="flex gap-4">
                         {/* Thumbnail */}
                         {course.thumbnail_url ? (
-                          <Image
+                          <img
                             src={course.thumbnail_url}
                             alt={course.title}
                             width={160}

@@ -123,7 +123,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                     >
                                         <div className="h-32 bg-gray-100 dark:bg-[#283039] relative">
                                             {course.thumbnail_url ? (
-                                                <Image src={course.thumbnail_url} alt={course.title} fill className="object-cover" />
+                                                <img src={course.thumbnail_url} alt={course.title} className="object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                                                     <span className="material-symbols-outlined text-4xl">school</span>
