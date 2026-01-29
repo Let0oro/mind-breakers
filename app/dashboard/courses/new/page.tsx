@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { fetchUrlMetadata, calculateXPFromDuration, type MetadataResponse } from '@/utils/fetch-metadata'
+import Image from 'next/image'
+import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
 
 interface LearningPath {
   id: string
@@ -92,22 +93,21 @@ export default function NewCoursePage() {
   }, [linkUrl, title, summary, description, thumbnailUrl, metadataFetched])
 
   useEffect(() => {
+    const fetchData = async () => {
+      // Obtener el usuario actual desde Supabase Auth
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [pathsRes, orgsRes] = await Promise.all([
+        supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
+        supabase.from('organizations').select('id, name').order('name'),
+      ])
+
+      if (pathsRes.data) setPaths(pathsRes.data)
+      if (orgsRes.data) setOrganizations(orgsRes.data)
+    }
     fetchData()
-  }, [])
-
-  const fetchData = async () => {
-    // Obtener el usuario actual desde Supabase Auth
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const [pathsRes, orgsRes] = await Promise.all([
-      supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
-      supabase.from('organizations').select('id, name').order('name'),
-    ])
-
-    if (pathsRes.data) setPaths(pathsRes.data)
-    if (orgsRes.data) setOrganizations(orgsRes.data)
-  }
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -241,7 +241,7 @@ export default function NewCoursePage() {
             <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
               Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
               <span className="block mt-1 text-amber-600 dark:text-amber-400">
-                💡 Use public URLs (without login). If auto-fill doesn't work, you can enter the data manually.
+                💡 Use public URLs (without login). If auto-fill doesn&apos;t work, you can enter the data manually.
               </span>
             </p>
           </div>
@@ -349,11 +349,12 @@ export default function NewCoursePage() {
               </div>
               {thumbnailUrl && (
                 <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-[#3b4754] flex-shrink-0">
-                  <img
+                  <Image
                     src={thumbnailUrl}
                     alt="Thumbnail preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
+                    fill
+                    className="object-cover"
+                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                       (e.target as HTMLImageElement).style.display = 'none'
                     }}
                   />

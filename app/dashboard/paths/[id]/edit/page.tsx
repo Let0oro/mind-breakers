@@ -22,6 +22,7 @@ import {
 // Import our new component (assuming it's in components folder relative to app root or alias)
 // Since we used write_to_file in dashboard/paths/[id]/edit context previously? No, app/components.
 import { SortableCourseItem } from '@/components/SortableCourseItem'
+import type { AdminRequest } from '@/lib/types'
 
 interface LearningPath {
   id: string
@@ -46,7 +47,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
   const [courses, setCourses] = useState<CourseItem[]>([])
 
   const [isAdmin, setIsAdmin] = useState(false)
-  const [pendingRequest, setPendingRequest] = useState<any>(null)
+  const [pendingRequest, setPendingRequest] = useState<AdminRequest | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -306,7 +307,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                     </p>
                     {pendingRequest.reason && (
                       <p className="text-xs text-yellow-500/60 mt-2 italic">
-                        Razón: "{pendingRequest.reason}"
+                        Razón: &quot;{pendingRequest.reason}&quot;
                       </p>
                     )}
                   </div>
@@ -361,7 +362,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                   Orden de los Cursos
                 </label>
-                <p className="text-xs text-gray-500 mb-3">Arrastra para reordenar. El orden se guardará al hacer clic en "Guardar cambios".</p>
+                <p className="text-xs text-gray-500 mb-3">Arrastra para reordenar. El orden se guardará al hacer clic en &quot;Guardar cambios&quot;.</p>
 
                 <div className="bg-gray-50 dark:bg-[#151b24] p-4 rounded-lg border border-gray-200 dark:border-[#3b4754]">
                   {courses.length > 0 ? (

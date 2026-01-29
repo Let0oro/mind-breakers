@@ -83,7 +83,17 @@ export default async function OrganizationsPage() {
         ...pathOrgIds
     ])
 
-    let organizations: any[] = []
+    interface OrganizationListItem {
+        id: string
+        name: string
+        description?: string
+        website_url?: string
+        is_validated?: boolean
+        learning_paths: { id: string }[]
+        courses: { id: string }[]
+    }
+
+    let organizations: OrganizationListItem[] = []
 
     if (relevantOrgIds.size > 0) {
         const { data } = await supabase

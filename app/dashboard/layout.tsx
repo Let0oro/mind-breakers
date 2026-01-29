@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import Link from 'next/link'
+
 import Breadcrumb from '@/components/breadcrumb'
 import { NotificationBell } from '@/components/NotificationBell'
 import { Sidebar } from './components/Sidebar'

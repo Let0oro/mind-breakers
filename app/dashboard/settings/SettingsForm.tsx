@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/lib/types'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 interface SettingsFormProps {
-    user: any
-    profile: any
+    user: User
+    profile: Profile
 }
 
 export function SettingsForm({ user, profile }: SettingsFormProps) {
@@ -25,8 +28,9 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
         setMessage(null)
 
         try {
-            const updates: any = {
+            const updates: Partial<Profile> = {
                 username,
+                // @ts-expect-error - updated_at technically not in Profile type but in DB
                 updated_at: new Date().toISOString(),
             }
 
@@ -58,8 +62,12 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
 
             setMessage({ type: 'success', text: 'Profile updated successfully!' })
             router.refresh()
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.message })
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setMessage({ type: 'error', text: error.message })
+            } else {
+                setMessage({ type: 'error', text: 'An unexpected error occurred' })
+            }
         } finally {
             setIsLoading(false)
         }
@@ -86,8 +94,12 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             setMessage({ type: 'success', text: 'Password updated successfully!' })
             setPassword('')
             setConfirmPassword('')
-        } catch (error: any) {
-            setMessage({ type: 'error', text: error.message })
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                setMessage({ type: 'error', text: error.message })
+            } else {
+                setMessage({ type: 'error', text: 'An unexpected error occurred' })
+            }
         } finally {
             setIsLoading(false)
         }
@@ -115,9 +127,11 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                         </label>
                         <div className="flex items-center gap-4">
                             {profile?.avatar_url && (
-                                <img
+                                <Image
                                     src={profile.avatar_url}
                                     alt="Current Avatar"
+                                    width={48}
+                                    height={48}
                                     className="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-[#3b4754]"
                                 />
                             )}

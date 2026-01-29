@@ -40,7 +40,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
     ])
 
     // Fetch exercises for these courses
-    let exercisesQuery = supabase
+    const exercisesQuery = supabase
         .from('course_exercises')
         .select(`
       id,
@@ -80,8 +80,8 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
             // or we could fetch it if it exists. Re-checking types... schema showed course_exercises doesn't have xp_reward but course does.
             // Let's use a default or update if schema has it.
             xp_reward: 50,
-            course_title: Array.isArray(ex.courses) ? ex.courses[0]?.title : (ex.courses as any)?.title,
-            course_id: Array.isArray(ex.courses) ? ex.courses[0]?.id : (ex.courses as any)?.id,
+            course_title: Array.isArray(ex.courses) ? ex.courses[0]?.title : (ex.courses as { title: string })?.title,
+            course_id: Array.isArray(ex.courses) ? ex.courses[0]?.id : (ex.courses as { id: string })?.id,
             submitted_at: submission?.created_at
         }
     }) || []
@@ -111,7 +111,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
             <header className="mb-8">
                 <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight mb-2">My Exercises</h2>
                 <p className="text-gray-600 dark:text-[#b0bfcc] text-base mb-6">
-                    Practice and apply what you've learned
+                    Practice and apply what you&apos;ve learned
                 </p>
 
                 {/* Filter Tabs */}

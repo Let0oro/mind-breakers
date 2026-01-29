@@ -21,6 +21,7 @@ export default function LoginPage() {
       const rememberMeWasChecked = localStorage.getItem('MindBreaker_remember')
 
       if (savedEmail && rememberMeWasChecked === 'true') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEmail(savedEmail)
         setRememberMe(true)
       }

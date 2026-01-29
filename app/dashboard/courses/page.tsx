@@ -40,7 +40,20 @@ export default async function CoursesPage() {
         ...(savedCourses?.map(c => c.course_id) || [])
     ])
 
-    let courses: any[] = []
+    interface CourseListItem {
+        id: string
+        title: string
+        summary?: string
+        thumbnail_url?: string
+        xp_reward: number
+        is_validated?: boolean
+        created_by: string
+        organizations: { name: string }[] | null
+        user_course_progress: { completed: boolean, xp_earned: number }[]
+        saved_courses: { user_id: string }[]
+    }
+
+    let courses: CourseListItem[] = []
 
     if (courseIds.size > 0) {
         const { data } = await supabase
@@ -126,10 +139,11 @@ export default async function CoursesPage() {
                                 {/* Thumbnail */}
                                 <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
                                     {course.thumbnail_url ? (
-                                        <img
+                                        <Image
                                             src={course.thumbnail_url}
                                             alt={course.title}
-                                            className="object-cover w-full h-full"
+                                            fill
+                                            className="object-cover"
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center">
@@ -197,7 +211,7 @@ export default async function CoursesPage() {
                     <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                         <span className="material-symbols-outlined w-16 h-16 text-[#3b4754] mx-auto mb-4">school</span>
                         <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No courses found</p>
-                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">You haven't enrolled in, saved, or created any courses yet.</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">You haven&apos;t enrolled in, saved, or created any courses yet.</p>
                         <Link
                             href="/dashboard/explore"
                             className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"

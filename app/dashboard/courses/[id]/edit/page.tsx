@@ -15,17 +15,38 @@ interface Course {
     created_by: string
 }
 
+interface Exercise {
+    id: string
+    title: string
+    description: string | null
+    requirements: string | null
+    course_id: string
+    created_at: string
+}
+
+interface EditRequest {
+    id: string
+    resource_type: string
+    resource_id: string
+    user_id: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any
+    reason: string | null
+    status: string
+    created_at: string
+}
+
 export default function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [course, setCourse] = useState<Course | null>(null)
-    const [exercises, setExercises] = useState<any[]>([])
+    const [exercises, setExercises] = useState<Exercise[]>([])
     const [viewingExerciseForm, setViewingExerciseForm] = useState(false)
 
     const [isAdmin, setIsAdmin] = useState(false)
-    const [pendingRequest, setPendingRequest] = useState<any>(null)
+    const [pendingRequest, setPendingRequest] = useState<EditRequest | null>(null)
     const router = useRouter()
     const supabase = createClient()
 
@@ -274,7 +295,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                                         </p>
                                         {pendingRequest.reason && (
                                             <p className="text-xs text-yellow-500/60 mt-2 italic">
-                                                Razón: "{pendingRequest.reason}"
+                                                Razón: &quot;{pendingRequest.reason}&quot;
                                             </p>
                                         )}
                                     </div>
@@ -429,7 +450,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
 
                         <div className="space-y-3">
                             {exercises.length > 0 ? (
-                                exercises.map((ex: any) => (
+                                exercises.map((ex: Exercise) => (
                                     <div key={ex.id} className="flex items-center justify-between p-3 bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] rounded-lg">
                                         <div>
                                             <p className="font-medium text-gray-900 dark:text-white">{ex.title}</p>
@@ -439,7 +460,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                                             onClick={async () => {
                                                 if (!confirm('¿Borrar ejercicio?')) return;
                                                 await supabase.from('course_exercises').delete().eq('id', ex.id);
-                                                setExercises(exercises.filter((e: any) => e.id !== ex.id));
+                                                setExercises(exercises.filter((e: Exercise) => e.id !== ex.id));
                                             }}
                                             className="text-red-500 hover:text-red-700 p-2"
                                         >

@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
-import type { PathWithCourses, Course } from '@/lib/types'
+import type { Course } from '@/lib/types'
 import Image from 'next/image'
 import RecommendedCourses from './RecommendedCourses'
 
@@ -238,9 +238,11 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                       <div className="flex gap-4">
                         {/* Thumbnail */}
                         {course.thumbnail_url ? (
-                          <img
+                          <Image
                             src={course.thumbnail_url}
                             alt={course.title}
+                            width={160}
+                            height={96}
                             className="h-24 w-40 shrink-0 rounded-lg object-cover"
                           />
                         ) : (

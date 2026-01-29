@@ -116,10 +116,10 @@ export default async function DashboardPage() {
 
   const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
     // Sort courses by order_index
-    const sortedCourses = [...(path.courses || [])].sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+    const sortedCourses = [...(path.courses || [])].sort((a: { order_index: number }, b: { order_index: number }) => (a.order_index || 0) - (b.order_index || 0))
     const totalCourses = sortedCourses.length
-    const completedCourses = sortedCourses.filter((c: any) => completedCourseIds.has(c.id)).length
-    const nextCourseData = sortedCourses.find((c: any) => !completedCourseIds.has(c.id))
+    const completedCourses = sortedCourses.filter((c: { id: string }) => completedCourseIds.has(c.id)).length
+    const nextCourseData = sortedCourses.find((c: { id: string, title: string }) => !completedCourseIds.has(c.id))
 
     return {
       id: path.id,
@@ -214,10 +214,17 @@ export default async function DashboardPage() {
     .eq('user_course_progress.user_id', user.id)
     .limit(3)
 
-  const enrolledCourses: DashboardCourse[] = coursesWithProgress?.map((course: any) => ({
+  const enrolledCourses: DashboardCourse[] = coursesWithProgress?.map((course: {
+    id: string
+    title: string
+    thumbnail_url?: string | null
+    xp_reward: number
+    organization: { name: string } | { name: string }[] | null
+    user_course_progress: { completed: boolean }[]
+  }) => ({
     id: course.id,
     title: course.title,
-    thumbnail_url: course.thumbnail_url,
+    thumbnail_url: course.thumbnail_url || undefined,
     xp_reward: course.xp_reward || 100,
     progress: course.user_course_progress?.[0]?.completed ? 100 : 0,
     duration: '8h',
@@ -242,11 +249,18 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .limit(5)
 
-  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((item: any) => ({
-    id: item.courses?.id,
-    title: item.courses?.title,
-    thumbnail_url: item.courses?.thumbnail_url,
-    xp_reward: item.courses?.xp_reward || 100,
+  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((item: {
+    courses: {
+      id: string
+      title: string
+      thumbnail_url?: string | null
+      xp_reward: number
+    }[] | null
+  }) => ({
+    id: item.courses?.[0]?.id || '',
+    title: item.courses?.[0]?.title || '',
+    thumbnail_url: item.courses?.[0]?.thumbnail_url || undefined,
+    xp_reward: item.courses?.[0]?.xp_reward || 100,
   })) || []
 
   return (
@@ -358,7 +372,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
-              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven't enrolled in any courses yet.</p>
+              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven&apos;t enrolled in any courses yet.</p>
               <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
             </div>
           )}
@@ -409,7 +423,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
-              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven't started any learning paths yet.</p>
+              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven&apos;t started any learning paths yet.</p>
               <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Paths</Link>
             </div>
           )}
@@ -437,7 +451,7 @@ export default async function DashboardPage() {
                 <Link href="/dashboard/explore" className="text-[11px] text-gray-600 dark:text-[#b0bfcc]">Explore More</Link>
               </div>
             </div>) : (
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm italic">You haven't saved any courses yet.</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm italic">You haven&apos;t saved any courses yet.</p>
           )}
         </section>
       </div>

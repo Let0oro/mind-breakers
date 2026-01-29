@@ -125,7 +125,7 @@ export default function NewPathPage() {
               <div>
                 <p className="text-[#137fec] text-sm font-bold mb-1">Next Steps</p>
                 <p className="text-gray-900 dark:text-white text-sm">
-                  After creating your path, you'll be able to add courses and organize the learning sequence.
+                  After creating your path, you&apos;ll be able to add courses and organize the learning sequence.
                 </p>
               </div>
             </div>

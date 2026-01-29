@@ -104,8 +104,8 @@ export function FuzzyMatchSelect({
                     onBlur={() => setIsFocused(false)}
                     placeholder={placeholder}
                     className={`w-full rounded-lg border bg-gray-50 dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:outline-none focus:ring-1 transition-all ${exactMatch
-                            ? 'border-yellow-500/50 focus:border-yellow-500 focus:ring-yellow-500/30'
-                            : 'border-gray-200 dark:border-[#3b4754] focus:border-[#137fec] focus:ring-[#137fec]'
+                        ? 'border-yellow-500/50 focus:border-yellow-500 focus:ring-yellow-500/30'
+                        : 'border-gray-200 dark:border-[#3b4754] focus:border-[#137fec] focus:ring-[#137fec]'
                         }`}
                 />
 
@@ -127,7 +127,7 @@ export function FuzzyMatchSelect({
                                 ¡Ya existe un item con este nombre!
                             </p>
                             <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
-                                "{exactMatch.name}" ya está registrado.
+                                &quot;{exactMatch.name}&quot; ya está registrado.
                                 {onSelectExisting && (
                                     <button
                                         type="button"
@@ -170,10 +170,10 @@ export function FuzzyMatchSelect({
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-gray-900 dark:text-white">{item.name}</span>
                                     <span className={`text-xs px-1.5 py-0.5 rounded ${item.score > 0.8
-                                            ? 'bg-red-500/20 text-red-400'
-                                            : item.score > 0.6
-                                                ? 'bg-yellow-500/20 text-yellow-400'
-                                                : 'bg-[#3b4754] text-gray-600 dark:text-[#b0bfcc]'
+                                        ? 'bg-red-500/20 text-red-400'
+                                        : item.score > 0.6
+                                            ? 'bg-yellow-500/20 text-yellow-400'
+                                            : 'bg-[#3b4754] text-gray-600 dark:text-[#b0bfcc]'
                                         }`}>
                                         {Math.round(item.score * 100)}% similar
                                     </span>

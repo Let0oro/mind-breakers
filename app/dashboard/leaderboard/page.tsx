@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import Link from 'next/link'
-import Image from 'next/image'
+
 
 export const metadata = {
   title: 'Leaderboard - MindBreaker',

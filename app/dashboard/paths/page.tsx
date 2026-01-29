@@ -32,7 +32,7 @@ export default async function PathsListPage() {
     .eq('user_id', user.id)
 
   // Extract path IDs
-  const progressPathIds = progressPaths?.map((p: any) => p.courses?.path_id).filter(Boolean) || []
+  const progressPathIds = progressPaths?.map((p: { courses: { path_id: string }[] | null }) => p.courses?.[0]?.path_id).filter(Boolean) || []
 
   // 3. Saved paths
   const { data: savedPaths } = await supabase
@@ -47,7 +47,7 @@ export default async function PathsListPage() {
     ...(savedPaths?.map(p => p.path_id) || [])
   ])
 
-  let paths: any[] = []
+  let paths: PathListItem[] = []
 
   if (pathIds.size > 0) {
     const { data } = await supabase

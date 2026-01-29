@@ -17,7 +17,7 @@ export default function NewOrganizationPage() {
 
     const formData = new FormData(e.currentTarget)
 
-    const { data, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('organizations')
       .insert({
         name: formData.get('name') as string,
@@ -120,7 +120,7 @@ export default function NewOrganizationPage() {
             <div className="flex gap-3">
               <span className="material-symbols-outlined text-[#137fec] mt-0.5">info</span>
               <div>
-                <p className="text-[#137fec] text-sm font-bold mb-1">What's Next?</p>
+                <p className="text-[#137fec] text-sm font-bold mb-1">What&apos;s Next?</p>
                 <p className="text-gray-900 dark:text-white text-sm">
                   After creating this organization, you can associate it with learning paths and courses when creating them.
                 </p>
