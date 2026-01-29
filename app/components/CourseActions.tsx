@@ -11,6 +11,7 @@ interface CourseActionsProps {
   isCompleted: boolean
   progressId?: string
   xpReward: number
+  canComplete?: boolean
 }
 
 export function CourseActions({
@@ -20,6 +21,7 @@ export function CourseActions({
   isCompleted: initialIsCompleted,
   progressId,
   xpReward,
+  canComplete = true,
 }: CourseActionsProps) {
   const [isSaved, setIsSaved] = useState(initialIsSaved)
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted)
@@ -30,7 +32,7 @@ export function CourseActions({
   const handleToggleSave = async () => {
     try {
       setLoading(true)
-      
+
       if (isSaved) {
         await supabase
           .from('saved_courses')
@@ -42,7 +44,7 @@ export function CourseActions({
           .from('saved_courses')
           .insert({ user_id: userId, course_id: courseId })
       }
-      
+
       setIsSaved(!isSaved)
     } catch (error) {
       console.error('Error toggling save:', error)
@@ -107,27 +109,88 @@ export function CourseActions({
     }
   }
 
+  const handleMarkIncomplete = async () => {
+    try {
+      setLoading(true)
+
+      if (progressId) {
+        // Revertir progreso
+        await supabase
+          .from('user_course_progress')
+          .update({
+            completed: false,
+            completed_at: null,
+            xp_earned: 0,
+          })
+          .eq('id', progressId)
+
+        // Revertir XP del usuario
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('total_xp')
+          .eq('id', userId)
+          .single()
+
+        if (profile) {
+          const newTotalXp = Math.max(0, profile.total_xp - xpReward)
+          const newLevel = Math.floor(newTotalXp / 1000) + 1
+
+          await supabase
+            .from('profiles')
+            .update({
+              total_xp: newTotalXp,
+              level: newLevel,
+            })
+            .eq('id', userId)
+        }
+
+        setIsCompleted(false)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error reverting complete:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
       <button
         onClick={handleToggleSave}
         disabled={loading}
-        className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-          isSaved
-            ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-        } disabled:opacity-50`}
+        className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isSaved
+          ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          } disabled:opacity-50`}
       >
         {isSaved ? '★ Guardado' : '☆ Guardar'}
       </button>
 
-      {!isCompleted && (
+      {!isCompleted ? (
+        canComplete ? (
+          <button
+            onClick={handleMarkComplete}
+            disabled={loading}
+            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            {loading ? 'Guardando...' : '✓ Completar'}
+          </button>
+        ) : (
+          <a
+            href="#exercises"
+            className="rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-white hover:bg-[#137fec]/90 transition-colors"
+          >
+            Vamos con el proyecto final!
+          </a>
+        )
+      ) : (
         <button
-          onClick={handleMarkComplete}
+          onClick={handleMarkIncomplete}
           disabled={loading}
-          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
+          className="rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50"
         >
-          {loading ? 'Guardando...' : '✓ Completar'}
+          {loading ? 'Guardando...' : '✕ No completado'}
         </button>
       )}
     </div>

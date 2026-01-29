@@ -3,6 +3,25 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+
+// Import our new component (assuming it's in components folder relative to app root or alias)
+// Since we used write_to_file in dashboard/paths/[id]/edit context previously? No, app/components.
+import { SortableCourseItem } from '@/components/SortableCourseItem'
 
 interface LearningPath {
   id: string
@@ -12,45 +31,107 @@ interface LearningPath {
   created_by: string
 }
 
+interface CourseItem {
+  id: string
+  title: string
+  order_index: number
+}
+
 export default function EditPathPage({ params }: { params: Promise<{ id: string }> }) {
-  // Unwrap params Promise con React.use()
   const { id } = use(params)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [path, setPath] = useState<LearningPath | null>(null)
+  const [courses, setCourses] = useState<CourseItem[]>([])
+
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [pendingRequest, setPendingRequest] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   useEffect(() => {
-    const loadPath = async () => {
+    const loadData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push('/login')
         return
       }
 
-      const { data, error: fetchError } = await supabase
+      // Check admin status
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single()
+
+      const userIsAdmin = profile?.is_admin || false
+      setIsAdmin(userIsAdmin)
+
+      // 1. Fetch Path
+      const { data: pathData, error: pathError } = await supabase
         .from('learning_paths')
         .select('*')
         .eq('id', id)
         .single()
 
-      if (fetchError || !data) {
+      if (pathError || !pathData) {
         setError('Path no encontrado')
         return
       }
 
-      if (data.created_by !== user.id) {
+      if (pathData.created_by !== user.id) {
         setError('No tienes permisos para editar este path')
         return
       }
 
-      setPath(data)
+      setPath(pathData)
+
+      // 2. Fetch Courses
+      const { data: coursesData } = await supabase
+        .from('courses')
+        .select('id, title, order_index')
+        .eq('path_id', id)
+        .order('order_index', { ascending: true })
+
+      setCourses(coursesData || [])
+
+      // Check for pending edit requests
+      const { data: request } = await supabase
+        .from('edit_requests')
+        .select('*')
+        .eq('resource_id', id)
+        .eq('resource_type', 'learning_paths')
+        .eq('status', 'pending')
+        .single()
+
+      if (request) {
+        setPendingRequest(request)
+      }
     }
 
-    loadPath()
+    loadData()
   }, [id, router, supabase])
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      setCourses((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id)
+        const newIndex = items.findIndex((item) => item.id === over?.id)
+
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -59,6 +140,60 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
 
     const formData = new FormData(e.currentTarget)
 
+    const updates = {
+      title: formData.get('title') as string,
+      summary: formData.get('summary') as string,
+      description: formData.get('description') as string,
+      // Note: courses reordering is tied to this submit too, but complex to store in JSON request well.
+      // For now, if requesting changes, we might only support basic info edits OR we need to include order in JSON?
+      // The user wants to reorder with drag and drop. Reordering IS an edit.
+      // So we should capture the new COURSE ORDER in the request JSON too.
+      _courses_order_update: courses.map((c, i) => ({ id: c.id, order_index: i }))
+    }
+
+    // 1. If Creator (Non-Admin), Request Edit
+    if (!isAdmin) {
+      const reason = prompt('Por favor, indica la razón de estos cambios para el administrador:')
+      if (reason === null) {
+        setLoading(false)
+        return // Cancelled
+      }
+      if (!reason.trim()) {
+        alert('Debes proporcionar una razón.')
+        setLoading(false)
+        return
+      }
+
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error: requestError } = await supabase
+        .from('edit_requests')
+        .insert({
+          resource_type: 'learning_paths', // Match table content
+          resource_id: id,
+          user_id: user?.id,
+          data: updates,
+          reason: reason,
+          status: 'pending'
+        })
+
+      if (requestError) {
+        setError(requestError.message)
+      } else {
+        alert('Solicitud de edición enviada correctamente. Espera validación.')
+        router.refresh()
+        window.location.reload()
+      }
+      setLoading(false)
+      return
+    }
+
+    // 2. If Admin, Direct Update (Existing Logic - but updated to use updates vars if possible, or keep as is)
+    // We will keep existing logic but wrapped in isAdmin check implicitly by falling through?
+    // Actually, the existing logic used separate update calls. We should preserve that for Admin.
+
+
+    // 1. Update Path Details
     const { error: updateError } = await supabase
       .from('learning_paths')
       .update({
@@ -74,7 +209,28 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       return
     }
 
+    // 2. Update Courses Order
+    // We update all courses with their new index
+    if (courses.length > 0) {
+      // Prepare updates
+      const updates = courses.map((course, index) => ({
+        id: course.id,
+        order_index: index,
+        // We only need to update order_index, but upsert requires specific handling or multiple update calls.
+        // Supabase JS doesn't support bulk update with different values easily in one call unless we use upsert with all required fields.
+        // Alternatively, separate calls. For UI responsiveness, separate calls are fine for small lists (<50).
+      }))
+
+      // Using Promise.all for parallel updates
+      const updatePromises = updates.map(u =>
+        supabase.from('courses').update({ order_index: u.order_index }).eq('id', u.id)
+      )
+
+      await Promise.all(updatePromises)
+    }
+
     router.push(`/dashboard/paths/${id}`)
+    router.refresh()
   }
 
   const handleDelete = async () => {
@@ -138,50 +294,102 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
               </div>
             )}
 
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Título *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                defaultValue={path?.title}
-                className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
-                placeholder="ej: Fundamentos de React"
-              />
-            </div>
+            {pendingRequest && (
+              <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-yellow-500 mt-0.5">lock_clock</span>
+                  <div>
+                    <h3 className="text-sm font-bold text-yellow-500">Edición Bloqueada</h3>
+                    <p className="text-sm text-yellow-500/80 mt-1">
+                      Este path tiene una solicitud de edición pendiente de validación.
+                      No se pueden realizar más cambios hasta que un administrador la apruebe o rechace.
+                    </p>
+                    {pendingRequest.reason && (
+                      <p className="text-xs text-yellow-500/60 mt-2 italic">
+                        Razón: "{pendingRequest.reason}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="summary" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Resumen
-              </label>
-              <input
-                type="text"
-                id="summary"
-                name="summary"
-                defaultValue={path?.summary || ''}
-                className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
-                placeholder="Descripción corta (1-2 líneas)"
-              />
-            </div>
+            <fieldset disabled={!!pendingRequest} className="space-y-6 group-disabled:opacity-50">
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Descripción completa
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={6}
-                defaultValue={path?.description || ''}
-                className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
-                placeholder="Describe en detalle qué aprenderá el usuario..."
-              />
-            </div>
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Título *
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  required
+                  defaultValue={path?.title}
+                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                />
+              </div>
 
-            <div className="flex gap-3">
+              <div>
+                <label htmlFor="summary" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Resumen
+                </label>
+                <input
+                  type="text"
+                  id="summary"
+                  name="summary"
+                  defaultValue={path?.summary || ''}
+                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Descripción completa
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  rows={6}
+                  defaultValue={path?.description || ''}
+                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
+                />
+              </div>
+
+              {/* Courses Reordering Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Orden de los Cursos
+                </label>
+                <p className="text-xs text-gray-500 mb-3">Arrastra para reordenar. El orden se guardará al hacer clic en "Guardar cambios".</p>
+
+                <div className="bg-gray-50 dark:bg-[#151b24] p-4 rounded-lg border border-gray-200 dark:border-[#3b4754]">
+                  {courses.length > 0 ? (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={courses.map(c => c.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {courses.map((course) => (
+                          <SortableCourseItem key={course.id} id={course.id}>
+                            <div className="font-medium text-gray-900 dark:text-white">{course.title}</div>
+                          </SortableCourseItem>
+                        ))}
+                      </SortableContext>
+                    </DndContext>
+                  ) : (
+                    <p className="text-gray-500 italic text-sm text-center">Este path no tiene cursos todavía.</p>
+                  )}
+                </div>
+              </div>
+
+            </fieldset>
+
+            <div className="flex gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -194,17 +402,17 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 disabled={loading}
                 className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
               >
-                {loading ? 'Guardando...' : 'Guardar cambios'}
+                {loading ? 'Procesando...' : (isAdmin ? 'Guardar cambios' : 'Solicitar Validación')}
               </button>
             </div>
           </form>
 
           <div className="mt-8 border-t border-gray-200 dark:border-[#3b4754] pt-8">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">Zona peligrosa</h3>
+            <h3 className="text-sm font-medium text-red-500 mb-4">Zona peligrosa</h3>
             <button
               onClick={handleDelete}
-              disabled={loading}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+              disabled={loading || !!pendingRequest}
+              className="rounded-lg bg-red-600/10 border border-red-600/20 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-600/20 disabled:opacity-50 transition-colors"
             >
               Eliminar Path
             </button>

@@ -14,25 +14,63 @@ export default async function PathsListPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch all validated paths (or user's own unvalidated paths)
-  const { data: paths } = await supabase
+  // Fetch user-related paths
+  // 1. Paths created by user
+  const { data: createdPaths } = await supabase
     .from('learning_paths')
-    .select(`
-      id,
-      title,
-      summary,
-      description,
-      created_at,
-      is_validated,
-      created_by,
-      organizations (id, name),
-      courses (id),
-      saved_paths!saved_paths_path_id_fkey (user_id)
-    `)
-    .or(`is_validated.eq.true,created_by.eq.${user.id}`)
-    .order('created_at', { ascending: false })
+    .select('id')
+    .eq('created_by', user.id)
 
-  // Fetch user progress
+  // 2. Paths with progress (via courses)
+  const { data: progressPaths } = await supabase
+    .from('user_course_progress')
+    .select(`
+            courses (
+                path_id
+            )
+        `)
+    .eq('user_id', user.id)
+
+  // Extract path IDs
+  const progressPathIds = progressPaths?.map((p: any) => p.courses?.path_id).filter(Boolean) || []
+
+  // 3. Saved paths
+  const { data: savedPaths } = await supabase
+    .from('saved_paths')
+    .select('path_id')
+    .eq('user_id', user.id)
+
+  // Combine all IDs
+  const pathIds = new Set([
+    ...(createdPaths?.map(p => p.id) || []),
+    ...progressPathIds,
+    ...(savedPaths?.map(p => p.path_id) || [])
+  ])
+
+  let paths: any[] = []
+
+  if (pathIds.size > 0) {
+    const { data } = await supabase
+      .from('learning_paths')
+      .select(`
+                id,
+                title,
+                summary,
+                description,
+                created_at,
+                is_validated,
+                created_by,
+                organizations (id, name),
+                courses (id),
+                saved_paths!saved_paths_path_id_fkey (user_id)
+            `)
+      .in('id', Array.from(pathIds))
+      .order('created_at', { ascending: false })
+
+    paths = data || []
+  }
+
+  // Fetch user progress for all paths (to calculate completion)
   const { data: userProgress } = await supabase
     .from('user_course_progress')
     .select('course_id, completed')
@@ -40,36 +78,47 @@ export default async function PathsListPage() {
     .eq('completed', true)
 
   const completedCourseIds = new Set(userProgress?.map(p => p.course_id) || [])
+  const savedSet = new Set(savedPaths?.map(s => s.path_id) || [])
 
   return (
     <>
       {/* Header Section */}
       <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
         <div className="flex flex-col gap-2">
-          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Learning Paths</h2>
+          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">My Learning Paths</h2>
           <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
-            {paths?.length || 0} learning paths available
+            {paths.length} paths in your journey
           </p>
         </div>
-        <Link
-          href="/dashboard/paths/new"
-          className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
-        >
-          <span className="material-symbols-outlined w-5 h-5">add_circle</span>
-          <span>Create Path</span>
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/dashboard/explore?tab=paths"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium transition-all hover:bg-gray-50 dark:hover:bg-[#283039]"
+          >
+            <span className="material-symbols-outlined w-5 h-5">search</span>
+            <span>Explore Paths</span>
+          </Link>
+          <Link
+            href="/dashboard/paths/new"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
+          >
+            <span className="material-symbols-outlined w-5 h-5">add_circle</span>
+            <span>Create Path</span>
+          </Link>
+        </div>
       </header>
 
       {/* Paths Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paths && paths.length > 0 ? (
+        {paths.length > 0 ? (
           paths.map((path: PathListItem) => {
             const courseCount = path.courses?.length || 0
             const completedCount = path.courses?.filter((c) =>
               completedCourseIds.has(c.id)
             ).length || 0
             const progressPercent = courseCount > 0 ? (completedCount / courseCount) * 100 : 0
-            const isSaved = path.saved_paths?.some(sp => sp.user_id === user.id) || false
+            const isSaved = savedSet.has(path.id)
+            const isOwner = path.created_by === user.id
 
             // Supabase returns organizations as an array, get first one
             const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
@@ -94,8 +143,8 @@ export default async function PathsListPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Pending Badge */}
-                    {!path.is_validated && path.created_by === user.id && (
-                      <span className="inline-flex items-center gap-1 bg-amber-500 text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold">
+                    {!path.is_validated && isOwner && (
+                      <span className="inline-flex items-center gap-1 bg-amber-500 text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
                         <span className="material-symbols-outlined text-xs">pending</span>
                         Pendiente
                       </span>
@@ -110,13 +159,13 @@ export default async function PathsListPage() {
 
                 {/* Summary */}
                 {path.summary && (
-                  <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2">
+                  <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2 flex-1">
                     {path.summary}
                   </p>
                 )}
 
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-4 text-sm mt-auto">
                   <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
                     <span className="material-symbols-outlined text-base">school</span>
                     <span>{courseCount} courses</span>
@@ -149,16 +198,16 @@ export default async function PathsListPage() {
           })
         ) : (
           <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
-            <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">
+            <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block mx-auto">
               route
             </span>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No learning paths yet</p>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Create your first learning path</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No active learning paths</p>
+            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Start your journey by finding a learning path</p>
             <Link
-              href="/dashboard/paths/new"
+              href="/dashboard/explore?tab=paths"
               className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
             >
-              Create Path
+              Explore Paths
             </Link>
           </div>
         )}

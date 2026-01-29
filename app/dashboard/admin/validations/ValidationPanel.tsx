@@ -31,6 +31,17 @@ interface PendingPath {
     organizations?: { id: string; name: string } | { id: string; name: string }[]
 }
 
+interface EditRequest {
+    id: string
+    resource_type: 'courses' | 'learning_paths' | 'organizations'
+    resource_id: string
+    data: any
+    reason: string | null
+    created_at: string
+    user?: { email: string }
+    resource_title?: string // Joined helper
+}
+
 interface ExistingItem {
     id: string
     name: string
@@ -41,6 +52,7 @@ interface ValidationPanelProps {
         courses: PendingCourse[]
         organizations: PendingOrganization[]
         paths: PendingPath[]
+        edits: EditRequest[]
     }
     existingItems: {
         organizations: ExistingItem[]
@@ -49,7 +61,7 @@ interface ValidationPanelProps {
     }
 }
 
-type TabType = 'organizations' | 'courses' | 'paths'
+type TabType = 'organizations' | 'courses' | 'paths' | 'edits'
 
 export function ValidationPanel({ pendingItems, existingItems }: ValidationPanelProps) {
     const [activeTab, setActiveTab] = useState<TabType>('organizations')
@@ -74,12 +86,17 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length },
         { key: 'courses', label: 'Courses', count: pendingItems.courses.length },
         { key: 'paths', label: 'Learning Paths', count: pendingItems.paths.length },
+        { key: 'edits', label: 'Edits', count: pendingItems.edits.length },
     ]
 
-    const handleApprove = async (type: TabType, id: string) => {
+    const handleApprove = async (type: TabType | 'edits', id: string) => {
         setLoading(id)
         try {
-            const response = await fetch(`/api/admin/validations/${type}/${id}`, {
+            const endpoint = type === 'edits'
+                ? `/api/admin/validations/edits/${id}`
+                : `/api/admin/validations/${type}/${id}`
+
+            const response = await fetch(endpoint, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'approve' }),
@@ -93,14 +110,18 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         }
     }
 
-    const handleDelete = async (type: TabType, id: string) => {
-        if (!confirm('¿Estás seguro de eliminar este item? Esta acción no se puede deshacer.')) {
+    const handleDelete = async (type: TabType | 'edits', id: string) => {
+        if (!confirm('¿Estás seguro de rechazar/eliminar este item?')) {
             return
         }
 
         setLoading(id)
         try {
-            const response = await fetch(`/api/admin/validations/${type}/${id}`, {
+            const endpoint = type === 'edits'
+                ? `/api/admin/validations/edits/${id}`
+                : `/api/admin/validations/${type}/${id}`
+
+            const response = await fetch(endpoint, {
                 method: 'DELETE',
             })
 
@@ -114,6 +135,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const handleSaveEdit = async () => {
         if (!editingItem) return
+
+        // This is for editing NEW items (not edit requests)
+        if (editingItem.type === 'edits') return
 
         setLoading(editingItem.id)
         try {
@@ -138,6 +162,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     }
 
     const handleMerge = async (type: TabType, sourceId: string, targetId: string) => {
+        if (type === 'edits') return; // Cannot merge edits
+
         if (!confirm('¿Estás seguro de fusionar este item con el existente? El item pendiente será eliminado.')) {
             return
         }
@@ -393,15 +419,79 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         </div>
     )
 
+    const renderEdits = () => (
+        <div className="space-y-4">
+            {pendingItems.edits.length === 0 ? (
+                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
+                    <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
+                    <p className="text-gray-600 dark:text-[#b0bfcc]">No hay ediciones pendientes de validación</p>
+                </div>
+            ) : (
+                pendingItems.edits.map((item) => (
+                    <div
+                        key={item.id}
+                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30 transition-colors"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                        Edit: {item.resource_title || item.resource_id}
+                                    </h3>
+                                    <span className="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400">
+                                        {item.resource_type}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 font-medium">
+                                    Razón: {item.reason || 'Sin razón especificada'}
+                                </p>
+
+                                {/* Diff Preview could go here */}
+                                <details className="mt-2 text-xs">
+                                    <summary className="cursor-pointer text-[#137fec]">Ver cambios JSON</summary>
+                                    <pre className="mt-2 p-2 bg-gray-100 dark:bg-black rounded overflow-x-auto">
+                                        {JSON.stringify(item.data, null, 2)}
+                                    </pre>
+                                </details>
+
+                                <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                    Solicitado: {new Date(item.created_at).toLocaleDateString('es-ES')}
+                                </p>
+                            </div>
+
+                            <div className="flex gap-2 shrink-0">
+                                <button
+                                    onClick={() => handleApprove('edits', item.id)}
+                                    disabled={loading === item.id}
+                                    className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                >
+                                    {loading === item.id ? '...' : 'Aprobar Edición'}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete('edits', item.id)}
+                                    disabled={loading === item.id}
+                                    className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
+                                    title="Rechazar"
+                                >
+                                    <span className="material-symbols-outlined text-lg">close</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    )
+
     return (
         <>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[#3b4754] pb-4">
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[#3b4754] pb-4 overflow-x-auto">
                 {tabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === tab.key
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
                             ? 'bg-[#137fec] text-gray-900 dark:text-white'
                             : 'text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50'
                             }`}
@@ -423,10 +513,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {activeTab === 'organizations' && renderOrganizations()}
             {activeTab === 'courses' && renderCourses()}
             {activeTab === 'paths' && renderPaths()}
+            {activeTab === 'edits' && renderEdits()}
 
-            {/* Edit Modal */}
+            {/* Edit Modal (for legacy creations, not edits of edits) */}
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    {/* ... Existing Modal Content ... */}
                     <div className="w-full max-w-lg rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] p-6 mx-4">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Editar Item</h2>
@@ -443,7 +535,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 label={editingItem.type === 'organizations' ? 'Nombre' : 'Título'}
                                 value={editingItem.name}
                                 onChange={(name) => setEditingItem({ ...editingItem, name })}
-                                existingItems={existingItems[editingItem.type]}
+                                existingItems={existingItems[editingItem.type as 'organizations' | 'courses' | 'paths']}
                                 placeholder="Nombre del item..."
                             />
 

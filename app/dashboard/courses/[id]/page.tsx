@@ -12,6 +12,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  // Get user profile for admin check
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
   // Obtener el curso con toda su información
   const { data: course, error } = await supabase
     .from('courses')
@@ -82,6 +89,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const isYouTube = course.link_url &&
     (course.link_url.includes('youtube.com') || course.link_url.includes('youtu.be'))
 
+  // Calculate completion eligibility
+  const exercises = course.course_exercises || []
+  const totalExercises = exercises.length
+  // Count submitted exercises (status pending, approved, or rejected - assuming submission exists)
+  // User said "completed or attached". So detailed check:
+  const submittedExercisesCount = exercises.filter((e: CourseExercise) =>
+    submissions?.some(s => s.exercise_id === e.id)
+  ).length
+
+  const canComplete = totalExercises === 0 || submittedExercisesCount === totalExercises
+
   return (
     <>
       {/* Pending Validation Banner */}
@@ -128,44 +146,64 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </div>
 
-          <CourseActions
-            courseId={course.id}
-            userId={user.id}
-            isSaved={isSaved}
-            isCompleted={isCompleted}
-            progressId={progress?.id}
-            xpReward={course.xp_reward}
-          />
+
+          <div className="flex items-center gap-3">
+            {(isOwner && profile?.is_admin) && (
+              <Link
+                href={`/dashboard/courses/${course.id}/edit`}
+                className="rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm">edit</span>
+                Editar
+              </Link>
+            )}
+
+
+
+            <CourseActions
+              courseId={course.id}
+              userId={user.id}
+              isSaved={isSaved}
+              isCompleted={isCompleted}
+              progressId={progress?.id}
+              xpReward={course.xp_reward}
+              canComplete={canComplete}
+            />
+          </div>
         </div>
-      </header>
+      </header >
 
       {/* Contenido */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      < div className="grid gap-6 lg:grid-cols-3" >
         {/* Video/Contenido principal */}
-        <div className="lg:col-span-2 space-y-6">
+        < div className="lg:col-span-2 space-y-6" >
           {/* Video player */}
-          {course.link_url && isYouTube && (
-            <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
-              <YouTubePlayer url={course.link_url} />
-            </div>
-          )}
+          {
+            course.link_url && isYouTube && (
+              <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+                <YouTubePlayer url={course.link_url} />
+              </div>
+            )
+          }
 
           {/* Enlace externo si no es YouTube */}
-          {course.link_url && !isYouTube && (
-            <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
-              <a
-                href={course.link_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-lg border-2 border-[#137fec]/30 bg-[#137fec]/10 p-4 hover:bg-[#137fec]/20 transition-colors"
-              >
-                <span className="font-medium text-gray-900 dark:text-white">
-                  🔗 Ir al curso externo
-                </span>
-                <span className="material-symbols-outlined h-5 w-5 text-[#137fec]">open_in_new</span>
-              </a>
-            </div>
-          )}
+          {
+            course.link_url && !isYouTube && (
+              <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+                <a
+                  href={course.link_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border-2 border-[#137fec]/30 bg-[#137fec]/10 p-4 hover:bg-[#137fec]/20 transition-colors"
+                >
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    🔗 Ir al curso externo
+                  </span>
+                  <span className="material-symbols-outlined h-5 w-5 text-[#137fec]">open_in_new</span>
+                </a>
+              </div>
+            )
+          }
 
           {/* Descripción */}
           <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
@@ -185,7 +223,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
           {/* Ejercicios */}
           {course.course_exercises && course.course_exercises.length > 0 && (
-            <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+            <div id="exercises" className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Ejercicios prácticos
               </h2>
@@ -255,53 +293,57 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 })}
               </div>
             </div>
-          )}
-        </div>
+          )
+          }
+        </div >
 
         {/* Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
+        < div className="lg:col-span-1 space-y-6" >
           {/* Estado del curso */}
-          <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+          < div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]" >
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
               Estado del curso
             </h3>
 
-            {isCompleted ? (
-              <div className="space-y-3">
-                <div className="rounded-lg bg-green-500/20 p-4 text-center border border-green-500/30">
-                  <span className="mx-auto material-symbols-outlined h-12 w-12 text-green-400">check_circle</span>
-                  <p className="mt-2 font-medium text-green-400">
-                    ¡Completado!
-                  </p>
-                  <p className="text-sm text-green-400/70">
-                    Ganaste {progress.xp_earned} XP
-                  </p>
+            {
+              isCompleted ? (
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-green-500/20 p-4 text-center border border-green-500/30">
+                    <span className="mx-auto material-symbols-outlined h-12 w-12 text-green-400">check_circle</span>
+                    <p className="mt-2 font-medium text-green-400">
+                      ¡Completado!
+                    </p>
+                    <p className="text-sm text-green-400/70">
+                      Ganaste {progress.xp_earned} XP
+                    </p>
+                  </div>
+                  {progress.completed_at && (
+                    <p className="text-xs text-center text-gray-600 dark:text-[#b0bfcc]">
+                      Completado el {new Date(progress.completed_at).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
-                {progress.completed_at && (
-                  <p className="text-xs text-center text-gray-600 dark:text-[#b0bfcc]">
-                    Completado el {new Date(progress.completed_at).toLocaleDateString()}
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
+                    Completa este curso para ganar <span className="font-semibold text-[#137fec]">{course.xp_reward} XP</span>
                   </p>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
-                  Completa este curso para ganar <span className="font-semibold text-[#137fec]">{course.xp_reward} XP</span>
-                </p>
-                <form action={`/api/courses/${course.id}/complete`} method="POST">
-                  <button
-                    type="submit"
-                    className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white hover:bg-green-700 transition-colors"
-                  >
-                    ✓ Marcar como completado
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
+                  <div className="rounded-lg bg-[#3b4754]/10 p-4 border border-[#3b4754]/20">
+                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
+                      Para completar este curso y ganar <span className="font-semibold text-[#137fec]">{course.xp_reward} XP</span>,
+                      debes aprobar el ejercicio final.
+                    </p>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-[#b0bfcc]/70">
+                      Tu entrega será revisada por un administrador.
+                    </p>
+                  </div>
+                </div>
+              )
+            }
+          </div >
 
           {/* Información adicional */}
-          <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+          < div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]" >
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
               Información
             </h3>
@@ -343,9 +385,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </dd>
               </div>
             </dl>
-          </div>
-        </div>
-      </div>
+          </div >
+        </div >
+      </div >
     </>
   )
 }

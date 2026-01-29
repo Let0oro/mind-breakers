@@ -270,7 +270,7 @@ function ResultCard({ result }: { result: SearchResult }) {
             case 'course':
                 return `/dashboard/courses/${result.id}`
             case 'organization':
-                return `/dashboard/organizations?org=${result.id}`
+                return `/dashboard/organizations/${result.id}`
             default:
                 return '#'
         }
