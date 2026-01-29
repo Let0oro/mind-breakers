@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ThemeToggle } from './ThemeToggle'
+import Image from 'next/image'
 
 export default function SharedHeader() {
     const pathname = usePathname()
@@ -15,7 +16,7 @@ export default function SharedHeader() {
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/" className="flex items-center gap-2 sm:gap-3 text-primary hover:opacity-80 transition-opacity">
-                        <span className="material-symbols-outlined text-2xl sm:text-3xl">sports_esports</span>
+                        <Image src="/icon.png" alt="MindBreaker" width={42} height={42} />
                         <h2 className="text-foreground text-xl sm:text-2xl font-bold tracking-tight">MindBreaker</h2>
                     </Link>
 
@@ -26,12 +27,6 @@ export default function SharedHeader() {
                                 href="/#explore"
                             >
                                 Explore
-                            </Link>
-                            <Link
-                                className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
-                                href="/#leaderboard"
-                            >
-                                Leaderboard
                             </Link>
                             <Link
                                 className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"

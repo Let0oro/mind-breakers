@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white">
-      <main className="relative">
+      <main id='explore' className="relative scroll-mt-40">
         <section className="hero-gradient pt-20 pb-12 px-6 lg:px-20">
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
@@ -18,7 +18,7 @@ export default function DashboardPage() {
                 Turn your professional expertise into interactive quests. Learn new skills, earn rare XP, and dominate the global leaderboard.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href={"/login"} className="bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform flex items-center gap-2">
+                <Link href={"/login"} className="bg-primary dark:bg-primary/5 dark:text-primary text-white px-8 py-4 rounded-xl font-bold text-lg hover:scale-105 transition-transform flex items-center gap-2">
                   <span className="material-symbols-outlined">play_arrow</span>
                   Start Learning
                 </Link>
@@ -73,15 +73,15 @@ export default function DashboardPage() {
         <section className="px-6 lg:px-20 py-12">
           <div className="max-w-7xl mx-auto flex flex-wrap gap-6">
             <div className="flex-1 min-w-70 bg-surface-dark p-8 rounded-2xl border border-white/5">
-              <p className="text-slate-800 text-sm font-medium mb-1 uppercase tracking-widest">Global XP Distributed</p>
+              <p className="text-slate-800 text-sm font-medium mb-1 uppercase dark:text-slate-200 tracking-widest">Global XP Distributed</p>
               <h4 className="text-4xl font-bold text-white tracking-tight">1.28B <span className="text-primary text-xl">XP</span></h4>
             </div>
             <div className="flex-1 min-w-70 bg-surface-dark p-8 rounded-2xl border border-white/5">
-              <p className="text-slate-800 text-sm font-medium mb-1 uppercase tracking-widest">Live Active Quests</p>
-              <h4 className="text-4xl font-bold text-white tracking-tight">4,290+ <span className="text-accent text-xl">Courses</span></h4>
+              <p className="text-slate-800 text-sm font-medium mb-1 uppercase dark:text-slate-200 tracking-widest">Live Active Quests</p>
+              <h4 className="text-4xl font-bold text-white tracking-tight">4,290+ <span className="text-accent dark:text-slate-400 text-xl">Courses</span></h4>
             </div>
-            <div className="flex-1 min-w-70 bg-primary p-8 rounded-2xl shadow-xl shadow-primary/20">
-              <p className="text-white/80 text-sm font-medium mb-1 uppercase tracking-widest">Top Player Prize Pool</p>
+            <div className="flex-1 min-w-70 bg-primary p-8 rounded-2xl dark:bg-primary/5 dark:text-primary shadow-xl shadow-primary/20 dark:shadow-background/20">
+              <p className="text-white/80 dark:text-white/80 text-sm font-medium mb-1 uppercase tracking-widest">Top Player Prize Pool</p>
               <h4 className="text-4xl font-bold text-white tracking-tight">$50k <span className="text-white/70 text-xl">USD</span></h4>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function DashboardPage() {
               <div className="order-2 lg:order-1">
                 <div className="bg-background-dark/80 backdrop-blur rounded-2xl border border-white/10 p-8 shadow-2xl">
                   <div className="flex items-center justify-between mb-8">
-                    <h4 className="text-white font-bold">Quest Builder <span className="text-slate-400 font-normal">v1.0</span></h4>
+                    <h4 id='quests' className="text-white font-bold scroll-mt-40">Quest Builder <span className="text-slate-400 font-normal">v1.0</span></h4>
                     <div className="flex gap-2">
                       <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
@@ -137,12 +137,12 @@ export default function DashboardPage() {
                   <div className="space-y-2">
                     <span className="material-symbols-outlined text-primary text-3xl">monetization_on</span>
                     <h5 className="text-white font-bold">Earn Revenue</h5>
-                    <p className="text-slate-900 text-sm">Get paid for every learner who completes your quest.</p>
+                    <p className="text-slate-900 dark:text-slate-200 text-sm">Get paid for every learner who completes your quest.</p>
                   </div>
                   <div className="space-y-2">
                     <span className="material-symbols-outlined text-accent text-3xl">insights</span>
                     <h5 className="text-white font-bold">Real Analytics</h5>
-                    <p className="text-slate-900 text-sm">Detailed insights into learner progress and drop-offs.</p>
+                    <p className="text-slate-900 dark:text-slate-200 text-sm">Detailed insights into learner progress and drop-offs.</p>
                   </div>
                 </div>
                 <Link href={"/login"} className="bg-white text-black px-10 py-4 rounded-xl font-bold text-lg hover:bg-slate-200 transition-colors flex">
@@ -174,8 +174,7 @@ export default function DashboardPage() {
                 <div className="space-y-4">
                   <h5 className="text-white font-bold text-sm">Company</h5>
                   <ul className="text-slate-400 text-sm space-y-2">
-                    <li><Link className="hover:text-primary transition-colors" href="#">About Us</Link></li>
-                    <li><Link className="hover:text-primary transition-colors" href="#">Careers</Link></li>
+                    <li><Link className="hover:text-primary transition-colors" href="https://github.com/Let0oro/mind-breakers">My Github</Link></li>
                     <li><Link className="hover:text-primary transition-colors" href="#">Discord</Link></li>
                   </ul>
                 </div>
@@ -191,7 +190,7 @@ export default function DashboardPage() {
                   Global XP Live Ticker: <span className="text-white">1,284,952,001 XP EARNED</span>
                 </p>
               </div>
-              <p className="text-slate-400 text-xs">© 2024 MindBreaker Global. All rights reserved.</p>
+              <p className="text-slate-400 text-xs">© 2026 MindBreaker Global. All rights reserved.</p>
             </div>
           </div>
         </footer>

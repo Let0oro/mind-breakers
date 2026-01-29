@@ -60,7 +60,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                 className={`
           fixed inset-y-0 left-0 z-50 w-64 flex flex-col justify-between border-r border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] p-4 
           transition-transform duration-300 ease-in-out
-          md:relative md:translate-x-0
+          md:relative md:translate-x-0 overflow-y-auto
           ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
         `}
             >
@@ -151,8 +151,6 @@ export function Sidebar({ user, profile }: SidebarProps) {
 
                         {profile?.is_admin && (
                             <>
-                                <div className="h-px bg-[#3b4754] my-4"></div>
-                                <p className="px-3 text-xs text-gray-600 dark:text-[#b0bfcc]/60 uppercase tracking-wider mb-2">Admin</p>
                                 <Link
                                     className={getLinkClassName('/dashboard/admin/validations')}
                                     href="/dashboard/admin/validations"
@@ -191,16 +189,6 @@ export function Sidebar({ user, profile }: SidebarProps) {
                         </button>
                     </nav>
                 </div>
-
-                {/* Create Course Button */}
-                <Link
-                    href="/dashboard/courses/new"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg h-11 bg-[#137fec] text-gray-900 dark:text-white text-sm font-bold transition-transform hover:bg-[#137fec]/90 active:scale-95"
-                    onClick={() => setIsOpen(false)}
-                >
-                    <span className="material-symbols-outlined w-5 h-5">add_circle</span>
-                    <span>Create New Course</span>
-                </Link>
             </aside>
         </>
     )

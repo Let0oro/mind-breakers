@@ -102,6 +102,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
       return
     }
 
+    await fetch('/api/streak/update', { method: 'POST' })
+
     if (exercise) {
       router.push(`/dashboard/courses/${exercise.courses.id}`)
     }
@@ -163,6 +165,14 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                 {error}
               </div>
             )}
+
+            {/* TDD Recommendation Message */}
+            <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 flex gap-3 items-start">
+              <span className="material-symbols-outlined text-blue-400 text-xl shrink-0">info</span>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-bold text-blue-400">Sugerencia Pro:</span> No es obligatorio, pero sí altamente recomendable que el proyecto entregado cuente con <strong>Test Driven Development (TDD)</strong> completo. ¡Esto demostrará tu calidad como desarrollador!
+              </p>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">

@@ -125,7 +125,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           Volver a {course.learning_paths.title}
         </Link>
 
-        <div className="flex items-start justify-between mt-2 gap-4">
+        <div className="flex lg:items-end text-center sm:text-left lg:justify-between mt-2 lg:gap-4 flex-wrap-reverse justify-center items-center gap-8">
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {course.title}
@@ -148,7 +148,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
 
           <div className="flex items-center gap-3">
-            {(isOwner && profile?.is_admin) && (
+            {(isOwner || profile?.is_admin) && (
               <Link
                 href={`/dashboard/courses/${course.id}/edit`}
                 className="rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors flex items-center gap-2"
@@ -328,7 +328,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
                     Completa este curso para ganar <span className="font-semibold text-[#137fec]">{course.xp_reward} XP</span>
                   </p>
-                  <div className="rounded-lg bg-[#3b4754]/10 p-4 border border-[#3b4754]/20">
+                  {!canComplete && <div className="rounded-lg bg-[#3b4754]/10 p-4 border border-[#3b4754]/20">
                     <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
                       Para completar este curso y ganar <span className="font-semibold text-[#137fec]">{course.xp_reward} XP</span>,
                       debes aprobar el ejercicio final.
@@ -336,7 +336,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                     <p className="mt-2 text-xs text-gray-500 dark:text-[#b0bfcc]/70">
                       Tu entrega será revisada por un administrador.
                     </p>
-                  </div>
+                  </div>}
                 </div>
               )
             }

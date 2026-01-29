@@ -81,7 +81,7 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
     if (!items || items.length === 0) return null
 
     return (
-        <nav className="flex items-center gap-2 text-sm font-medium mb-6">
+        <nav className="flex items-center gap-2 text-sm/6 font-thin md:font-medium mb-2 md:mb-6 md:text-sm">
             {items.map((item, index) => {
                 const isLast = index === items.length - 1
 
