@@ -172,16 +172,27 @@ export default async function DashboardPage() {
     instructor: Array.isArray(course.organization) ? course.organization[0]?.name : course.organization?.name || 'Unknown Organization',
   })) || []
 
-  // Fetch learning paths
-  const { data: learningPathsData } = await supabase
-    .from('learning_paths')
+  // Fetch Saved Paths for the dashboard summary
+  // We prioritize saved paths to show active intent
+  const { data: savedDashboardPaths } = await supabase
+    .from('saved_paths')
     .select(`
-      id,
-      title,
-      summary,
-      courses (id, title, order_index)
+      path:learning_paths (
+        id,
+        title,
+        summary,
+        courses (id, title, order_index)
+      )
     `)
+    .eq('user_id', user.id)
     .limit(2)
+
+  // Handle Supabase relation returning array or object
+  const learningPathsData = savedDashboardPaths?.map(p => Array.isArray(p.path) ? p.path[0] : p.path) || []
+
+  // If we have fewer than 2, maybe fill with "active via course progress" if we can efficiently?
+  // For now, showing Saved Paths in this widget is a good start. 
+  // If empty, we might want to suggest "Explore Paths".
 
   // Calculate progress for paths
   // Note: accurate path progress calculation requires fetching all user progress which might be heavy. 

@@ -36,6 +36,12 @@ export default function NewCoursePage() {
   const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
   const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
 
+  // Exercise fields
+  const [exerciseTitle, setExerciseTitle] = useState('')
+  const [exerciseDescription, setExerciseDescription] = useState('')
+  const [exerciseRequirements, setExerciseRequirements] = useState('')
+  const [showExerciseSection, setShowExerciseSection] = useState(false)
+
   // Fetch metadata from URL
   const handleFetchMetadata = useCallback(async () => {
     if (!linkUrl.trim()) return
@@ -137,6 +143,23 @@ export default function NewCoursePage() {
       setError(insertError.message)
       setLoading(false)
       return
+    }
+
+    // Create exercise if title is provided
+    if (exerciseTitle.trim()) {
+      const { error: exerciseError } = await supabase
+        .from('course_exercises')
+        .insert({
+          course_id: data.id,
+          title: exerciseTitle.trim(),
+          description: exerciseDescription.trim() || null,
+          requirements: exerciseRequirements.trim() || null,
+        })
+
+      if (exerciseError) {
+        console.error('Error creating exercise:', exerciseError)
+        // Course was created, continue anyway
+      }
     }
 
     router.push(`/dashboard/courses/${data.id}`)
@@ -407,11 +430,74 @@ export default function NewCoursePage() {
                 max={300}
                 step={25}
                 className={`w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all ${xpNeedsAttention
-                    ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
-                    : 'border-gray-200 dark:border-[#3b4754]'
+                  ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
+                  : 'border-gray-200 dark:border-[#3b4754]'
                   }`}
               />
             </div>
+          </div>
+
+
+
+          {/* Exercise Section (Collapsible) */}
+          <div className="rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowExerciseSection(!showExerciseSection)}
+              className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-[#283039] hover:bg-gray-100 dark:hover:bg-[#3b4754] transition-colors"
+            >
+              <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
+                <span className="material-symbols-outlined text-[#137fec]">assignment</span>
+                Final Exercise (Optional)
+              </div>
+              <span className="material-symbols-outlined text-gray-500 transition-transform duration-200" style={{ transform: showExerciseSection ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                expand_more
+              </span>
+            </button>
+
+            {showExerciseSection && (
+              <div className="p-4 space-y-4 border-t border-gray-200 dark:border-[#3b4754]">
+                <div className="space-y-2">
+                  <label htmlFor="exercise_title" className="block text-gray-900 dark:text-white text-sm font-bold">
+                    Exercise Title
+                  </label>
+                  <input
+                    type="text"
+                    id="exercise_title"
+                    value={exerciseTitle}
+                    onChange={(e) => setExerciseTitle(e.target.value)}
+                    className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                    placeholder="e.g. Build a To-Do App"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="exercise_description" className="block text-gray-900 dark:text-white text-sm font-bold">
+                    Description
+                  </label>
+                  <textarea
+                    id="exercise_description"
+                    value={exerciseDescription}
+                    onChange={(e) => setExerciseDescription(e.target.value)}
+                    className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+                    placeholder="Explain what the student needs to do..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="exercise_requirements" className="block text-gray-900 dark:text-white text-sm font-bold">
+                    Requirements
+                  </label>
+                  <textarea
+                    id="exercise_requirements"
+                    value={exerciseRequirements}
+                    onChange={(e) => setExerciseRequirements(e.target.value)}
+                    className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+                    placeholder="- Must use React&#10;- Must use Supabase&#10;- Must be responsive"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Order Index */}
@@ -458,8 +544,8 @@ export default function NewCoursePage() {
               )}
             </button>
           </div>
-        </form>
-      </div>
+        </form >
+      </div >
     </>
   )
 }

@@ -13,21 +13,95 @@ export default async function OrganizationsPage() {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) redirect('/login')
 
-    // Fetch validated organizations (or user's own unvalidated)
-    const { data: organizations } = await supabase
-        .from('organizations')
-        .select(`
-      id,
-      name,
-      description,
-      website_url,
-      is_validated,
-      created_by,
-      learning_paths (id),
-      courses (id)
-    `)
-        .or(`is_validated.eq.true,created_by.eq.${user.id}`)
-        .order('name')
+    // Fetch organizations relevant to the user:
+
+    // 1. Get organizations from USER's Courses (saved or enrolled)
+    // We fetch ALL course IDs involved first to be safe, then get their organization_id
+    const { data: userCourses } = await supabase
+        .from('user_course_progress')
+        .select('course_id')
+        .eq('user_id', user.id)
+
+    const { data: savedCourses } = await supabase
+        .from('saved_courses')
+        .select('course_id')
+        .eq('user_id', user.id)
+
+    const courseIds = new Set([
+        ...(userCourses?.map(c => c.course_id) || []),
+        ...(savedCourses?.map(c => c.course_id) || [])
+    ])
+
+    let courseOrgIds: string[] = []
+    if (courseIds.size > 0) {
+        const { data: courses } = await supabase
+            .from('courses')
+            .select('organization_id')
+            .in('id', Array.from(courseIds))
+
+        courseOrgIds = courses?.map(c => c.organization_id).filter(Boolean) || []
+    }
+
+    // 2. Get organizations from USER's Paths (saved or enrolled via courses)
+    const { data: savedPaths } = await supabase
+        .from('saved_paths')
+        .select('path_id')
+        .eq('user_id', user.id)
+
+    // Also include paths from enrolled courses? Usually "enrolled in path" means "enrolled in a course of that path".
+    // We can get path_id from courses we fetched above.
+    // Fetch path IDs from courses
+    let pathIdsFromCourses: string[] = []
+    if (courseIds.size > 0) {
+        const { data: coursesWithPaths } = await supabase
+            .from('courses')
+            .select('path_id')
+            .in('id', Array.from(courseIds))
+            .not('path_id', 'is', null)
+
+        pathIdsFromCourses = coursesWithPaths?.map(c => c.path_id) || []
+    }
+
+    const allPathIds = new Set([
+        ...(savedPaths?.map(p => p.path_id) || []),
+        ...pathIdsFromCourses
+    ])
+
+    let pathOrgIds: string[] = []
+    if (allPathIds.size > 0) {
+        const { data: paths } = await supabase
+            .from('learning_paths')
+            .select('author_id') // author_id is the organization ID
+            .in('id', Array.from(allPathIds))
+
+        pathOrgIds = paths?.map(p => p.author_id).filter(Boolean) || []
+    }
+
+    // Combine all Organization IDs
+    const relevantOrgIds = new Set([
+        ...courseOrgIds,
+        ...pathOrgIds
+    ])
+
+    let organizations: any[] = []
+
+    if (relevantOrgIds.size > 0) {
+        const { data } = await supabase
+            .from('organizations')
+            .select(`
+          id,
+          name,
+          description,
+          website_url,
+          is_validated,
+          learning_paths (id),
+          courses (id)
+        `)
+            .in('id', Array.from(relevantOrgIds))
+            .order('name')
+
+        organizations = data || []
+    }
 
     return (
         <>
@@ -52,7 +126,6 @@ export default async function OrganizationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {organizations && organizations.length > 0 ? (
                     organizations.map((org) => {
-                        const pathCount = org.learning_paths?.length || 0
                         const courseCount = org.courses?.length || 0
 
                         return (
@@ -91,12 +164,7 @@ export default async function OrganizationsPage() {
                                 )}
 
                                 {/* Stats */}
-                                <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-[#3b4754]">
-                                    <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined w-5 h-5 text-[#137fec]">route</span>
-                                        <span className="text-gray-900 dark:text-white text-sm font-medium">{pathCount}</span>
-                                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">paths</span>
-                                    </div>
+                                <div className="flex pt-4 justify-center border-t border-gray-200 dark:border-[#3b4754]">
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined w-5 h-5 text-[#137fec]">school</span>
                                         <span className="text-gray-900 dark:text-white text-sm font-medium">{courseCount}</span>
@@ -106,10 +174,10 @@ export default async function OrganizationsPage() {
 
                                 {/* Actions */}
                                 <Link
-                                    href={`/dashboard/paths?org=${org.id}`}
+                                    href={`/dashboard/organizations/${org.id}`}
                                     className="mt-2 w-full text-center bg-[#283039] hover:bg-gray-100 dark:hover:bg-[#3b4754] text-gray-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                                 >
-                                    View Paths
+                                    View Organization
                                 </Link>
                             </div>
                         )
