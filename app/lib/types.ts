@@ -122,6 +122,7 @@ export interface PathListItem {
   description?: string
   created_by?: string
   created_at: string
+  is_validated?: boolean
   organizations?: {
     id: string
     name: string
