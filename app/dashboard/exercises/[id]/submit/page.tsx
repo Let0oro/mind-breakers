@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, use } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { FileUpload } from '@/components/FileUpload'
@@ -36,19 +36,18 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
   const router = useRouter()
   const supabase = createClient()
 
-  const loadExercise = useCallback(async () => {
-    const { data } = await supabase
-      .from('course_exercises')
-      .select('*, courses (id, title, learning_paths (id))')
-      .eq('id', id)
-      .single()
-
-    if (data) setExercise(data as Exercise)
-  }, [supabase, id])
-
   useEffect(() => {
+    const loadExercise = async () => {
+      const { data } = await supabase
+        .from('course_exercises')
+        .select('*, courses (id, title, learning_paths (id))')
+        .eq('id', id)
+        .single()
+
+      if (data) setExercise(data as Exercise)
+    }
     loadExercise()
-  }, [loadExercise])
+  }, [supabase, id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

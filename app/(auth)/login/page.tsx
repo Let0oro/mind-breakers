@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import Link from 'next/link'
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -21,6 +21,7 @@ export default function LoginPage() {
       const rememberMeWasChecked = localStorage.getItem('MindBreaker_remember')
 
       if (savedEmail && rememberMeWasChecked === 'true') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEmail(savedEmail)
         setRememberMe(true)
       }
@@ -44,7 +45,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })

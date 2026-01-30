@@ -1,15 +1,21 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import Image from 'next/image'
+
 
 export const metadata = {
     title: 'Courses - MindBreaker',
     description: 'Browse and enroll in courses',
 }
 
-export default async function CoursesPage() {
+export default async function CoursesPage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
     const supabase = await createClient()
+    const resolvedSearchParams = await searchParams
+    const filter = (resolvedSearchParams?.filter as string) || 'all'
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) redirect('/login')
@@ -40,7 +46,21 @@ export default async function CoursesPage() {
         ...(savedCourses?.map(c => c.course_id) || [])
     ])
 
-    let courses: any[] = []
+    interface CourseListItem {
+        id: string
+        title: string
+        summary?: string
+        thumbnail_url?: string
+        xp_reward: number
+        is_validated?: boolean
+        created_by: string
+        status: 'draft' | 'published' | 'archived'
+        organizations: { name: string }[] | null
+        user_course_progress: { completed: boolean, xp_earned: number }[]
+        saved_courses: { user_id: string }[]
+    }
+
+    let courses: CourseListItem[] = []
 
     if (courseIds.size > 0) {
         const { data } = await supabase
@@ -53,6 +73,7 @@ export default async function CoursesPage() {
                 xp_reward,
                 is_validated,
                 created_by,
+                status,
                 organizations (name),
                 user_course_progress (
                     completed,
@@ -65,7 +86,19 @@ export default async function CoursesPage() {
             .in('id', Array.from(courseIds))
             .order('created_at', { ascending: false })
 
-        courses = data || []
+        courses = (data as unknown as CourseListItem[]) || []
+    }
+
+    // Filter courses based on status if filter is requested
+    const allCoursesCount = courses.length
+    if (filter !== 'all') {
+        courses = courses.filter(course => {
+            if (filter === 'pending') return course.is_validated === false && course.status !== 'draft'
+            if (filter === 'published') return course.status === 'published' && course.is_validated === true
+            if (filter === 'draft') return course.status === 'draft'
+            if (filter === 'archived') return course.status === 'archived'
+            return true
+        })
     }
 
     // Fetch user progress for map (simplified as we already have some in join but good for exact map)
@@ -77,33 +110,81 @@ export default async function CoursesPage() {
     const progressMap = new Map(userProgress?.map(p => [p.course_id, p.completed]) || [])
     const savedSet = new Set(savedCourses?.map(s => s.course_id) || [])
 
-    // Filter logic based on tabs (we can add query param for tabs later, for now show sections or all)
-    // User asked for "items that have link with user". We are showing exactly that.
-
     return (
         <>
             {/* Header Section */}
-            <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
-                <div className="flex flex-col gap-2">
-                    <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">My Courses</h2>
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
-                        {courses.length} courses in your collection
-                    </p>
+            <header className="flex flex-col gap-6 mb-8">
+                <div className="flex flex-wrap justify-between items-end gap-6">
+                    <div className="flex flex-col gap-2">
+                        <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">My Courses</h2>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
+                            {courses.length} / {allCoursesCount} courses displayed
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        <Link
+                            href="/dashboard/explore"
+                            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium transition-all hover:bg-gray-50 dark:hover:bg-[#283039]"
+                        >
+                            <span className="material-symbols-outlined w-5 h-5">search</span>
+                            <span>Explore More</span>
+                        </Link>
+                        <Link
+                            href="/dashboard/courses/new"
+                            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
+                        >
+                            <span className="material-symbols-outlined w-5 h-5">add_circle</span>
+                            <span>Create Course</span>
+                        </Link>
+                    </div>
                 </div>
-                <div className="flex gap-3">
+
+                {/* Filter Tabs */}
+                <div className="flex items-center gap-2 border-b border-gray-200 dark:border-[#3b4754] pb-1 overflow-x-auto">
                     <Link
-                        href="/dashboard/explore"
-                        className="flex items-center gap-2 h-11 px-6 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium transition-all hover:bg-gray-50 dark:hover:bg-[#283039]"
+                        href="/dashboard/courses"
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'all'
+                            ? 'border-[#137fec] text-[#137fec]'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:hover:text-white'
+                            }`}
                     >
-                        <span className="material-symbols-outlined w-5 h-5">search</span>
-                        <span>Explore More</span>
+                        All
                     </Link>
                     <Link
-                        href="/dashboard/courses/new"
-                        className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
+                        href="/dashboard/courses?filter=published"
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'published'
+                            ? 'border-[#137fec] text-[#137fec]'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:hover:text-white'
+                            }`}
                     >
-                        <span className="material-symbols-outlined w-5 h-5">add_circle</span>
-                        <span>Create Course</span>
+                        Published
+                    </Link>
+                    <Link
+                        href="/dashboard/courses?filter=pending"
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'pending'
+                            ? 'border-amber-500 text-amber-500'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        Pending
+                    </Link>
+                    <Link
+                        href="/dashboard/courses?filter=draft"
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'draft'
+                            ? 'border-[#137fec] text-[#137fec]'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        Drafts
+                    </Link>
+                    <Link
+                        href="/dashboard/courses?filter=archived"
+                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'archived'
+                            ? 'border-[#137fec] text-[#137fec]'
+                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                    >
+                        Archived
                     </Link>
                 </div>
             </header>
@@ -117,11 +198,17 @@ export default async function CoursesPage() {
                         const isSaved = savedSet.has(course.id)
                         const isOwner = course.created_by === user.id
 
+                        // Status Logic
+                        const isDraft = course.status === 'draft'
+                        const isArchived = course.status === 'archived'
+                        const isPublished = course.status === 'published'
+                        const isPending = isPublished && !course.is_validated
+
                         return (
                             <Link
                                 key={course.id}
                                 href={`/dashboard/courses/${course.id}`}
-                                className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col"
+                                className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative"
                             >
                                 {/* Thumbnail */}
                                 <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
@@ -129,7 +216,7 @@ export default async function CoursesPage() {
                                         <img
                                             src={course.thumbnail_url}
                                             alt={course.title}
-                                            className="object-cover w-full h-full"
+                                            className="object-cover"
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center">
@@ -137,12 +224,11 @@ export default async function CoursesPage() {
                                         </div>
                                     )}
 
-                                    {/* Status Badge */}
-                                    <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                                        {/* Progress Badges */}
                                         {isCompleted && (
                                             <div className="bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                                                <span className="material-symbols-outlined w-3 h-3">check</span>
-                                                Completed
+                                                Created
                                             </div>
                                         )}
                                         {!isCompleted && isEnrolled && (
@@ -156,15 +242,28 @@ export default async function CoursesPage() {
                                                 Saved
                                             </div>
                                         )}
-                                    </div>
 
-                                    {/* Pending Badge */}
-                                    {!course.is_validated && isOwner && (
-                                        <div className="absolute top-2 left-2 bg-amber-500 text-gray-900 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                                            <span className="material-symbols-outlined w-3 h-3">pending</span>
-                                            Pendiente
-                                        </div>
-                                    )}
+                                        {/* Status Badges (Owner only) */}
+                                        {isOwner && (
+                                            <>
+                                                {isDraft && (
+                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-yellow-100 text-yellow-800">
+                                                        Draft
+                                                    </div>
+                                                )}
+                                                {isArchived && (
+                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-800">
+                                                        Archived
+                                                    </div>
+                                                )}
+                                                {isPending && (
+                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-100 text-amber-800 animate-pulse">
+                                                        Pending
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Content */}
@@ -197,7 +296,9 @@ export default async function CoursesPage() {
                     <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
                         <span className="material-symbols-outlined w-16 h-16 text-[#3b4754] mx-auto mb-4">school</span>
                         <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No courses found</p>
-                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">You haven't enrolled in, saved, or created any courses yet.</p>
+                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">
+                            {filter !== 'all' ? `No ${filter} courses found.` : "You haven't enrolled in, saved, or created any courses yet."}
+                        </p>
                         <Link
                             href="/dashboard/explore"
                             className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"

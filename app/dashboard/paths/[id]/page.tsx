@@ -3,8 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
-import type { PathWithCourses, Course } from '@/lib/types'
-import Image from 'next/image'
+import type { Course } from '@/lib/types'
+
 import RecommendedCourses from './RecommendedCourses'
 
 export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -241,6 +241,8 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                           <img
                             src={course.thumbnail_url}
                             alt={course.title}
+                            width={160}
+                            height={96}
                             className="h-24 w-40 shrink-0 rounded-lg object-cover"
                           />
                         ) : (

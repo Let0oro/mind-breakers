@@ -63,7 +63,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
             }
 
             setRepos(data.repos || [])
-        } catch (err) {
+        } catch {
             setError('Failed to connect to server')
         } finally {
             setLoading(false)

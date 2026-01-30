@@ -38,6 +38,7 @@ export function NotificationBell({ userId }: { userId: string }) {
 
   useEffect(() => {
     // Cargar datos iniciales
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadNotifications()
 
     // Suscribirse a notificaciones en tiempo real

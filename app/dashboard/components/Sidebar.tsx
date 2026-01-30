@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
+import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/lib/types'
+
 interface SidebarProps {
-    user: any
-    profile: any
+    user: User
+    profile: Profile
 }
 
 export function Sidebar({ user, profile }: SidebarProps) {
@@ -104,6 +107,14 @@ export function Sidebar({ user, profile }: SidebarProps) {
                         >
                             <span className="material-symbols-outlined w-6 h-6">school</span>
                             <span className="text-sm font-medium">Courses</span>
+                        </Link>
+                        <Link
+                            className={getLinkClassName('/dashboard/drafts')}
+                            href="/dashboard/drafts"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <span className="material-symbols-outlined w-6 h-6">edit_document</span>
+                            <span className="text-sm font-medium">My Drafts</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/paths')}

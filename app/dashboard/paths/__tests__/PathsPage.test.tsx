@@ -19,12 +19,14 @@ describe('PathsListPage', () => {
         auth: {
             getUser: vi.fn(),
         },
-        from: vi.fn((_table: string) => {
+        from: vi.fn(() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const chain: any = {
                 select: vi.fn(() => chain),
                 eq: vi.fn(() => chain),
                 in: vi.fn(() => chain),
                 order: vi.fn(() => Promise.resolve({ data: [] })),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 then: (cb: any) => Promise.resolve({ data: [] }).then(cb)
             }
             return chain
@@ -33,7 +35,7 @@ describe('PathsListPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockResolvedValue(mockSupabase)
     })
 
@@ -42,7 +44,7 @@ describe('PathsListPage', () => {
 
         try {
             await PathsListPage()
-        } catch (e) {
+        } catch {
             // redirect might throw in Next.js, but our mock is a spy. 
             // In real next.js redirect throws NEXT_REDIRECT error.
         }
@@ -65,6 +67,7 @@ describe('PathsListPage', () => {
             eq: vi.fn(() => chain),
             in: vi.fn(() => chain),
             order: vi.fn(() => Promise.resolve({ data: [] })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             then: (resolve: any) => Promise.resolve({ data: [] }).then(resolve) // Allow await directly
         }
         mockSupabase.from.mockReturnValue(chain)
@@ -89,7 +92,7 @@ describe('PathsListPage', () => {
         }]
 
         // We need to match specific table calls to return data
-        mockSupabase.from.mockImplementation((table: string) => {
+        mockSupabase.from.mockImplementation((table?: string) => {
             if (table === 'learning_paths') {
                 return {
                     select: () => ({
@@ -105,6 +108,7 @@ describe('PathsListPage', () => {
                 select: () => chain,
                 eq: () => chain,
                 in: () => chain,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 then: (resolve: any) => Promise.resolve({ data: [] }).then(resolve)
             }
             return chain

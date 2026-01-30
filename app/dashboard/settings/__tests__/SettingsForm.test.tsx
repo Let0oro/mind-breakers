@@ -1,4 +1,5 @@
 import { expect, test, describe, vi, beforeEach } from 'vitest'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { SettingsForm } from '../SettingsForm'
 import { createClient } from '@/utils/supabase/client'
@@ -20,8 +21,7 @@ describe('SettingsForm', () => {
     const mockProfile = { username: 'testuser', avatar_url: 'https://example.com/avatar.png' }
 
     // Mock functions for Supabase chain
-    const mockUpdate = vi.fn().mockReturnValue({ error: null })
-    const mockEq = vi.fn().mockReturnValue({ update: mockUpdate }) // eq returns object with update (wait, update is end of chain usually? No: from().update().eq())
+
     // Correct chain: from -> update -> eq -> Promise
     // Actually in code: .from('profiles').update(updates).eq('id', user.id)
 
@@ -47,18 +47,18 @@ describe('SettingsForm', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockReturnValue(mockSupabase)
     })
 
     test('renders with initial data', () => {
-        render(<SettingsForm user={mockUser} profile={mockProfile} />)
+        render(<SettingsForm user={mockUser as any} profile={mockProfile as any} />)
         expect(screen.getByDisplayValue('testuser')).toBeInTheDocument()
         expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument()
     })
 
     test('updates username successfully', async () => {
-        render(<SettingsForm user={mockUser} profile={mockProfile} />)
+        render(<SettingsForm user={mockUser as any} profile={mockProfile as any} />)
 
         const usernameInput = screen.getByPlaceholderText('Enter username')
         fireEvent.change(usernameInput, { target: { value: 'newusername' } })
@@ -80,7 +80,7 @@ describe('SettingsForm', () => {
         // Mock error
         mockEqFinal.mockResolvedValueOnce({ error: { message: 'Update failed' } })
 
-        render(<SettingsForm user={mockUser} profile={mockProfile} />)
+        render(<SettingsForm user={mockUser as any} profile={mockProfile as any} />)
 
         fireEvent.click(screen.getByText('Save Changes'))
 
@@ -90,7 +90,7 @@ describe('SettingsForm', () => {
     })
 
     test('validates password mismatch', async () => {
-        render(<SettingsForm user={mockUser} profile={mockProfile} />)
+        render(<SettingsForm user={mockUser as any} profile={mockProfile as any} />)
 
         const passInput = screen.getByPlaceholderText('Enter new password')
         const confirmInput = screen.getByPlaceholderText('Confirm new password')
@@ -105,7 +105,7 @@ describe('SettingsForm', () => {
     })
 
     test('updates password successfully', async () => {
-        render(<SettingsForm user={mockUser} profile={mockProfile} />)
+        render(<SettingsForm user={mockUser as any} profile={mockProfile as any} />)
 
         const passInput = screen.getByPlaceholderText('Enter new password')
         const confirmInput = screen.getByPlaceholderText('Confirm new password')

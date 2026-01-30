@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import Image from 'next/image'
+
 
 export default async function OrganizationDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient()
@@ -89,7 +89,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         <section>
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Learning Paths</h2>
                             <div className="grid gap-4">
-                                {org.learning_paths.map((path: any) => (
+                                {org.learning_paths.map((path: { id: string, title: string, summary: string, courses: { id: string }[] }) => (
                                     <Link
                                         key={path.id}
                                         href={`/dashboard/paths/${path.id}`}
@@ -115,7 +115,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         <section>
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Individual Courses</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {org.courses.map((course: any) => (
+                                {org.courses.map((course: { id: string, title: string, summary: string, thumbnail_url: string | null, xp_reward: number }) => (
                                     <Link
                                         key={course.id}
                                         href={`/dashboard/courses/${course.id}`}
@@ -123,7 +123,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                     >
                                         <div className="h-32 bg-gray-100 dark:bg-[#283039] relative">
                                             {course.thumbnail_url ? (
-                                                <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
+                                                <img src={course.thumbnail_url} alt={course.title} className="object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                                                     <span className="material-symbols-outlined text-4xl">school</span>

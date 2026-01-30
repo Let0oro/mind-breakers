@@ -20,6 +20,7 @@ export function ThemeToggle() {
       document.documentElement.classList.remove('dark')
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDark(shouldBeDark)
     setMounted(true)
   }, [])

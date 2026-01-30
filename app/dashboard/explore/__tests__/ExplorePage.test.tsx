@@ -2,7 +2,7 @@ import { expect, test, describe, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ExplorePage from '../page'
 import { createClient } from '@/utils/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
+
 
 // Mocks
 vi.mock('@/utils/supabase/client', () => ({
@@ -27,19 +27,19 @@ describe('ExplorePage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockReturnValue(mockSupabase)
     })
 
     // Helper to create a chainable mock
-    const createChain = (data: any = []) => {
+    const createChain = (data: unknown = []) => {
         const chain = {
             select: vi.fn(() => chain),
             eq: vi.fn(() => chain),
             order: vi.fn(() => chain),
             limit: vi.fn(() => chain),
             or: vi.fn(() => chain),
-            then: (resolve: any) => Promise.resolve({ data }).then(resolve)
+            then: (resolve: (value: { data: unknown }) => void) => Promise.resolve({ data }).then(resolve)
         }
         return chain
     }

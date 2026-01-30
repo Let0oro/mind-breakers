@@ -31,7 +31,7 @@ describe('CourseActions', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - Mocking supabase client return type is complex
         createClient.mockReturnValue(mockSupabase)
     })
 
@@ -42,6 +42,7 @@ describe('CourseActions', () => {
             isSaved={false}
             isCompleted={false}
             xpReward={10}
+            status="published"
         />)
 
         const saveButton = screen.getByText('☆ Guardar')
@@ -67,6 +68,7 @@ describe('CourseActions', () => {
             isSaved={false}
             isCompleted={false}
             xpReward={10}
+            status="published"
         />)
 
         const completeButton = screen.getByText('✓ Completar')
@@ -89,6 +91,7 @@ describe('CourseActions', () => {
             isCompleted={true}
             progressId="p1"
             xpReward={10}
+            status="published"
         />)
 
         const incompleteButton = screen.getByText('✕ No completado')

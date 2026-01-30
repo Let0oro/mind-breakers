@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { fetchUrlMetadata, calculateXPFromDuration, type MetadataResponse } from '@/utils/fetch-metadata'
+
+import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
 
 interface LearningPath {
   id: string
@@ -36,11 +37,38 @@ export default function NewCoursePage() {
   const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
   const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
 
+  const [orderIndex, setOrderIndex] = useState(0)
+  const [pathId, setPathId] = useState('')
+  const [organizationId, setOrganizationId] = useState('')
+
   // Exercise fields
-  const [exerciseTitle, setExerciseTitle] = useState('')
-  const [exerciseDescription, setExerciseDescription] = useState('')
-  const [exerciseRequirements, setExerciseRequirements] = useState('')
-  const [showExerciseSection, setShowExerciseSection] = useState(false)
+  interface Exercise {
+    id: string
+    title: string
+    description: string
+    requirements: string
+  }
+  const [exercises, setExercises] = useState<Exercise[]>([])
+
+  // Helper to add new exercise
+  const addExercise = () => {
+    setExercises([
+      ...exercises,
+      { id: crypto.randomUUID(), title: '', description: '', requirements: '' }
+    ])
+  }
+
+  // Helper to remove exercise
+  const removeExercise = (id: string) => {
+    setExercises(exercises.filter(ex => ex.id !== id))
+  }
+
+  // Helper to update exercise
+  const updateExercise = (id: string, field: keyof Exercise, value: string) => {
+    setExercises(exercises.map(ex =>
+      ex.id === id ? { ...ex, [field]: value } : ex
+    ))
+  }
 
   // Fetch metadata from URL
   const handleFetchMetadata = useCallback(async () => {
@@ -58,25 +86,20 @@ export default function NewCoursePage() {
     }
 
     if (data) {
-      // Only update fields that are empty or if this is fresh metadata
       if (!title || metadataFetched === false) setTitle(data.title)
       if (!summary || metadataFetched === false) {
-        // Use description as summary, truncated if too long
         const desc = data.description || ''
         setSummary(desc.length > 200 ? desc.substring(0, 197) + '...' : desc)
       }
       if (!description || metadataFetched === false) setDescription(data.description)
       if (!thumbnailUrl || metadataFetched === false) setThumbnailUrl(data.thumbnail)
 
-      // Calculate XP from duration
       const calculatedXP = calculateXPFromDuration(data.durationHours)
       setXpReward(calculatedXP)
 
-      // If XP is 0 (no duration found), show tooltip and visual feedback
       if (calculatedXP === 0) {
         setXpNeedsAttention(true)
         setShowXpTooltip(true)
-        // Auto-hide tooltip after 4 seconds
         if (xpTooltipTimeout.current) clearTimeout(xpTooltipTimeout.current)
         xpTooltipTimeout.current = setTimeout(() => {
           setShowXpTooltip(false)
@@ -92,49 +115,92 @@ export default function NewCoursePage() {
   }, [linkUrl, title, summary, description, thumbnailUrl, metadataFetched])
 
   useEffect(() => {
+    const fetchData = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [pathsRes, orgsRes] = await Promise.all([
+        supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
+        supabase.from('organizations').select('id, name').order('name'),
+      ])
+
+      if (pathsRes.data) setPaths(pathsRes.data)
+      if (orgsRes.data) setOrganizations(orgsRes.data)
+    }
     fetchData()
-  }, [])
+  }, [supabase])
 
-  const fetchData = async () => {
-    // Obtener el usuario actual desde Supabase Auth
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+  // Scroll to error
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [error])
 
-    const [pathsRes, orgsRes] = await Promise.all([
-      supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
-      supabase.from('organizations').select('id, name').order('name'),
-    ])
-
-    if (pathsRes.data) setPaths(pathsRes.data)
-    if (orgsRes.data) setOrganizations(orgsRes.data)
+  // Validation Helpers
+  const isFormValidForDraft = () => {
+    return !!(title.trim() || linkUrl.trim())
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const isFormValidForPublish = () => {
+    return !!(
+      title.trim() &&
+      summary.trim() &&
+      description.trim() &&
+      thumbnailUrl.trim() &&
+      xpReward > 0 &&
+      pathId
+    )
+  }
+
+  const handleSaveClick = (targetStatus: 'draft' | 'published') => {
+    setError(null)
+
+    if (targetStatus === 'published' && !isFormValidForPublish()) {
+      setError("To publish, all fields must be filled, a path selected, and XP must be greater than 0.")
+      return
+    }
+    if (targetStatus === 'draft' && !isFormValidForDraft()) {
+      setError("Drafts require at least a Title or a Link.")
+      return
+    }
+
+    processSave(targetStatus)
+  }
+
+  const processSave = async (targetStatus: 'draft' | 'published') => {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-
-    const pathId = formData.get('path_id') as string
-    if (!pathId) {
-      setError('Please select a learning path')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setError('You must be logged in to create a course')
       setLoading(false)
       return
     }
 
-    const { data, error: insertError } = await supabase
+    if (!pathId) {
+      setError("Please select a learning path")
+      setLoading(false)
+      return
+    }
+
+    // 1. Create Course
+    const { data: courseData, error: insertError } = await supabase
       .from('courses')
       .insert({
         path_id: pathId,
-        title: formData.get('title') as string,
-        summary: formData.get('summary') as string,
-        description: formData.get('description') as string,
-        link_url: formData.get('link_url') as string || null,
-        thumbnail_url: formData.get('thumbnail_url') as string || null,
-        organization_id: formData.get('organization_id') as string || null,
-        xp_reward: parseInt(formData.get('xp_reward') as string) || 100,
-        order_index: parseInt(formData.get('order_index') as string) || 0,
+        title: title,
+        summary: summary,
+        description: description,
+        link_url: linkUrl || null,
+        thumbnail_url: thumbnailUrl || null,
+        organization_id: organizationId || null,
+        xp_reward: xpReward,
+        order_index: orderIndex,
+        status: targetStatus,
+        created_by: user.id,
+        is_validated: false
       })
       .select()
       .single()
@@ -145,25 +211,29 @@ export default function NewCoursePage() {
       return
     }
 
-    // Create exercise if title is provided
-    if (exerciseTitle.trim()) {
-      const { error: exerciseError } = await supabase
-        .from('course_exercises')
-        .insert({
-          course_id: data.id,
-          title: exerciseTitle.trim(),
-          description: exerciseDescription.trim() || null,
-          requirements: exerciseRequirements.trim() || null,
-        })
+    // 2. Create Exercises
+    if (exercises.length > 0) {
+      const validExercises = exercises.filter(ex => ex.title.trim() !== '')
+      if (validExercises.length > 0) {
+        const exercisesToInsert = validExercises.map(ex => ({
+          course_id: courseData.id,
+          title: ex.title.trim(),
+          description: ex.description.trim() || null,
+          requirements: ex.requirements.trim() || null,
+        }))
 
-      if (exerciseError) {
-        console.error('Error creating exercise:', exerciseError)
-        // Course was created, continue anyway
+        const { error: exerciseError } = await supabase
+          .from('course_exercises')
+          .insert(exercisesToInsert)
+
+        if (exerciseError) console.error('Error creating exercises:', exerciseError)
       }
     }
 
-    router.push(`/dashboard/courses/${data.id}`)
+    router.push(`/dashboard/courses/${courseData.id}`)
   }
+
+  const handleSubmit = (e: React.FormEvent) => e.preventDefault()
 
   return (
     <>
@@ -196,7 +266,7 @@ export default function NewCoursePage() {
             </div>
           )}
 
-          {/* Course URL - First input with auto-fill */}
+          {/* Course URL */}
           <div className="space-y-2">
             <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
               Course URL
@@ -212,7 +282,6 @@ export default function NewCoursePage() {
                 <input
                   type="url"
                   id="link_url"
-                  name="link_url"
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
@@ -241,7 +310,7 @@ export default function NewCoursePage() {
             <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
               Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
               <span className="block mt-1 text-amber-600 dark:text-amber-400">
-                💡 Use public URLs (without login). If auto-fill doesn't work, you can enter the data manually.
+                💡 Use public URLs (without login). If auto-fill doesn&apos;t work, you can enter the data manually.
               </span>
             </p>
           </div>
@@ -253,7 +322,8 @@ export default function NewCoursePage() {
             </label>
             <select
               id="path_id"
-              name="path_id"
+              value={pathId}
+              onChange={(e) => setPathId(e.target.value)}
               required
               className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
             >
@@ -277,7 +347,6 @@ export default function NewCoursePage() {
             <input
               type="text"
               id="title"
-              name="title"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -297,7 +366,6 @@ export default function NewCoursePage() {
             <input
               type="text"
               id="summary"
-              name="summary"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
@@ -315,7 +383,6 @@ export default function NewCoursePage() {
             </label>
             <textarea
               id="description"
-              name="description"
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -340,7 +407,6 @@ export default function NewCoursePage() {
                 <input
                   type="url"
                   id="thumbnail_url"
-                  name="thumbnail_url"
                   value={thumbnailUrl}
                   onChange={(e) => setThumbnailUrl(e.target.value)}
                   className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
@@ -352,8 +418,8 @@ export default function NewCoursePage() {
                   <img
                     src={thumbnailUrl}
                     alt="Thumbnail preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
+                    className="object-cover"
+                    onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
                       (e.target as HTMLImageElement).style.display = 'none'
                     }}
                   />
@@ -370,7 +436,8 @@ export default function NewCoursePage() {
               </label>
               <select
                 id="organization_id"
-                name="organization_id"
+                value={organizationId}
+                onChange={(e) => setOrganizationId(e.target.value)}
                 className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               >
                 <option value="">None</option>
@@ -420,7 +487,6 @@ export default function NewCoursePage() {
               <input
                 type="number"
                 id="xp_reward"
-                name="xp_reward"
                 value={xpReward}
                 onChange={(e) => {
                   setXpReward(parseInt(e.target.value) || 0)
@@ -438,68 +504,6 @@ export default function NewCoursePage() {
           </div>
 
 
-
-          {/* Exercise Section (Collapsible) */}
-          <div className="rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowExerciseSection(!showExerciseSection)}
-              className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-[#283039] hover:bg-gray-100 dark:hover:bg-[#3b4754] transition-colors"
-            >
-              <div className="flex items-center gap-2 font-bold text-gray-900 dark:text-white">
-                <span className="material-symbols-outlined text-[#137fec]">assignment</span>
-                Final Exercise (Optional)
-              </div>
-              <span className="material-symbols-outlined text-gray-500 transition-transform duration-200" style={{ transform: showExerciseSection ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                expand_more
-              </span>
-            </button>
-
-            {showExerciseSection && (
-              <div className="p-4 space-y-4 border-t border-gray-200 dark:border-[#3b4754]">
-                <div className="space-y-2">
-                  <label htmlFor="exercise_title" className="block text-gray-900 dark:text-white text-sm font-bold">
-                    Exercise Title
-                  </label>
-                  <input
-                    type="text"
-                    id="exercise_title"
-                    value={exerciseTitle}
-                    onChange={(e) => setExerciseTitle(e.target.value)}
-                    className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
-                    placeholder="e.g. Build a To-Do App"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="exercise_description" className="block text-gray-900 dark:text-white text-sm font-bold">
-                    Description
-                  </label>
-                  <textarea
-                    id="exercise_description"
-                    value={exerciseDescription}
-                    onChange={(e) => setExerciseDescription(e.target.value)}
-                    className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
-                    placeholder="Explain what the student needs to do..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="exercise_requirements" className="block text-gray-900 dark:text-white text-sm font-bold">
-                    Requirements
-                  </label>
-                  <textarea
-                    id="exercise_requirements"
-                    value={exerciseRequirements}
-                    onChange={(e) => setExerciseRequirements(e.target.value)}
-                    className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
-                    placeholder="- Must use React&#10;- Must use Supabase&#10;- Must be responsive"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Order Index */}
           <div className="space-y-2">
             <label htmlFor="order_index" className="block text-gray-900 dark:text-white text-sm font-bold">
@@ -508,8 +512,8 @@ export default function NewCoursePage() {
             <input
               type="number"
               id="order_index"
-              name="order_index"
-              defaultValue={0}
+              value={orderIndex}
+              onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
               min={0}
               className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="0"
@@ -517,35 +521,122 @@ export default function NewCoursePage() {
             <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Lower numbers appear first (0 = first)</p>
           </div>
 
+          <div className="border-t border-gray-200 dark:border-[#3b4754] my-8"></div>
+
+          {/* Exercise Section using Dynamic List */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Exercises</h3>
+              <button
+                type="button"
+                onClick={addExercise}
+                className="px-4 py-2 rounded-lg bg-[#137fec]/10 text-[#137fec] hover:bg-[#137fec]/20 font-medium transition-colors flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined">add</span>
+                Add Exercise
+              </button>
+            </div>
+
+            {exercises.length === 0 ? (
+              <div className="text-center py-8 rounded-xl border border-dashed border-gray-300 dark:border-[#3b4754] bg-gray-50/50 dark:bg-[#1a232e]/50">
+                <p className="text-gray-500 dark:text-gray-400">No exercises added yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {exercises.map((exercise, index) => (
+                  <div key={exercise.id} className="rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] overflow-hidden">
+                    <div className="p-4 bg-gray-50 dark:bg-[#283039] flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#137fec] text-white text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={exercise.title}
+                          onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
+                          placeholder="Exercise Title"
+                          className="bg-transparent border-none text-gray-900 dark:text-white font-bold focus:ring-0 p-0 w-64"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeExercise(exercise.id)}
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <span className="material-symbols-outlined">delete</span>
+                      </button>
+                    </div>
+
+                    <div className="p-4 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-gray-500 uppercase">Description</label>
+                          <textarea
+                            value={exercise.description}
+                            onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#137fec] transition-all resize-none"
+                            placeholder="Brief description..."
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-xs font-bold text-gray-500 uppercase">Requirements</label>
+                          <textarea
+                            value={exercise.requirements}
+                            onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#137fec] transition-all resize-none"
+                            placeholder="- Validations&#10;- Tests"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-[#3b4754]">
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 h-12 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
+              className="px-6 h-12 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-12 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-xl">add</span>
-                  Create Course
-                </>
-              )}
-            </button>
+            <div className="flex-1 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => handleSaveClick('draft')}
+                disabled={loading}
+                className={`px-6 h-12 rounded-lg border border-[#137fec] text-[#137fec] font-bold hover:bg-[#137fec]/10 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {loading ? 'Saving...' : 'Save Draft'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSaveClick('published')}
+                disabled={loading}
+                className={`px-6 h-12 rounded-lg bg-[#137fec] text-white font-bold hover:bg-[#137fec]/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-xl">rocket_launch</span>
+                    Publish Course
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </form >
-      </div >
+        </form>
+      </div>
     </>
   )
 }

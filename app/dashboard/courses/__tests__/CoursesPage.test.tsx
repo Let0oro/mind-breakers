@@ -24,7 +24,7 @@ describe('CoursesPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockResolvedValue(mockSupabase)
     })
 
@@ -32,8 +32,8 @@ describe('CoursesPage', () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
 
         try {
-            await CoursesPage()
-        } catch (e) {
+            await CoursesPage({ searchParams: Promise.resolve({}) })
+        } catch {
             // caught redirect
         }
 
@@ -57,12 +57,14 @@ describe('CoursesPage', () => {
         }]
 
         // Helper mock chain
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const createChain = (returnData: any = []) => {
             const chain = {
                 select: vi.fn(() => chain),
                 eq: vi.fn(() => chain),
                 in: vi.fn(() => chain),
                 order: vi.fn(() => chain),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 then: (resolve: any) => Promise.resolve({ data: returnData }).then(resolve)
             }
             return chain
@@ -75,7 +77,7 @@ describe('CoursesPage', () => {
             return createChain([]) // for saved_courses, user_course_progress initial IDs fetching
         })
 
-        const jsx = await CoursesPage()
+        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('React Fundamentals')).toBeInTheDocument()
@@ -86,12 +88,14 @@ describe('CoursesPage', () => {
     test('renders empty state', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const createChain = (returnData: any = []) => {
             const chain = {
                 select: vi.fn(() => chain),
                 eq: vi.fn(() => chain),
                 in: vi.fn(() => chain),
                 order: vi.fn(() => chain),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 then: (resolve: any) => Promise.resolve({ data: returnData }).then(resolve)
             }
             return chain
@@ -99,7 +103,7 @@ describe('CoursesPage', () => {
 
         mockSupabase.from.mockReturnValue(createChain([]))
 
-        const jsx = await CoursesPage()
+        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('No courses found')).toBeInTheDocument()

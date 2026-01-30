@@ -2,7 +2,7 @@ import { expect, test, describe, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import CourseDetailPage from '../page'
 import { createClient } from '@/utils/supabase/server'
-import { notFound } from 'next/navigation'
+
 
 // Mocks
 vi.mock('@/utils/supabase/server', () => ({
@@ -32,16 +32,18 @@ describe('CourseDetailPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockResolvedValue(mockSupabase)
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createChain = (data: any) => {
         const chain = {
             select: vi.fn(() => chain),
             eq: vi.fn(() => chain),
             in: vi.fn(() => chain),
             single: vi.fn(() => Promise.resolve({ data, error: data ? null : { message: 'Not found' } })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             then: (resolve: any) => Promise.resolve({ data }).then(resolve) // for array returns
         }
         return chain

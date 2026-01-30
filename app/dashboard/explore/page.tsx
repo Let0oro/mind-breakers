@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -42,7 +42,7 @@ function ExplorePageContent() {
                 setActiveTab(tabFromUrl)
             }
         }
-    }, [searchParams])
+    }, [searchParams, activeTab])
 
     // Update URL when tab changes state (user click)
     const handleTabChange = (newTab: typeof activeTab) => {
@@ -68,14 +68,9 @@ function ExplorePageContent() {
             }
         }
         fetchSavedCourses()
-    }, [])
+    }, [supabase])
 
-    useEffect(() => {
-        performSearch()
-    }, [searchQuery, activeTab, savedCourseIds]) // re-run search/filter when saved IDs load/change to update icons? Actually just re-rendering result cards is enough if we pass set. 
-    // But performSearch builds the result list. We should ideally merge saved status there.
-
-    const performSearch = async () => {
+    const performSearch = useCallback(async () => {
         setLoading(true)
         const allResults: SearchResult[] = []
 
@@ -126,6 +121,8 @@ function ExplorePageContent() {
             xp_reward,
             organizations (name)
           `)
+                    .eq('status', 'published')
+                    .eq('is_validated', true)
                     .order('created_at', { ascending: false })
                     .limit(20)
 
@@ -187,7 +184,11 @@ function ExplorePageContent() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [activeTab, searchQuery, savedCourseIds, supabase])
+
+    useEffect(() => {
+        performSearch()
+    }, [performSearch])
 
     return (
         <>

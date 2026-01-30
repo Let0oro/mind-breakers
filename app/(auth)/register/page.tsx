@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const [currentStep, setCurrentStep] = useState(1)
+
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
