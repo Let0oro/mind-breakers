@@ -93,7 +93,7 @@ export default function SharedHeader() {
             {/* Mobile menu dropdown */}
             {mobileMenuOpen && !isAuthPage && (
                 <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg">
-                    <nav className="flex flex-col p-4 gap-2">
+                    <nav className="flex flex-col p-4 gap-2 items-stretch text-center">
                         <Link
                             className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors py-2"
                             href="/#explore"
@@ -103,19 +103,12 @@ export default function SharedHeader() {
                         </Link>
                         <Link
                             className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors py-2"
-                            href="/#leaderboard"
-                            onClick={() => setMobileMenuOpen(false)}
-                        >
-                            Leaderboard
-                        </Link>
-                        <Link
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors py-2"
                             href="/#quests"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Quests
                         </Link>
-                        <div className="border-t border-border mt-2 pt-4 flex flex-col gap-2">
+                        <div className="border-t border-border mt-2 pt-4 flex flex-col items-stretch text-center gap-2">
                             <Link
                                 href="/login"
                                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
