@@ -91,6 +91,65 @@ export async function PATCH(
         return NextResponse.json({ success: true })
     }
 
+    if (action === 'reject') {
+        const { rejection_reason } = body
+
+        if (!rejection_reason) {
+            return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 })
+        }
+
+        if (validationType === 'courses') {
+            // Check if it's a Shadow Draft or New Course
+            const { data: course } = await supabase
+                .from('courses')
+                .select('draft_data, is_validated')
+                .eq('id', id)
+                .single()
+
+            if (!course) {
+                return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+            }
+
+            if (course.draft_data) {
+                // It's a Shadow Draft: Clear draft_data and set reason
+                const { error } = await supabase
+                    .from('courses')
+                    .update({
+                        draft_data: null,
+                        rejection_reason: rejection_reason
+                    })
+                    .eq('id', id)
+
+                if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+            } else {
+                // It's a New Course: Archive and set reason
+                const { error } = await supabase
+                    .from('courses')
+                    .update({
+                        status: 'archived',
+                        rejection_reason: rejection_reason,
+                        archived_at: new Date().toISOString()
+                    })
+                    .eq('id', id)
+
+                if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+            }
+        } else {
+            // For other types, just delete? Or maybe just ignore for now as not requested.
+            // But we can fallback to DELETE logic or just error.
+            // Let's implement Soft Delete (Archiving) if possible, or Hard Delete if no archive column.
+            // Or just Hard Delete as before for non-courses.
+            // But ValidationPanel calls DELETE for non-courses (via handleDelete).
+            // So if I call PATCH with reject, it's specific to my new Modal which is mainly for Courses.
+            // If I opened the modal for an Organization, it would fail here.
+            // I should probably support it or return error.
+            // Given the schema only added rejection_reason to Courses, I will return error for others.
+            return NextResponse.json({ error: 'Rejection with reason is only supported for Courses' }, { status: 400 })
+        }
+
+        return NextResponse.json({ success: true })
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }
 

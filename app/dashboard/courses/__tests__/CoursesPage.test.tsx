@@ -32,7 +32,7 @@ describe('CoursesPage', () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
 
         try {
-            await CoursesPage()
+            await CoursesPage({ searchParams: Promise.resolve({}) })
         } catch {
             // caught redirect
         }
@@ -77,7 +77,7 @@ describe('CoursesPage', () => {
             return createChain([]) // for saved_courses, user_course_progress initial IDs fetching
         })
 
-        const jsx = await CoursesPage()
+        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('React Fundamentals')).toBeInTheDocument()
@@ -103,7 +103,7 @@ describe('CoursesPage', () => {
 
         mockSupabase.from.mockReturnValue(createChain([]))
 
-        const jsx = await CoursesPage()
+        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('No courses found')).toBeInTheDocument()

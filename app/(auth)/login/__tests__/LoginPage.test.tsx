@@ -31,7 +31,7 @@ describe('LoginPage', () => {
 
     beforeEach(() => {
         vi.clearAllMocks()
-        // @ts-ignore
+        // @ts-expect-error - mock types are simplified
         createClient.mockReturnValue(mockSupabase)
     })
 

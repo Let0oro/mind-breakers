@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FuzzyMatchSelect } from '@/components/FuzzyMatchSelect'
 
+
+
+import { EditRequest } from '@/lib/types'
+
 interface PendingCourse {
     id: string
     title: string
@@ -11,6 +15,7 @@ interface PendingCourse {
     is_validated: boolean
     created_at: string
     organizations?: { id: string; name: string } | { id: string; name: string }[]
+    draft_data?: Record<string, unknown> // Fixed any
 }
 
 interface PendingOrganization {
@@ -31,16 +36,6 @@ interface PendingPath {
     organizations?: { id: string; name: string } | { id: string; name: string }[]
 }
 
-interface EditRequest {
-    id: string
-    resource_type: 'courses' | 'learning_paths' | 'organizations'
-    resource_id: string
-    data: any
-    reason: string | null
-    created_at: string
-    user?: { email: string }
-    resource_title?: string // Joined helper
-}
 
 interface ExistingItem {
     id: string
@@ -89,6 +84,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         { key: 'edits', label: 'Edits', count: pendingItems.edits.length },
     ]
 
+    const [rejectionModal, setRejectionModal] = useState<{
+        type: TabType | 'edits'
+        id: string
+    } | null>(null)
+    const [rejectionReason, setRejectionReason] = useState('')
+
     const handleApprove = async (type: TabType | 'edits', id: string) => {
         setLoading(id)
         try {
@@ -110,6 +111,11 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         }
     }
 
+    const openRejectionModal = (type: TabType | 'edits', id: string) => {
+        setRejectionModal({ type, id })
+        setRejectionReason('')
+    }
+
     const handleDelete = async (type: TabType | 'edits', id: string) => {
         if (!confirm('¿Estás seguro de rechazar/eliminar este item?')) {
             return
@@ -127,6 +133,50 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
             if (response.ok) {
                 router.refresh()
+            }
+        } finally {
+            setLoading(null)
+        }
+    }
+
+    const confirmRejection = async () => {
+        if (!rejectionModal) return
+        if (!rejectionReason.trim()) {
+            alert('Por favor indica una razón para el rechazo.')
+            return
+        }
+
+        setLoading(rejectionModal.id)
+        try {
+            const { type, id } = rejectionModal
+            const endpoint = type === 'edits'
+                ? `/api/admin/validations/edits/${id}`
+                : `/api/admin/validations/${type}/${id}`
+
+            // Use DELETE method but send reason in body?
+            // DELETE usually doesn't have body.
+            // Depending on API implementation.
+            // If we want to "Archive" or "Reject", maybe PATCH with action='reject'?
+            // The previous code used DELETE.
+            // I will Assume the backend supports DELETE or I should change to PATCH.
+            // The prompt says "archiving instead of deleting".
+            // So I should probably use PATCH with action='reject'.
+
+            const response = await fetch(endpoint, {
+                method: 'PATCH', // Changed from DELETE to PATCH for soft rejection
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'reject',
+                    rejection_reason: rejectionReason
+                }),
+            })
+
+            if (response.ok) {
+                setRejectionModal(null)
+                router.refresh()
+            } else {
+                // Fallback to DELETE if PATCH not supported? No, stick to new logic.
+                alert('Error al rechazar.')
             }
         } finally {
             setLoading(null)
@@ -275,70 +325,89 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                     <p className="text-gray-600 dark:text-[#b0bfcc]">No hay cursos pendientes de validación</p>
                 </div>
             ) : (
-                pendingItems.courses.map((course) => (
-                    <div
-                        key={course.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30 transition-colors"
-                    >
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{course.title}</h3>
-                                    <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
-                                        Pendiente
-                                    </span>
-                                </div>
-                                {course.summary && (
-                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 line-clamp-2">{course.summary}</p>
-                                )}
-                                {getOrgName(course.organizations) && (
-                                    <p className="text-xs text-gray-600 dark:text-[#b0bfcc]">
-                                        Organización: {getOrgName(course.organizations)}
-                                    </p>
-                                )}
-                                <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
-                                    Creado: {new Date(course.created_at).toLocaleDateString('es-ES')}
-                                </p>
-                            </div>
+                pendingItems.courses.map((course) => {
+                    const isShadowDraft = !!course.draft_data
+                    // Safely cast draft_data for access
+                    const draft = course.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
 
-                            <div className="flex gap-2 shrink-0">
-                                <button
-                                    onClick={() => setEditingItem({
-                                        type: 'courses',
-                                        id: course.id,
-                                        name: course.title,
-                                        description: course.summary,
-                                    })}
-                                    className="p-2 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
-                                    title="Editar"
-                                >
-                                    <span className="material-symbols-outlined text-lg">edit</span>
-                                </button>
-                                <button
-                                    onClick={() => handleApprove('courses', course.id)}
-                                    disabled={loading === course.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
-                                >
-                                    {loading === course.id ? '...' : 'Aprobar'}
-                                </button>
-                                <button
-                                    onClick={() => handleDelete('courses', course.id)}
-                                    disabled={loading === course.id}
-                                    className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                                    title="Eliminar"
-                                >
-                                    <span className="material-symbols-outlined text-lg">delete</span>
-                                </button>
+                    return (
+                        <div
+                            key={course.id}
+                            className={`rounded-xl bg-white dark:bg-[#1a232e] p-6 border transition-colors ${isShadowDraft
+                                ? 'border-purple-500/30 hover:border-purple-500/50'
+                                : 'border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30'
+                                }`}
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                            {isShadowDraft && draft?.title ? draft.title : course.title}
+                                        </h3>
+                                        {isShadowDraft ? (
+                                            <span className="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400 font-bold">
+                                                Edición Pendiente
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
+                                                Nuevo Curso
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 line-clamp-2">
+                                        {isShadowDraft && draft?.summary ? draft.summary : course.summary}
+                                    </p>
+
+                                    {isShadowDraft && draft?.edit_reason && (
+                                        <div className="mt-2 text-sm bg-gray-50 dark:bg-[#111418] p-2 rounded text-gray-700 dark:text-gray-300">
+                                            <strong>Razón del cambio:</strong> {draft.edit_reason}
+                                        </div>
+                                    )}
+
+                                    {getOrgName(course.organizations) && (
+                                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
+                                            Organización: {getOrgName(course.organizations)}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                        Actualizado: {new Date(course.created_at).toLocaleDateString('es-ES')}
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-2 shrink-0">
+                                    {/* Preview Draft Data */}
+                                    {isShadowDraft && (
+                                        <details className="text-xs">
+                                            <summary className="p-2 rounded-lg border cursor-pointer">JSON</summary>
+                                            <pre className="absolute bg-black text-white p-4 rounded z-10 max-w-sm overflow-auto text-xs">
+                                                {JSON.stringify(course.draft_data, null, 2)}
+                                            </pre>
+                                        </details>
+                                    )}
+
+                                    <button
+                                        onClick={() => openRejectionModal('courses', course.id)}
+                                        disabled={loading === course.id}
+                                        className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
+                                        title="Rechazar"
+                                        aria-label="Rechazar"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">close</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleApprove('courses', course.id)}
+                                        disabled={loading === course.id}
+                                        className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                        aria-label={isShadowDraft ? 'Aprobar Cambios' : 'Aprobar'}
+                                    >
+                                        {loading === course.id ? '...' : (isShadowDraft ? 'Aprobar Cambios' : 'Aprobar')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
-                        <FuzzyMatchSuggestions
-                            value={course.title}
-                            existingItems={existingItems.courses}
-                            onMerge={(targetId) => handleMerge('courses', course.id, targetId)}
-                        />
-                    </div>
-                ))
+                    )
+                })
             )}
         </div>
     )
@@ -580,6 +649,54 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
                             >
                                 {loading === editingItem.id ? 'Guardando...' : 'Guardar y Aprobar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Rejection Modal */}
+            {rejectionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Motivo del Rechazo</h2>
+                            <button
+                                onClick={() => setRejectionModal(null)}
+                                className="p-2 text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
+                            >
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                                    Por favor explica por qué se rechaza este cambio:
+                                </label>
+                                <textarea
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    rows={4}
+                                    className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
+                                    placeholder="Ej: El contenido es inapropiado, faltan secciones, etc."
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={() => setRejectionModal(null)}
+                                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmRejection}
+                                disabled={loading === rejectionModal.id || !rejectionReason.trim()}
+                                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                            >
+                                {loading === rejectionModal.id ? 'Procesando...' : 'Confirmar Rechazo'}
                             </button>
                         </div>
                     </div>

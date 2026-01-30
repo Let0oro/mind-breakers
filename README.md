@@ -6,6 +6,7 @@ MindBreaker is a gamified learning tracking platform designed to help users orga
 
 -   **Learning Paths**: Structured collections of courses to guide learning.
 -   **Course Tracking**: Mark courses as complete and track progress.
+-   **Drafts System**: Save courses as drafts and continue editing them later.
 -   **Gamification**:
     -   **XP & Levels**: Earn XP by completing courses and exercises.
     -   **Streaks**: Maintain daily activity streaks.
@@ -13,7 +14,9 @@ MindBreaker is a gamified learning tracking platform designed to help users orga
 -   **Community**:
     -   **Leaderboard**: Compete with other learners.
     -   **Profiles**: Showcase your progress and achievements.
--   **Admin Tools**: Manage content and approve user submissions.
+-   **Admin Tools**:
+    -   **Content Validation**: specific workflow to review and approve submitted courses and organizations.
+    -   **User Management**: Approve user submissions.
 
 ## Tech Stack 🛠️
 

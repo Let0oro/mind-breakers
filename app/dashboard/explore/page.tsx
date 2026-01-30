@@ -121,6 +121,8 @@ function ExplorePageContent() {
             xp_reward,
             organizations (name)
           `)
+                    .eq('status', 'published')
+                    .eq('is_validated', true)
                     .order('created_at', { ascending: false })
                     .limit(20)
 

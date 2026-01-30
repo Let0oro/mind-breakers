@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import Link from 'next/link'
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -45,7 +45,7 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })

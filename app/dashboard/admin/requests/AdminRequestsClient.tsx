@@ -36,8 +36,8 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
             ))
 
             router.refresh()
-        } catch (error: any) {
-            alert(error.message)
+        } catch (error: unknown) {
+            alert(error instanceof Error ? error.message : 'An error occurred')
         } finally {
             setLoading(null)
         }
@@ -65,8 +65,8 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
             ))
 
             router.refresh()
-        } catch (error: any) {
-            alert(error.message)
+        } catch (error: unknown) {
+            alert(error instanceof Error ? error.message : 'An error occurred')
         } finally {
             setLoading(null)
         }

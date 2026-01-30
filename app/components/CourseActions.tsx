@@ -12,6 +12,7 @@ interface CourseActionsProps {
   progressId?: string
   xpReward: number
   canComplete?: boolean
+  status: string
 }
 
 export function CourseActions({
@@ -22,6 +23,7 @@ export function CourseActions({
   progressId,
   xpReward,
   canComplete = true,
+  status,
 }: CourseActionsProps) {
   const [isSaved, setIsSaved] = useState(initialIsSaved)
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted)
@@ -167,7 +169,8 @@ export function CourseActions({
         {isSaved ? '★ Guardado' : '☆ Guardar'}
       </button>
 
-      {!isCompleted ? (
+      {status === 'published' && (
+      !isCompleted ? (
         canComplete ? (
           <button
             onClick={handleMarkComplete}
@@ -192,7 +195,9 @@ export function CourseActions({
         >
           {loading ? 'Guardando...' : '✕ No completado'}
         </button>
+      )
       )}
+
     </div>
   )
 }
