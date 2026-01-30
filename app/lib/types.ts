@@ -49,6 +49,12 @@ export interface Course {
   xp_reward: number
   created_at: string
   is_validated?: boolean
+  version: number
+  draft_data?: Record<string, unknown> | null
+  rejection_reason?: string | null
+  edit_reason?: string | null
+  archived_at?: string | null
+  status?: 'draft' | 'published' | 'archived'
   organizations?: Organization
   course_exercises?: CourseExercise[]
   user_course_progress?: UserCourseProgress[]
@@ -65,6 +71,19 @@ export interface LearningPath {
   is_validated?: boolean
   organizations?: Organization
   courses?: Course[]
+}
+
+// Edit Request Type for Admin Validations
+export interface EditRequest {
+  id: string
+  resource_type: 'courses' | 'learning_paths' | 'organizations'
+  resource_id: string
+  data: Record<string, unknown>
+  reason: string | null
+  created_at: string
+  user?: { email: string }
+  resource_title?: string
+  status: string
 }
 
 // Tipos específicos para queries con relaciones - CORREGIDOS

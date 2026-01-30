@@ -11,6 +11,7 @@ interface DashboardCourse {
   progress: number
   thumbnail_url?: string
   xp_reward: number
+  status: string
 }
 
 interface DashboardLearningPath {
@@ -205,6 +206,7 @@ export default async function DashboardPage() {
       title,
       thumbnail_url,
       xp_reward,
+      status,
       organization:organizations(name),
       user_course_progress (
         completed,
@@ -214,11 +216,13 @@ export default async function DashboardPage() {
     .eq('user_course_progress.user_id', user.id)
     .limit(3)
 
+
   const enrolledCourses: DashboardCourse[] = coursesWithProgress?.map((course: {
     id: string
     title: string
     thumbnail_url?: string | null
     xp_reward: number
+    status: string
     organization: { name: string } | { name: string }[] | null
     user_course_progress: { completed: boolean }[]
   }) => ({
@@ -226,12 +230,23 @@ export default async function DashboardPage() {
     title: course.title,
     thumbnail_url: course.thumbnail_url || undefined,
     xp_reward: course.xp_reward || 100,
+    status: course.status,
     progress: course.user_course_progress?.[0]?.completed ? 100 : 0,
     duration: '8h',
     instructor: Array.isArray(course.organization) ? course.organization[0]?.name : course.organization?.name || 'Unknown Organization',
   })) || []
 
 
+
+
+  // Fetch user's drafts
+  const { data: drafts } = await supabase
+    .from('courses')
+    .select('id, title, thumbnail_url, xp_reward, summary, status, updated_at')
+    .eq('created_by', user.id)
+    .eq('status', 'draft')
+    .order('updated_at', { ascending: false })
+    .limit(3)
 
   // Fetch saved courses
   // The schema showed 'saved_courses' table.
@@ -243,25 +258,26 @@ export default async function DashboardPage() {
         id,
         title,
         thumbnail_url,
-        xp_reward
+        xp_reward,
+        status,
+        organizations (name)
       )
     `)
     .eq('user_id', user.id)
     .limit(5)
 
-  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((item: {
-    courses: {
-      id: string
-      title: string
-      thumbnail_url?: string | null
-      xp_reward: number
-    }[] | null
-  }) => ({
-    id: item.courses?.[0]?.id || '',
-    title: item.courses?.[0]?.title || '',
-    thumbnail_url: item.courses?.[0]?.thumbnail_url || undefined,
-    xp_reward: item.courses?.[0]?.xp_reward || 100,
-  })) || []
+  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((item) => {
+    const course = item.courses?.[0] || item.courses
+    return {
+      id: course?.id || '',
+      title: course?.title || '',
+      thumbnail_url: course?.thumbnail_url || undefined,
+      xp_reward: course?.xp_reward || 100,
+      status: course?.status || 'published',
+      instructor: course?.organizations?.[0]?.name || 'Unknown Organization',
+      duration: '8h'
+    }
+  }) || []
 
   return (
     <>
@@ -350,21 +366,61 @@ export default async function DashboardPage() {
           {enrolledCourses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {enrolledCourses.map((course) => (
-                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer">
-                  <div className="h-32 bg-cover bg-center relative" style={{ backgroundImage: `url(${course.thumbnail_url || '/course-placeholder.jpg'})` }}>
-                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-gray-900 dark:text-white">{course.duration}</div>
+                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative">
+                  {/* Thumbnail */}
+                  <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
+                    {course.thumbnail_url ? (
+                      <img
+                        src={course.thumbnail_url}
+                        alt={course.title}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="material-symbols-outlined w-16 h-16 text-[#137fec]/30">school</span>
+                      </div>
+                    )}
+
+                    {/* Badges Container (Right Side) */}
+                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                      {/* Progress Badge */}
+                      {course.progress === 100 ? (
+                        <span className="bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                          <span className="material-symbols-outlined w-3 h-3">check</span>
+                          Completed
+                        </span>
+                      ) : course.progress > 0 ? (
+                        <span className="bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                          {course.progress}%
+                        </span>
+                      ) : null}
+
+                      {/* Status Badge (Under Progress) */}
+                      {course.status !== 'published' && (
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${course.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                          {course.status}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="p-4 flex flex-col gap-3">
-                    <h4 className="font-bold text-sm line-clamp-1 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">{course.title}</h4>
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Instructor: {course.instructor}</p>
-                    <div className="space-y-1 mt-2">
-                      <div className="flex justify-between text-[11px] text-gray-600 dark:text-[#b0bfcc]">
-                        <span>Progress</span>
-                        <span>{course.progress}%</span>
+
+                  {/* Content */}
+                  <div className="p-5 flex flex-col gap-3 flex-1">
+                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
+                      {course.title}
+                    </h4>
+
+                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+                      {course.instructor}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
+                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium">{course.xp_reward} XP</span>
                       </div>
-                      <div className="h-1.5 w-full bg-[#3b4754] rounded-full overflow-hidden">
-                        <div className="h-full bg-[#137fec]" style={{ width: `${course.progress}%` }}></div>
-                      </div>
+                      <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">{course.duration}</span>
                     </div>
                   </div>
                 </Link>
@@ -377,6 +433,72 @@ export default async function DashboardPage() {
             </div>
           )}
         </section>
+
+        {/* My Drafts Section */}
+        {drafts && drafts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                <span className="material-symbols-outlined w-6 h-6 text-yellow-500">edit_document</span>
+                My Drafts
+              </h3>
+              <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/drafts">View All</Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              {drafts.slice(0, 3).map((draft) => (
+                <Link key={draft.id} href={`/dashboard/drafts/${draft.id}/edit`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative">
+                  {/* Thumbnail */}
+                  <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
+                    {draft.thumbnail_url ? (
+                      <img
+                        src={draft.thumbnail_url}
+                        alt={draft.title}
+                        className="object-cover w-full h-full opacity-80"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="material-symbols-outlined w-16 h-16 text-[#137fec]/30">edit_document</span>
+                      </div>
+                    )}
+
+                    {/* Badges Container (Right Side) */}
+                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-yellow-100 text-yellow-800">
+                        Draft
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5 flex flex-col gap-3 flex-1">
+                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
+                      {draft.title}
+                    </h4>
+
+                    {draft.summary ? (
+                      <p className="text-gray-600 dark:text-[#b0bfcc] text-xs line-clamp-2">
+                        {draft.summary}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 dark:text-[#b0bfcc]/70 text-xs italic">
+                        No summary provided.
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
+                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium is-dirty">{draft.xp_reward} XP</span>
+                      </div>
+                      <span className="text-[#137fec] text-xs font-bold">Continue Editing</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* My Learning Paths Section */}
         <section>

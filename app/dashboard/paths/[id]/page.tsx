@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
 import type { Course } from '@/lib/types'
-import Image from 'next/image'
+
 import RecommendedCourses from './RecommendedCourses'
 
 export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {

@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import Image from 'next/image'
+
 
 export default async function OrganizationDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient()

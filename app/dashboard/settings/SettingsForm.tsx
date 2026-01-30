@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types'
-import Image from 'next/image'
+
 import { useRouter } from 'next/navigation'
 
 interface SettingsFormProps {
@@ -63,11 +63,13 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             setMessage({ type: 'success', text: 'Profile updated successfully!' })
             router.refresh()
         } catch (error: unknown) {
+            let errorMessage = 'An unexpected error occurred'
             if (error instanceof Error) {
-                setMessage({ type: 'error', text: error.message })
-            } else {
-                setMessage({ type: 'error', text: 'An unexpected error occurred' })
+                errorMessage = error.message
+            } else if (typeof error === 'object' && error !== null && 'message' in error) {
+                errorMessage = String((error as { message: unknown }).message)
             }
+            setMessage({ type: 'error', text: errorMessage })
         } finally {
             setIsLoading(false)
         }
@@ -127,7 +129,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                         </label>
                         <div className="flex items-center gap-4">
                             {profile?.avatar_url && (
-                                <Image
+                                <img
                                     src={profile.avatar_url}
                                     alt="Current Avatar"
                                     width={48}

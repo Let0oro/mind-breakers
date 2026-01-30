@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { ValidationPanel } from './ValidationPanel'
+import { EditRequest } from '@/lib/types'
 
 export const metadata = {
     title: 'Content Validation - MindBreaker Admin',
@@ -25,8 +26,9 @@ export default async function AdminValidationsPage() {
         redirect('/dashboard')
     }
 
-    // Fetch unvalidated items
-    const [coursesRes, orgsRes, pathsRes, editRequestsRes] = await Promise.all([
+    // Fetch unvalidated items AND items with pending draft_data
+    const [coursesRes, draftCoursesRes, orgsRes, pathsRes, editRequestsRes] = await Promise.all([
+        // 1. New Courses (not validated)
         supabase
             .from('courses')
             .select(`
@@ -35,9 +37,27 @@ export default async function AdminValidationsPage() {
         summary,
         is_validated,
         created_at,
-        organizations (id, name)
+        organizations (id, name),
+        draft_data
       `)
             .eq('is_validated', false)
+            .eq('status', 'published')
+            .order('created_at', { ascending: false }),
+
+        // 2. Existing Courses with Draft Data (Shadow Drafts)
+        supabase
+            .from('courses')
+            .select(`
+        id,
+        title,
+        summary,
+        is_validated,
+        created_at,
+        organizations (id, name),
+        draft_data
+      `)
+            .not('draft_data', 'is', null) // Fetch where draft_data is NOT null
+            .eq('is_validated', true) // Only validated courses that have NEW drafts
             .order('created_at', { ascending: false }),
 
         supabase
@@ -66,6 +86,12 @@ export default async function AdminValidationsPage() {
             .order('created_at', { ascending: false })
     ])
 
+    // Combine courses
+    const allPendingCourses = [
+        ...(coursesRes.data || []),
+        ...(draftCoursesRes.data || [])
+    ]
+
     // Fetch all existing validated items for fuzzy matching
     const [existingOrgsRes, existingCoursesRes, existingPathsRes] = await Promise.all([
         supabase.from('organizations').select('id, name').eq('is_validated', true),
@@ -74,10 +100,10 @@ export default async function AdminValidationsPage() {
     ])
 
     const pendingItems = {
-        courses: coursesRes.data || [],
+        courses: allPendingCourses,
         organizations: orgsRes.data || [],
         paths: pathsRes.data || [],
-        edits: (editRequestsRes.data || []) as any[], // Typing cast for quick fix, better to match interface
+        edits: (editRequestsRes.data || []) as EditRequest[],
     }
 
     const existingItems = {

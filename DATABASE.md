@@ -90,6 +90,13 @@ Individual modules within a path.
 - `organization_id`: UUID (FK `organizations.id`)
 - `order_index`: INTEGER
 - `xp_reward`: INTEGER (Default: 100)
+- `status`: TEXT (Default: 'draft', check: in ('draft', 'published', 'archived'))
+- `is_validated`: BOOLEAN (Default: FALSE)
+- `version`: INTEGER (Default: 1)
+- `draft_data`: JSONB (Nullable, stores pending changes for published courses)
+- `rejection_reason`: TEXT (Nullable)
+- `edit_reason`: TEXT (Nullable)
+- `archived_at`: TIMESTAMPTZ (Nullable)
 - `created_at`: TIMESTAMPTZ
 
 ### Learning & Progress

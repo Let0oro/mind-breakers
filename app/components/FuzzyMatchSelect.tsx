@@ -50,7 +50,6 @@ export function FuzzyMatchSelect({
     onSelectExisting
 }: FuzzyMatchSelectProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const [isFocused, setIsFocused] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Find similar items based on current input
@@ -98,10 +97,9 @@ export function FuzzyMatchSelect({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     onFocus={() => {
-                        setIsFocused(true)
                         setIsOpen(true)
                     }}
-                    onBlur={() => setIsFocused(false)}
+                    onBlur={() => { }}
                     placeholder={placeholder}
                     className={`w-full rounded-lg border bg-gray-50 dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:outline-none focus:ring-1 transition-all ${exactMatch
                         ? 'border-yellow-500/50 focus:border-yellow-500 focus:ring-yellow-500/30'
