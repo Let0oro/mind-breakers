@@ -21,6 +21,13 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [avatarFile, setAvatarFile] = useState<File | null>(null)
+    const [bio, setBio] = useState(profile?.bio || '')
+    const [socialLinks, setSocialLinks] = useState(profile?.social_links || {
+        twitter: '',
+        linkedin: '',
+        github: '',
+        website: ''
+    })
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -30,6 +37,8 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
         try {
             const updates: Partial<Profile> = {
                 username,
+                bio,
+                social_links: socialLinks,
                 // @ts-expect-error - updated_at technically not in Profile type but in DB
                 updated_at: new Date().toISOString(),
             }
@@ -172,6 +181,54 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                             className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
                             placeholder="Enter username"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                            Bio
+                        </label>
+                        <textarea
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                            className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors resize-none"
+                            placeholder="Tell us about yourself..."
+                        />
+                    </div>
+
+                    <div className="space-y-4">
+                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium">
+                            Social Links
+                        </label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input
+                                type="text"
+                                value={socialLinks?.twitter || ''}
+                                onChange={(e) => setSocialLinks({ ...socialLinks, twitter: e.target.value })}
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="Twitter URL"
+                            />
+                            <input
+                                type="text"
+                                value={socialLinks?.linkedin || ''}
+                                onChange={(e) => setSocialLinks({ ...socialLinks, linkedin: e.target.value })}
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="LinkedIn URL"
+                            />
+                            <input
+                                type="text"
+                                value={socialLinks?.github || ''}
+                                onChange={(e) => setSocialLinks({ ...socialLinks, github: e.target.value })}
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="GitHub URL"
+                            />
+                            <input
+                                type="text"
+                                value={socialLinks?.website || ''}
+                                onChange={(e) => setSocialLinks({ ...socialLinks, website: e.target.value })}
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                placeholder="Personal Website URL"
+                            />
+                        </div>
                     </div>
 
                     <div className="flex justify-end">

@@ -69,7 +69,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
             >
                 <div className="flex flex-col gap-8">
                     {/* User Profile */}
-                    <div className="flex items-center gap-3 px-2 mt-8 md:mt-0">
+                    <Link href={`/dashboard/users/${user.id}`} className={`flex items-center gap-3 px-2 mt-8 md:mt-0 ${getLinkClassName(`/dashboard/users/${user.id}`)}`}>
                         <div
                             className="h-10 w-10 rounded-full bg-cover bg-center border-2 border-[#137fec]"
                             style={{ backgroundImage: `url("${profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}")` }}
@@ -80,7 +80,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             </h1>
                             <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Scholar • Lvl {profile?.level || 1}</p>
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Navigation */}
                     <nav className="flex flex-col gap-1">

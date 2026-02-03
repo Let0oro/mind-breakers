@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import type { PathListItem } from '@/lib/types'
+import { CardPath } from '@/components/ui/CardPath'
 
 export const metadata = {
   title: 'Learning Paths - MindBreaker',
@@ -124,76 +125,20 @@ export default async function PathsListPage() {
             const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
 
             return (
-              <Link
+              <CardPath
                 key={path.id}
-                href={`/dashboard/paths/${path.id}`}
-                className="group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all p-6 flex flex-col gap-4"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
-                      {path.title}
-                    </h3>
-                    {org && (
-                      <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mt-1">
-                        by {org.name}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Pending Badge */}
-                    {!path.is_validated && isOwner && (
-                      <span className="inline-flex items-center gap-1 bg-amber-500 text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
-                        <span className="material-symbols-outlined text-xs">pending</span>
-                        Pendiente
-                      </span>
-                    )}
-                    {isSaved && (
-                      <span className="material-symbols-outlined text-[#137fec]">
-                        bookmark
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Summary */}
-                {path.summary && (
-                  <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2 flex-1">
-                    {path.summary}
-                  </p>
-                )}
-
-                {/* Stats */}
-                <div className="flex items-center gap-4 text-sm mt-auto">
-                  <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
-                    <span className="material-symbols-outlined text-base">school</span>
-                    <span>{courseCount} courses</span>
-                  </div>
-                  {progressPercent > 0 && (
-                    <div className="flex items-center gap-1 text-green-500">
-                      <span className="material-symbols-outlined text-base">check_circle</span>
-                      <span>{completedCount} completed</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Progress Bar */}
-                {courseCount > 0 && (
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-gray-600 dark:text-[#b0bfcc]">Progress</span>
-                      <span className="text-gray-900 dark:text-white font-medium">{Math.round(progressPercent)}%</span>
-                    </div>
-                    <div className="h-2 bg-[#3b4754] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#137fec] rounded-full transition-all"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </Link>
+                id={path.id}
+                title={path.title}
+                summary={path.summary}
+                completedCourses={completedCount}
+                totalCourses={courseCount}
+                progressPercent={progressPercent}
+                isSaved={isSaved}
+                isValidated={path.is_validated}
+                isOwner={isOwner}
+                organizationName={org?.name}
+                variant="card"
+              />
             )
           })
         ) : (

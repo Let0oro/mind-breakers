@@ -22,6 +22,7 @@ import {
 // Import our new component (assuming it's in components folder relative to app root or alias)
 // Since we used write_to_file in dashboard/paths/[id]/edit context previously? No, app/components.
 import { SortableCourseItem } from '@/components/SortableCourseItem'
+import { ManageCoOwners } from '@/components/ManageCoOwners'
 import type { AdminRequest } from '@/lib/types'
 
 interface LearningPath {
@@ -88,12 +89,31 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
         return
       }
 
-      if (pathData.created_by !== user.id) {
-        setError('No tienes permisos para editar este path')
-        return
+      setPath(pathData)
+
+      // Check if user is creator or co-owner
+      const isCreator = pathData.created_by === user.id
+      let isCoOwner = false
+
+      if (!isCreator) {
+        const { data: coOwnerData } = await supabase
+          .from('path_owners')
+          .select('*')
+          .eq('path_id', id)
+          .eq('user_id', user.id)
+          .single()
+        isCoOwner = !!coOwnerData
       }
 
-      setPath(pathData)
+      // If NOT Admin AND NOT Creator AND NOT CoOwner -> They are a contributor requesting an edit
+      // We do NOT block them anymore, but we change the submit behavior.
+      const canDirectEdit = userIsAdmin || isCreator || isCoOwner
+      setIsAdmin(canDirectEdit) // Reusing isAdmin state to mean "Can Direct Edit" for UI (or we should rename/add state)
+      // Actually, let's keep isAdmin as strictly Global Admin, and add canDirectEdit state?
+      // For now, to minimize refactor, let's assume `isAdmin` in the UI context means "Can bypass validation".
+      // But wait, the previous code used `isAdmin` to determine if validation request is needed.
+      // So setting `setIsAdmin(canDirectEdit)` effectively achieves "If you are Creator/CoOwner/Admin you edit directly".
+      // This matches the goal.
 
       // 2. Fetch Courses
       const { data: coursesData } = await supabase
@@ -104,13 +124,34 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
 
       setCourses(coursesData || [])
 
-      // Check for pending edit requests
+      // Check for pending edit requests (Only relevant if they can't direct edit?)
+      // Actually, if there is a pending request, MAYBE we block edits even for owners to avoid conflict?
+      // Or we just show it. The current UI blocks inputs if pendingRequest exists.
+      // If I am an Owner, I might want to SEE the pending request and Approve/Reject it?
+      // But this is the Edit Page.
+      // If I am a contributor, I should see my own pending key?
+      // The current logic: fetches edit_requests for this resource.
+      // If it exists and status is pending, it sets pendingRequest, which disables the form.
+      // This is good behavior for standard users.
+      // For Admins/Owners, they probably shouldn't be blocked by a pending request from someone else?
+      // But the query `orderBy` isn't there, so it just gets *any* single pending request.
+      // If there are multiple, who knows. `single()` might error if multiple.
+      // Let's keep it simple: If *any* pending request exists valid for this resource, we show it.
+      // But we should probably filter by `user_id` if we only want to block the user who made it?
+      // Or block globally?
+      // Design decision: Block strictly for the user who made it OR block globally?
+      // Current: global block for this resource if `single()` finds one.
+      // Let's refine: Only block if `user_id === user.id` OR if we want a global "Under Review" lock.
+      // User requirement: "can edit but the path admin verifies".
+      // If I edit and submit, it goes to pending. If I come back, I should see "Pending".
+      // So fetch request for THIS user.
       const { data: request } = await supabase
         .from('edit_requests')
         .select('*')
         .eq('resource_id', id)
         .eq('resource_type', 'learning_paths')
         .eq('status', 'pending')
+        .eq('user_id', user.id) // Only my requests
         .single()
 
       if (request) {
@@ -407,6 +448,10 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
               </button>
             </div>
           </form>
+
+          <div className="mt-8 border-t border-gray-200 dark:border-[#3b4754] pt-8">
+            <ManageCoOwners pathId={id} createdBy={path?.created_by || ''} />
+          </div>
 
           <div className="mt-8 border-t border-gray-200 dark:border-[#3b4754] pt-8">
             <h3 className="text-sm font-medium text-red-500 mb-4">Zona peligrosa</h3>

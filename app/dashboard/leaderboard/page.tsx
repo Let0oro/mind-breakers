@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import Link from 'next/link'
 
 
 export const metadata = {
@@ -87,6 +88,7 @@ export default async function LeaderboardPage() {
 
                       {/* Player */}
                       <td className="px-6 py-4 whitespace-nowrap">
+                        <Link href={`/dashboard/users/${profile.id}`}>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-[#137fec]/20 flex items-center justify-center">
                             <span className="text-[#137fec] font-bold">
@@ -102,6 +104,7 @@ export default async function LeaderboardPage() {
                             </p>
                           </div>
                         </div>
+                              </Link>
                       </td>
 
                       {/* Level */}

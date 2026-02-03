@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 
 import Breadcrumb from '@/components/breadcrumb'
 import { NotificationBell } from '@/components/NotificationBell'
-import { Sidebar } from './components/Sidebar'
+import { Sidebar } from './Sidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 export default async function DashboardLayout({
