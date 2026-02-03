@@ -51,9 +51,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
     // Workflow State
     const [courseStatus, setCourseStatus] = useState<'draft' | 'published' | 'archived'>('draft')
-    const [version, setVersion] = useState(1)
-    const [rejectionReason, setRejectionReason] = useState<string | null>(null)
-    const [hasPendingChanges, setHasPendingChanges] = useState(false)
     const [showEditReasonModal, setShowEditReasonModal] = useState(false)
     const [editReason, setEditReason] = useState('')
     const [progressCount, setProgressCount] = useState(0)
@@ -169,17 +166,15 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             // Set Workflow State
             setCourseStatus(course.status as 'draft' | 'published' | 'archived')
-            setVersion(course.version || 1)
-            setRejectionReason(course.rejection_reason)
             // count is returned by supabase count query
             const pCount = course.user_course_progress?.[0]?.count || 0
             setProgressCount(pCount)
 
             // Determine if we show Draft Data or Live Data
             const sourceData = (course.draft_data as unknown as Course) || course
-            if (course.draft_data) {
+            /* if (course.draft_data) {
                 setHasPendingChanges(true)
-            }
+            } */
 
             // Populate Form from sourceData (Draft or Live)
             setTitle(sourceData.title || course.title)
@@ -391,8 +386,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         }
     }
 
-    // Wrap for form submit (unused mostly)
-    const handleSubmit = (e: React.FormEvent) => e.preventDefault()
 
     if (loading) {
         return <div className="p-8 text-center">Loading course data...</div>
@@ -417,15 +410,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 </div>
             </header>
 
-            {rejectionReason && (
-                <div className="mb-8 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400">
-                    <div className="flex items-center gap-2 font-bold mb-1">
-                        <span className="material-symbols-outlined">block</span>
-                        Changes Rejected
-                    </div>
-                    <p className="text-sm">{rejectionReason}</p>
-                </div>
-            )}
 
             {/* Form */}
             <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 max-w-3xl">

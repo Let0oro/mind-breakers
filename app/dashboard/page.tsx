@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { CardCourse } from '@/components/ui/CardCourse'
 import { CardPath } from '@/components/ui/CardPath'
+import Recommendations from '@/components/Recommendations'
+import { getLevelProgress } from '@/lib/gamification'
 
 interface DashboardCourse {
   id: string
@@ -34,31 +36,7 @@ interface DashboardSavedCourse {
   thumbnail_url?: string
 }
 
-// Calculate XP required for next level
-// Formula: Base XP * Level multiplier (escalates with level)
-function getXpForNextLevel(level: number): number {
-  const baseXP = 300
-  const multiplier = 1.5
-  return Math.round(baseXP * Math.pow(multiplier, level - 1))
-}
 
-// Get XP progress within current level
-function getXpProgress(totalXp: number, level: number): { current: number; required: number; percentage: number } {
-  // Calculate total XP needed to reach current level
-  let xpForPreviousLevels = 0
-  for (let i = 1; i < level; i++) {
-    xpForPreviousLevels += getXpForNextLevel(i)
-  }
-
-  const xpInCurrentLevel = totalXp - xpForPreviousLevels
-  const xpNeededForNextLevel = getXpForNextLevel(level)
-
-  return {
-    current: Math.max(0, xpInCurrentLevel),
-    required: xpNeededForNextLevel,
-    percentage: Math.min(100, Math.max(0, (xpInCurrentLevel / xpNeededForNextLevel) * 100))
-  }
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -209,12 +187,15 @@ export default async function DashboardPage() {
       thumbnail_url,
       xp_reward,
       status,
+      is_validated,
       organization:organizations(name),
       user_course_progress (
         completed,
         xp_earned
       )
     `)
+    .eq('status', 'published')
+    .eq('is_validated', true)
     .eq('user_course_progress.user_id', user.id)
     .limit(3)
 
@@ -311,7 +292,7 @@ export default async function DashboardPage() {
                 <p className="text-gray-900 dark:text-white text-sm font-medium">Level {profile?.level || 1} - {profile?.title || 'Scholar'}</p>
                 <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
                   {(() => {
-                    const xpProgress = getXpProgress(profile?.total_xp || 0, profile?.level || 1)
+                    const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
                     return `${xpProgress.required - xpProgress.current} XP to Level ${(profile?.level || 1) + 1}`
                   })()}
                 </p>
@@ -319,7 +300,7 @@ export default async function DashboardPage() {
             </div>
             <p className="text-gray-900 dark:text-white font-bold">
               {(() => {
-                const xpProgress = getXpProgress(profile?.total_xp || 0, profile?.level || 1)
+                const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
                 return `${xpProgress.current} / ${xpProgress.required} XP`
               })()}
             </p>
@@ -328,7 +309,7 @@ export default async function DashboardPage() {
             <div
               className="h-full bg-[#137fec] rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]"
               style={{
-                width: `${getXpProgress(profile?.total_xp || 0, profile?.level || 1).percentage}%`
+                width: `${getLevelProgress(profile?.total_xp || 0, profile?.level || 1).percentage}%`
               }}
             ></div>
           </div>
@@ -355,6 +336,12 @@ export default async function DashboardPage() {
 
       {/* Dashboard Modules */}
       <div className="grid grid-cols-1 gap-10">
+
+        {/* Recommendations Section */}
+        <section>
+          <Recommendations mode="social" />
+        </section>
+
         {/* My Courses Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -423,7 +410,7 @@ export default async function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">hub</span>
+              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">route</span>
               Learning Paths
             </h3>
             <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/paths">View All</Link>

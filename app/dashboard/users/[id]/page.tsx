@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import ProfileTabs from './ProfileTabs'
 
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
@@ -68,7 +67,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
     // Calculate Next Level (Simplified logic for demo)
     const currentLevel = profile.level || 1
-    const xpForNextLevel = currentLevel * 1000
     const currentLevelXp = (profile.total_xp || 0) % 1000
     const progressPercent = Math.min((currentLevelXp / 1000) * 100, 100)
 
