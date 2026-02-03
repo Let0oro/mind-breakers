@@ -14,8 +14,7 @@ export interface Profile {
     github?: string
     website?: string
   } | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  featured_content?: any[] // TODO: Define specific structure if needed
+  // featured_content?: any[] 
 }
 
 export interface PathOwner {
@@ -47,6 +46,7 @@ export interface CourseExercise {
   description?: string
   requirements?: string
   created_at: string
+  uk: string
 }
 
 export interface UserCourseProgress {
@@ -80,6 +80,7 @@ export interface Course {
   organizations?: Organization
   course_exercises?: CourseExercise[]
   user_course_progress?: UserCourseProgress[]
+  uk: string
 }
 
 export interface LearningPath {
@@ -93,6 +94,7 @@ export interface LearningPath {
   is_validated?: boolean
   organizations?: Organization
   courses?: Course[]
+  uk: string
 }
 
 // Edit Request Type for Admin Validations
@@ -217,3 +219,16 @@ export interface Notification {
   expires_at: string
 }
 
+export interface PathResource {
+  id: string
+  path_id: string
+  user_id: string | null
+  title: string
+  type: 'link' | 'text'
+  content: string
+  created_at: string
+  profiles?: {
+    username: string
+    avatar_url: string
+  }
+}

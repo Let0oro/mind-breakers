@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import type { Course, PathListItem, PathWithCourses } from '@/lib/types'
 import { CardCourse } from '@/components/ui/CardCourse'
 import { CardPath } from '@/components/ui/CardPath'
@@ -17,8 +16,7 @@ interface LearningPath {
 
 interface ProfileTabsProps {
     courses: Course[] | null
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    paths: any[] | null // Using any for flexibility with Supabase types for now
+    paths: PathListItem[] | null
 }
 
 export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
@@ -89,7 +87,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                 {activeTab === 'paths' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paths && paths.length > 0 ? (
-                            paths.map((path: PathWithCourses) => (
+                            paths.map((path: PathListItem) => (
                                 <CardPath
                                     key={path.id}
                                     id={path.id}

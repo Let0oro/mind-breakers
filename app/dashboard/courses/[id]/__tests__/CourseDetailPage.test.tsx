@@ -3,10 +3,45 @@ import { render, screen } from '@testing-library/react'
 import CourseDetailPage from '../page'
 import { createClient } from '@/utils/supabase/server'
 
-
 // Mocks
 vi.mock('@/utils/supabase/server', () => ({
     createClient: vi.fn()
+}))
+
+vi.mock('@supabase/ssr', () => ({
+    createBrowserClient: vi.fn(() => ({
+        from: vi.fn(() => ({
+            select: vi.fn(() => ({
+                eq: vi.fn(() => ({
+                    single: vi.fn(() => Promise.resolve({
+                        data: {
+                            id: 'test-id',
+                            title: 'Test Title',
+                            uk: 'test-uk',
+                            created_by: 'user-id',
+                            status: 'published'
+                        },
+                        error: null
+                    })),
+                    limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
+                })),
+                in: vi.fn(() => ({
+                    eq: vi.fn(() => ({
+                        limit: vi.fn(() => Promise.resolve({ data: [], error: null }))
+                    }))
+                })),
+                or: vi.fn(() => ({
+                    neq: vi.fn(() => ({
+                        limit: vi.fn(() => Promise.resolve({ data: [], error: null }))
+                    }))
+                }))
+            }))
+        })),
+        auth: {
+            getUser: vi.fn(() => Promise.resolve({ data: { user: { id: 'test-user' } }, error: null }))
+        }
+    })),
+    createServerClient: vi.fn()
 }))
 
 vi.mock('next/navigation', () => ({

@@ -26,6 +26,8 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.1",
     "@tailwindcss/vite": "^4.1.18",
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
     "material-symbols": "^0.40.2",
     "next": "16.1.5",

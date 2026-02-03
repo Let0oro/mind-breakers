@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import SimilarItemsList from '@/components/SimilarItemsList'
 
 export default function NewOrganizationPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [name, setName] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -20,7 +22,7 @@ export default function NewOrganizationPage() {
     const { error: insertError } = await supabase
       .from('organizations')
       .insert({
-        name: formData.get('name') as string,
+        name: name,
         description: formData.get('description') as string || null,
         website_url: formData.get('website_url') as string || null,
       })
@@ -76,9 +78,15 @@ export default function NewOrganizationPage() {
               type="text"
               id="name"
               name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="e.g., Meta, Google, MIT, etc."
+            />
+            <SimilarItemsList
+              type="organizations"
+              query={name}
             />
           </div>
 

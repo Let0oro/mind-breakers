@@ -16,7 +16,8 @@ export async function GET(request: Request) {
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .gt('expires_at', new Date().toISOString())
+        // .gt('expires_at', new Date().toISOString()) // Removed strict check to allow nulls, logic needs OR
+        .or(`expires_at.gt.${new Date().toISOString()},expires_at.is.null`)
         .order('created_at', { ascending: false })
         .limit(50)
 

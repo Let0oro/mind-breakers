@@ -106,7 +106,7 @@ export function CardPath({
                         type="path"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-                        <span className="material-symbols-outlined text-4xl text-white/80">map</span>
+                        <span className="material-symbols-outlined text-4xl text-white/80">workspace_premium</span>
                     </div>
                     <div className="absolute top-2 right-2">
                         <span className="bg-[#137fec]/90 text-white text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm">

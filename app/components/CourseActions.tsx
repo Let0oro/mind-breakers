@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { getLevelFromXp } from '@/lib/gamification'
+import { levelUpEvent } from '@/lib/events'
 
 interface CourseActionsProps {
   courseId: string
@@ -91,7 +93,7 @@ export function CourseActions({
 
       if (profile) {
         const newTotalXp = profile.total_xp + xpReward
-        const newLevel = Math.floor(newTotalXp / 1000) + 1
+        const newLevel = getLevelFromXp(newTotalXp)
 
         await supabase
           .from('profiles')
@@ -100,6 +102,11 @@ export function CourseActions({
             level: newLevel,
           })
           .eq('id', userId)
+
+        // Check for level up
+        if (newLevel > profile.level) {
+          levelUpEvent.emit(newLevel)
+        }
       }
 
       setIsCompleted(true)
@@ -129,13 +136,13 @@ export function CourseActions({
         // Revertir XP del usuario
         const { data: profile } = await supabase
           .from('profiles')
-          .select('total_xp')
+          .select('total_xp, level')
           .eq('id', userId)
           .single()
 
         if (profile) {
           const newTotalXp = Math.max(0, profile.total_xp - xpReward)
-          const newLevel = Math.floor(newTotalXp / 1000) + 1
+          const newLevel = getLevelFromXp(newTotalXp)
 
           await supabase
             .from('profiles')
@@ -170,32 +177,32 @@ export function CourseActions({
       </button>
 
       {status === 'published' && (
-      !isCompleted ? (
-        canComplete ? (
-          <button
-            onClick={handleMarkComplete}
-            disabled={loading}
-            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
-          >
-            {loading ? 'Guardando...' : '✓ Completar'}
-          </button>
+        !isCompleted ? (
+          canComplete ? (
+            <button
+              onClick={handleMarkComplete}
+              disabled={loading}
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {loading ? 'Guardando...' : '✓ Completar'}
+            </button>
+          ) : (
+            <a
+              href="#exercises"
+              className="rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-white hover:bg-[#137fec]/90 transition-colors"
+            >
+              Vamos con el proyecto final!
+            </a>
+          )
         ) : (
-          <a
-            href="#exercises"
-            className="rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-white hover:bg-[#137fec]/90 transition-colors"
+          <button
+            onClick={handleMarkIncomplete}
+            disabled={loading}
+            className="rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50"
           >
-            Vamos con el proyecto final!
-          </a>
+            {loading ? 'Guardando...' : '✕ No completado'}
+          </button>
         )
-      ) : (
-        <button
-          onClick={handleMarkIncomplete}
-          disabled={loading}
-          className="rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50"
-        >
-          {loading ? 'Guardando...' : '✕ No completado'}
-        </button>
-      )
       )}
 
     </div>

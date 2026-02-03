@@ -4,6 +4,7 @@ import { YouTubePlayer } from '@/components/YouTubePlayer'
 import { CourseActions } from '@/components/CourseActions'
 import Link from 'next/link'
 import type { CourseExercise } from '@/lib/types'
+import Recommendations from '@/components/Recommendations'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -404,6 +405,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div >
         </div >
       </div >
+      <div className="mt-10">
+        <Recommendations mode="similar" contextId={course.id} contextType="course" />
+      </div>
     </>
   )
 }

@@ -4,9 +4,11 @@ import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
 import { FallbackImage } from '@/components/FallbackImage'
-import type { Course } from '@/lib/types'
+import type { Course, PathResource } from '@/lib/types'
 
 import RecommendedCourses from './RecommendedCourses'
+import Recommendations from '@/components/Recommendations'
+import PathResources from '@/components/PathResources'
 
 export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -14,6 +16,14 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // Fetch Path Resources Server Side
+  const { data: initialResources } = await supabase
+    .from('path_resources')
+    .select('*, profiles(username, avatar_url)')
+    .eq('path_id', id)
+    .order('created_at', { ascending: false }) as { data: PathResource[] }
+
 
   // Obtener el path con sus cursos
   const { data: path, error } = await supabase
@@ -323,6 +333,9 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </p>
             )}
           </div>
+
+          {/* Path Resources */}
+          <PathResources pathId={path.id} initialResources={initialResources || []} />
         </div>
 
         {/* Lista de cursos */}
@@ -420,6 +433,14 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="lg:col-span-3">
           <RecommendedCourses pathId={id} />
+          <div className="mt-10">
+            <Recommendations mode="similar" contextId={path.id} contextType="path" />
+          </div>
+
+          {/* Path Resources */}
+          <div className="mt-10">
+            <PathResources pathId={path.id} initialResources={initialResources || []} />
+          </div>
         </div>
       </div >
     </>
