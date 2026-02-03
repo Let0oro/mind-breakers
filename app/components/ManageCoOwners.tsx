@@ -92,7 +92,7 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
             fetchCoOwners()
 
         } catch (error) {
-            setMessage({ type: 'error', text: error.message || 'Error al añadir co-owner' })
+            setMessage({ type: 'error', text: (error as Error).message || 'Error al añadir co-owner' })
         } finally {
             setIsLoading(false)
         }
