@@ -92,11 +92,21 @@ export function CourseActions({
         .single()
 
       if (profile) {
-        // import { getLevelFromXp } from '@/lib/gamification'
-        // import { levelUpEvent } from '@/lib/events'
-        // We need to import these at the top of the file, but for now I will assume they are auto-imported or I need to add them carefully.
-        // Wait, replace_file_content replaces a block. I need to make sure imports are added.
-        // I will use multi_replace for this file to be safe.
+        const newTotalXp = profile.total_xp + xpReward
+        const newLevel = getLevelFromXp(newTotalXp)
+
+        await supabase
+          .from('profiles')
+          .update({
+            total_xp: newTotalXp,
+            level: newLevel,
+          })
+          .eq('id', userId)
+
+        // Check for level up
+        if (newLevel > profile.level) {
+          levelUpEvent.emit(newLevel)
+        }
       }
 
       setIsCompleted(true)
@@ -163,7 +173,7 @@ export function CourseActions({
           : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
           } disabled:opacity-50`}
       >
-        {isSaved ? 'Guardado' : 'Guardar'}
+        {isSaved ? '★ Guardado' : '☆ Guardar'}
       </button>
 
       {status === 'published' && (
@@ -174,7 +184,7 @@ export function CourseActions({
               disabled={loading}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : 'Completar'}
+              {loading ? 'Guardando...' : '✓ Completar'}
             </button>
           ) : (
             <a
@@ -190,7 +200,7 @@ export function CourseActions({
             disabled={loading}
             className="rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50"
           >
-            {loading ? 'Guardando...' : 'No completado'}
+            {loading ? 'Guardando...' : '✕ No completado'}
           </button>
         )
       )}
