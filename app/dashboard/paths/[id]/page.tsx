@@ -3,9 +3,12 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ProgressBar'
 import Link from 'next/link'
-import type { Course } from '@/lib/types'
+import { FallbackImage } from '@/components/FallbackImage'
+import type { Course, PathResource } from '@/lib/types'
 
 import RecommendedCourses from './RecommendedCourses'
+import Recommendations from '@/components/Recommendations'
+import PathResources from '@/components/PathResources'
 
 export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -13,6 +16,14 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // Fetch Path Resources Server Side
+  const { data: initialResources } = await supabase
+    .from('path_resources')
+    .select('*, profiles(username, avatar_url)')
+    .eq('path_id', id)
+    .order('created_at', { ascending: false }) as { data: PathResource[] }
+
 
   // Obtener el path con sus cursos
   const { data: path, error } = await supabase
@@ -78,6 +89,59 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
     .single()
 
   const isSaved = !!savedPath
+
+  // Leaderboard Logic
+  const pathCourseIds = path.courses?.map((c: Course) => c.id) || []
+  let leaderboard: { userId: string; username: string; avatarUrl: string; totalXp: number; completedCount: number }[] = []
+
+  if (pathCourseIds.length > 0) {
+    // 1. Fetch all progress for these courses
+    const { data: allProgress } = await supabase
+      .from('user_course_progress')
+      .select('user_id, xp_earned, completed')
+      .in('course_id', pathCourseIds)
+
+    if (allProgress) {
+      // 2. Aggregate by user
+      const statsByUser = new Map<string, { totalXp: number; completedCount: number }>()
+
+      allProgress.forEach(p => {
+        const current = statsByUser.get(p.user_id) || { totalXp: 0, completedCount: 0 }
+        statsByUser.set(p.user_id, {
+          totalXp: current.totalXp + (p.xp_earned || 0),
+          completedCount: current.completedCount + (p.completed ? 1 : 0)
+        })
+      })
+
+      // 3. Sort and take top 5
+      const topUserIds = Array.from(statsByUser.entries())
+        .sort((a, b) => b[1].totalXp - a[1].totalXp)
+        .slice(0, 5)
+        .map(entry => entry[0])
+
+      if (topUserIds.length > 0) {
+        // 4. Fetch profiles
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', topUserIds)
+
+        const profileMap = new Map(profiles?.map(p => [p.id, p])) || new Map()
+
+        leaderboard = topUserIds.map(userId => {
+          const stats = statsByUser.get(userId)!
+          const profile = profileMap.get(userId)
+          return {
+            userId,
+            username: profile?.username || 'Unknown',
+            avatarUrl: profile?.avatar_url || '',
+            totalXp: stats.totalXp,
+            completedCount: stats.completedCount
+          }
+        })
+      }
+    }
+  }
 
   return (
     <>
@@ -155,14 +219,13 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </button>
             </form>
 
-            {path.created_by === user.id && (
-              <Link
-                href={`/dashboard/paths/${path.id}/edit`}
-                className="rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
-              >
-                Editar
-              </Link>
-            )}
+            {/* Edit button visible to all - permissions handled in edit page */}
+            <Link
+              href={`/dashboard/paths/${path.id}/edit`}
+              className="rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+            >
+              Editar
+            </Link>
           </div>
         </div>
 
@@ -216,6 +279,63 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </Link>
             )}
           </div>
+
+          {/* Leaderboard Section */}
+          <div className="mt-6 rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-yellow-500">trophy</span>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Top Estudiantes
+              </h2>
+            </div>
+
+            {leaderboard.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {leaderboard.map((student, index) => (
+                  <Link
+                    key={student.userId}
+                    href={`/dashboard/users/${student.userId}`}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-[#3b4754]/30 rounded-lg transition-colors"
+                  >
+                    <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                        index === 2 ? 'bg-orange-100 text-orange-700' :
+                          'text-gray-500'
+                      }`}>
+                      {index + 1}
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                      <FallbackImage
+                        as="img"
+                        src={student.avatarUrl || ''}
+                        alt={student.username}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {student.username}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {student.completedCount} cursos completados
+                      </p>
+                    </div>
+                    <div className="text-sm font-bold text-[#137fec]">
+                      {student.totalXp} XP
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Sé el primero en completar cursos de este path.
+              </p>
+            )}
+          </div>
+
+          {/* Path Resources */}
+          <PathResources pathId={path.id} initialResources={initialResources || []} />
         </div>
 
         {/* Lista de cursos */}
@@ -237,19 +357,19 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                       }`}>
                       <div className="flex gap-4">
                         {/* Thumbnail */}
-                        {course.thumbnail_url ? (
-                          <img
-                            src={course.thumbnail_url}
+                        <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-[#3b4754]">
+                          <FallbackImage
+                            as="img"
+                            src={course.thumbnail_url || ''}
                             alt={course.title}
-                            width={160}
-                            height={96}
-                            className="h-24 w-40 shrink-0 rounded-lg object-cover"
+                            className="h-full w-full object-cover"
                           />
-                        ) : (
-                          <div className="flex h-24 w-40 shrink-0 items-center justify-center rounded-lg bg-[#3b4754] text-gray-600 dark:text-[#b0bfcc]">
-                            <span className="material-symbols-outlined h-10 w-10">image</span>
-                          </div>
-                        )}
+                          {!course.thumbnail_url && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="material-symbols-outlined h-10 w-10 text-gray-600 dark:text-[#b0bfcc]">image</span>
+                            </div>
+                          )}
+                        </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
@@ -313,8 +433,16 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="lg:col-span-3">
           <RecommendedCourses pathId={id} />
+          <div className="mt-10">
+            <Recommendations mode="similar" contextId={path.id} contextType="path" />
+          </div>
+
+          {/* Path Resources */}
+          <div className="mt-10">
+            <PathResources pathId={path.id} initialResources={initialResources || []} />
+          </div>
         </div>
-      </div>
+      </div >
     </>
   )
 }

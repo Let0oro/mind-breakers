@@ -3,8 +3,9 @@ import { createClient } from '@/utils/supabase/server'
 
 import Breadcrumb from '@/components/breadcrumb'
 import { NotificationBell } from '@/components/NotificationBell'
-import { Sidebar } from './components/Sidebar'
+import { Sidebar } from './Sidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { LevelUpModal } from '@/components/LevelUpModal'
 
 export default async function DashboardLayout({
     children,
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
                 </div>
 
                 {children}
+                <LevelUpModal />
             </main>
         </div>
     )

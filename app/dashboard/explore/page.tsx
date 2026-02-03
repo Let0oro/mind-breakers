@@ -42,7 +42,7 @@ function ExplorePageContent() {
                 setActiveTab(tabFromUrl)
             }
         }
-    }, [searchParams, activeTab])
+    }, [searchParams])
 
     // Update URL when tab changes state (user click)
     const handleTabChange = (newTab: typeof activeTab) => {
@@ -87,6 +87,7 @@ function ExplorePageContent() {
             organizations (name),
             courses (id)
           `)
+                    .eq('is_validated', true)
                     .order('created_at', { ascending: false })
                     .limit(20)
 
@@ -125,6 +126,7 @@ function ExplorePageContent() {
                     .eq('is_validated', true)
                     .order('created_at', { ascending: false })
                     .limit(20)
+
 
                 if (searchQuery) {
                     courseQuery = courseQuery.or(`title.ilike.%${searchQuery}%,summary.ilike.%${searchQuery}%`)
@@ -189,6 +191,9 @@ function ExplorePageContent() {
     useEffect(() => {
         performSearch()
     }, [performSearch])
+
+    console.log(results);
+
 
     return (
         <>

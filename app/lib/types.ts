@@ -7,6 +7,27 @@ export interface Profile {
   is_admin: boolean
   created_at: string
   avatar_url?: string | null
+  bio?: string | null
+  social_links?: {
+    twitter?: string
+    linkedin?: string
+    github?: string
+    website?: string
+  } | null
+  // featured_content?: any[] 
+}
+
+export interface PathOwner {
+  id: string
+  path_id: string
+  user_id: string
+  created_at: string
+}
+
+export interface UserFollow {
+  follower_id: string
+  following_id: string
+  created_at: string
 }
 
 export interface Organization {
@@ -25,6 +46,7 @@ export interface CourseExercise {
   description?: string
   requirements?: string
   created_at: string
+  uk: string
 }
 
 export interface UserCourseProgress {
@@ -58,6 +80,7 @@ export interface Course {
   organizations?: Organization
   course_exercises?: CourseExercise[]
   user_course_progress?: UserCourseProgress[]
+  uk: string
 }
 
 export interface LearningPath {
@@ -71,6 +94,7 @@ export interface LearningPath {
   is_validated?: boolean
   organizations?: Organization
   courses?: Course[]
+  uk: string
 }
 
 // Edit Request Type for Admin Validations
@@ -195,3 +219,16 @@ export interface Notification {
   expires_at: string
 }
 
+export interface PathResource {
+  id: string
+  path_id: string
+  user_id: string | null
+  title: string
+  type: 'link' | 'text'
+  content: string
+  created_at: string
+  profiles?: {
+    username: string
+    avatar_url: string
+  }
+}

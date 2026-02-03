@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import SimilarItemsList from '@/components/SimilarItemsList'
 
 export default function NewPathPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [title, setTitle] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -26,7 +28,7 @@ export default function NewPathPage() {
     const { data, error: insertError } = await supabase
       .from('learning_paths')
       .insert({
-        title: formData.get('title') as string,
+        title: title,
         summary: formData.get('summary') as string,
         description: formData.get('description') as string,
         created_by: user.id,
@@ -83,9 +85,15 @@ export default function NewPathPage() {
               type="text"
               id="title"
               name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
               className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="e.g., Full-Stack Web Development"
+            />
+            <SimilarItemsList
+              type="learning_paths"
+              query={title}
             />
           </div>
 

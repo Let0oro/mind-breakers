@@ -1,0 +1,78 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import confetti from 'canvas-confetti'
+import { levelUpEvent } from '@/lib/events'
+
+export function LevelUpModal() {
+    const [isOpen, setIsOpen] = useState(false)
+    const [level, setLevel] = useState(1)
+
+    useEffect(() => {
+        const unsubscribe = levelUpEvent.subscribe((newLevel) => {
+            setLevel(newLevel)
+            setIsOpen(true)
+
+            // Trigger confetti
+            const duration = 3000
+            const end = Date.now() + duration
+
+            const frame = () => {
+                confetti({
+                    particleCount: 2,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#137fec', '#34d399', '#fbbf24']
+                })
+                confetti({
+                    particleCount: 2,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#137fec', '#34d399', '#fbbf24']
+                })
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame)
+                }
+            }
+            frame()
+        })
+
+        return () => {
+            unsubscribe()
+        }
+    }, [])
+
+    if (!isOpen) return null
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="relative bg-white dark:bg-[#1a232e] rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-gray-200 dark:border-[#3b4754] animate-in zoom-in-95 duration-300">
+
+                {/* Glow effect behind the badge */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#137fec]/20 rounded-full blur-3xl -z-10"></div>
+
+                <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#137fec] to-[#3b82f6] shadow-lg shadow-blue-500/30 text-white">
+                    <span className="material-symbols-outlined text-6xl">military_tech</span>
+                </div>
+
+                <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+                    LEVEL UP!
+                </h2>
+
+                <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-8">
+                    You&apos;ve reached <strong className="text-[#137fec]">Level {level}</strong>. Keep up the amazing work!
+                </p>
+
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-full py-3 px-6 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-[#137fec]/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25"
+                >
+                    Continue Learning
+                </button>
+            </div>
+        </div>
+    )
+}

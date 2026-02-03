@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
+import { Toast } from './ui/Toast'
 
 interface Notification {
   id: string
@@ -18,6 +19,8 @@ export function NotificationBell({ userId }: { userId: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [latestNotification, setLatestNotification] = useState<Notification | null>(null)
+
 
   // Estabilizar la referencia del cliente de Supabase
   const supabase = useMemo(() => createClient(), [])
@@ -53,8 +56,10 @@ export function NotificationBell({ userId }: { userId: string }) {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev])
+          const newNotification = payload.new as Notification
+          setNotifications((prev) => [newNotification, ...prev])
           setUnreadCount((prev) => prev + 1)
+          setLatestNotification(newNotification)
         }
       )
       .subscribe()
@@ -99,6 +104,7 @@ export function NotificationBell({ userId }: { userId: string }) {
         return '🔔'
     }
   }
+
 
   return (
     <div className="relative">
@@ -194,6 +200,16 @@ export function NotificationBell({ userId }: { userId: string }) {
             </div>
           </div>
         </>
+      )}
+
+      {/* Render Toast if there is a new notification */}
+      {latestNotification && (
+        <Toast
+          title={latestNotification.title}
+          message={latestNotification.message}
+          type={latestNotification.type}
+          onClose={() => setLatestNotification(null)}
+        />
       )}
     </div>
   )
