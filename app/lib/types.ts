@@ -7,6 +7,28 @@ export interface Profile {
   is_admin: boolean
   created_at: string
   avatar_url?: string | null
+  bio?: string | null
+  social_links?: {
+    twitter?: string
+    linkedin?: string
+    github?: string
+    website?: string
+  } | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  featured_content?: any[] // TODO: Define specific structure if needed
+}
+
+export interface PathOwner {
+  id: string
+  path_id: string
+  user_id: string
+  created_at: string
+}
+
+export interface UserFollow {
+  follower_id: string
+  following_id: string
+  created_at: string
 }
 
 export interface Organization {

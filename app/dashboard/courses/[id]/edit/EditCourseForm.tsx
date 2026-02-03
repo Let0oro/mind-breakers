@@ -736,6 +736,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             {/* Actions Footer */}
             <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-[#3b4754] mt-8">
+
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="ml-7 px-6 h-12 rounded-lg bg-[#137fec]/10 text-[#137fec] hover:bg-[#137fec]/20 font-bold transition-colors flex items-center justify-center gap-2"
+                >
+                    Cancel
+                </button>
                 <button
                     type="button"
                     onClick={handleDelete}

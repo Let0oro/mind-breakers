@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { CardCourse } from '@/components/ui/CardCourse'
 
 
 export const metadata = {
@@ -101,6 +102,21 @@ export default async function CoursesPage({
         })
     }
 
+    // Fetch creators for the displayed courses
+    const creatorIds = Array.from(new Set(courses.map(c => c.created_by).filter(Boolean)))
+    let creatorMap = new Map<string, string>()
+
+    if (creatorIds.length > 0) {
+        const { data: creators } = await supabase
+            .from('profiles')
+            .select('id, username')
+            .in('id', creatorIds)
+
+        if (creators) {
+            creatorMap = new Map(creators.map(p => [p.id, p.username]))
+        }
+    }
+
     // Fetch user progress for map (simplified as we already have some in join but good for exact map)
     const { data: userProgress } = await supabase
         .from('user_course_progress')
@@ -196,100 +212,25 @@ export default async function CoursesPage({
                         const isCompleted = progressMap.get(course.id) || false
                         const isEnrolled = progressMap.has(course.id)
                         const isSaved = savedSet.has(course.id)
-                        const isOwner = course.created_by === user.id
 
                         // Status Logic
-                        const isDraft = course.status === 'draft'
-                        const isArchived = course.status === 'archived'
                         const isPublished = course.status === 'published'
                         const isPending = isPublished && !course.is_validated
 
                         return (
-                            <Link
+                            <CardCourse
                                 key={course.id}
-                                href={`/dashboard/courses/${course.id}`}
-                                className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative"
-                            >
-                                {/* Thumbnail */}
-                                <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
-                                    {course.thumbnail_url ? (
-                                        <img
-                                            src={course.thumbnail_url}
-                                            alt={course.title}
-                                            className="object-cover"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="material-symbols-outlined w-16 h-16 text-[#137fec]/30">school</span>
-                                        </div>
-                                    )}
-
-                                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
-                                        {/* Progress Badges */}
-                                        {isCompleted && (
-                                            <div className="bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                                                Created
-                                            </div>
-                                        )}
-                                        {!isCompleted && isEnrolled && (
-                                            <div className="bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                                                In Progress
-                                            </div>
-                                        )}
-                                        {isSaved && !isEnrolled && (
-                                            <div className="bg-gray-900/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm border border-white/10">
-                                                <span className="material-symbols-outlined w-3 h-3">bookmark</span>
-                                                Saved
-                                            </div>
-                                        )}
-
-                                        {/* Status Badges (Owner only) */}
-                                        {isOwner && (
-                                            <>
-                                                {isDraft && (
-                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-yellow-100 text-yellow-800">
-                                                        Draft
-                                                    </div>
-                                                )}
-                                                {isArchived && (
-                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-800">
-                                                        Archived
-                                                    </div>
-                                                )}
-                                                {isPending && (
-                                                    <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-100 text-amber-800 animate-pulse">
-                                                        Pending
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="p-5 flex flex-col gap-3 flex-1">
-                                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
-                                        {course.title}
-                                    </h4>
-
-                                    {course.summary && (
-                                        <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2">
-                                            {course.summary}
-                                        </p>
-                                    )}
-
-                                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
-                                            <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium">{course.xp_reward} XP</span>
-                                        </div>
-
-                                        {course.organizations && course.organizations.length > 0 && (
-                                            <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">{course.organizations[0].name}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </Link>
+                                id={course.id}
+                                title={course.title}
+                                thumbnail_url={course.thumbnail_url}
+                                xp_reward={course.xp_reward}
+                                summary={course.summary}
+                                status={isPending ? 'pending' : course.status}
+                                progress={isEnrolled ? (isCompleted ? 100 : 10) : 0} // Approximate progress based on boolean
+                                isSaved={isSaved}
+                                instructor={course.organizations && course.organizations.length > 0 ? course.organizations[0].name : (creatorMap.get(course.created_by) ? `by ${creatorMap.get(course.created_by)}` : undefined)}
+                                variant="grid"
+                            />
                         )
                     })
                 ) : (

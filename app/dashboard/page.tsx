@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import { CardCourse } from '@/components/ui/CardCourse'
+import { CardPath } from '@/components/ui/CardPath'
 
 interface DashboardCourse {
   id: string
@@ -366,64 +368,18 @@ export default async function DashboardPage() {
           {enrolledCourses.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {enrolledCourses.map((course) => (
-                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative">
-                  {/* Thumbnail */}
-                  <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
-                    {course.thumbnail_url ? (
-                      <img
-                        src={course.thumbnail_url}
-                        alt={course.title}
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="material-symbols-outlined w-16 h-16 text-[#137fec]/30">school</span>
-                      </div>
-                    )}
-
-                    {/* Badges Container (Right Side) */}
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
-                      {/* Progress Badge */}
-                      {course.progress === 100 ? (
-                        <span className="bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                          <span className="material-symbols-outlined w-3 h-3">check</span>
-                          Completed
-                        </span>
-                      ) : course.progress > 0 ? (
-                        <span className="bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                          {course.progress}%
-                        </span>
-                      ) : null}
-
-                      {/* Status Badge (Under Progress) */}
-                      {course.status !== 'published' && (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${course.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                          {course.status}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex flex-col gap-3 flex-1">
-                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
-                      {course.title}
-                    </h4>
-
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
-                      {course.instructor}
-                    </p>
-
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
-                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium">{course.xp_reward} XP</span>
-                      </div>
-                      <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">{course.duration}</span>
-                    </div>
-                  </div>
-                </Link>
+                <CardCourse
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  thumbnail_url={course.thumbnail_url}
+                  xp_reward={course.xp_reward}
+                  progress={course.progress}
+                  status={course.status}
+                  instructor={course.instructor}
+                  duration={course.duration}
+                  variant="grid"
+                />
               ))}
             </div>
           ) : (
@@ -447,54 +403,17 @@ export default async function DashboardPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {drafts.slice(0, 3).map((draft) => (
-                <Link key={draft.id} href={`/dashboard/drafts/${draft.id}/edit`} className="group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative">
-                  {/* Thumbnail */}
-                  <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
-                    {draft.thumbnail_url ? (
-                      <img
-                        src={draft.thumbnail_url}
-                        alt={draft.title}
-                        className="object-cover w-full h-full opacity-80"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="material-symbols-outlined w-16 h-16 text-[#137fec]/30">edit_document</span>
-                      </div>
-                    )}
-
-                    {/* Badges Container (Right Side) */}
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-yellow-100 text-yellow-800">
-                        Draft
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5 flex flex-col gap-3 flex-1">
-                    <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
-                      {draft.title}
-                    </h4>
-
-                    {draft.summary ? (
-                      <p className="text-gray-600 dark:text-[#b0bfcc] text-xs line-clamp-2">
-                        {draft.summary}
-                      </p>
-                    ) : (
-                      <p className="text-gray-500 dark:text-[#b0bfcc]/70 text-xs italic">
-                        No summary provided.
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
-                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium is-dirty">{draft.xp_reward} XP</span>
-                      </div>
-                      <span className="text-[#137fec] text-xs font-bold">Continue Editing</span>
-                    </div>
-                  </div>
-                </Link>
+                <CardCourse
+                  key={draft.id}
+                  id={draft.id}
+                  title={draft.title}
+                  thumbnail_url={draft.thumbnail_url}
+                  xp_reward={draft.xp_reward}
+                  summary={draft.summary || undefined}
+                  status={draft.status}
+                  variant="draft"
+                  href={`/dashboard/drafts/${draft.id}/edit`}
+                />
               ))}
             </div>
           </section>
@@ -512,35 +431,16 @@ export default async function DashboardPage() {
           {learningPathsList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {learningPathsList.map((path) => (
-                <Link key={path.id} href={`/dashboard/paths/${path.id}`} className="p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1a232e] dark:to-[#111827] border border-gray-200 dark:border-[#3b4754] flex gap-6 items-center hover:shadow-lg transition-all">
-                  <div className={`h-20 w-20 shrink-0 rounded-lg ${path.color === 'primary' ? 'bg-[#137fec]/20' : 'bg-purple-500/20'} flex items-center justify-center`}>
-                    {path.color === 'primary' ? (
-                      <span className="material-symbols-outlined w-6.5 h-6.5 text-[#137fec]">workspace_premium</span>
-                    ) : (
-                      <span className="material-symbols-outlined w-6.5 h-6.5 text-purple-400">workspace_premium</span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{path.title}</h4>
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs mb-4">Path {path.completedCourses} of {path.totalCourses} courses completed</p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2">
-                        {[...Array(path.completedCourses)].map((_, i) => (
-                          <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
-                            <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">check</span>
-                          </div>
-                        ))}
-                        <div className="w-6 h-6 rounded-full bg-[#137fec] flex items-center justify-center border border-[#111827] animate-pulse">
-                          <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">play_arrow</span>
-                        </div>
-                        {[...Array(path.totalCourses - path.completedCourses)].map((_, i) => (
-                          <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-[#3b4754] border border-[#111827]"></div>
-                        ))}
-                      </div>
-                      <span className="text-[11px] text-gray-600 dark:text-[#b0bfcc] ml-2">Next: {path.nextCourse}</span>
-                    </div>
-                  </div>
-                </Link>
+                <CardPath
+                  key={path.id}
+                  id={path.id}
+                  title={path.title}
+                  completedCourses={path.completedCourses}
+                  totalCourses={path.totalCourses}
+                  nextCourse={path.nextCourse}
+                  color={path.color}
+                  variant="hero"
+                />
               ))}
             </div>
           ) : (
@@ -562,11 +462,14 @@ export default async function DashboardPage() {
           {savedCourses.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {savedCourses.map((course) => (
-                <Link key={course.id} href={`/dashboard/courses/${course.id}`} className="p-3 bg-white dark:bg-[#1a232e] rounded-lg border border-gray-200 dark:border-[#3b4754] hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors cursor-pointer group">
-                  <div className="aspect-video rounded bg-cover mb-2" style={{ backgroundImage: `url(${course.thumbnail_url || 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=300&h=200&fit=crop'})` }}></div>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-[#137fec]">{course.title}</p>
-                  <p className="text-[11px] text-gray-600 dark:text-[#b0bfcc]">{course.xp_reward} XP</p>
-                </Link>
+                <CardCourse
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  thumbnail_url={course.thumbnail_url}
+                  xp_reward={course.xp_reward}
+                  variant="compact"
+                />
               ))}
               <div className="p-3 border border-dashed border-gray-200 dark:border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
                 <span className="material-symbols-outlined w-6 h-6 text-[#3b4754] mb-1">add</span>
