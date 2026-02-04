@@ -216,7 +216,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                   : 'border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50'
                   }`}
               >
-                {isSaved ? '★ Guardado' : '☆ Guardar'}
+                {isSaved ? 'Guardado' : 'Guardar'}
               </button>
             </form>
 
@@ -237,7 +237,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
       </header>
 
       {/* Contenido */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="flex flex-col md:grid gap-6 lg:grid-cols-3">
         {/* Descripción y detalles */}
         <div className="lg:col-span-1">
           <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
