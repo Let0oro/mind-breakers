@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { FallbackImage } from '@/components/FallbackImage'
+import { FallbackImage } from '@/components/ui/FallbackImage'
 
 interface CardCourseProps {
     id: string
@@ -41,9 +41,9 @@ export function CardCourse({
         return (
             <Link
                 href={href}
-                className={`p-3 bg-white dark:bg-[#1a232e] rounded-lg border border-gray-200 dark:border-[#3b4754] hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors cursor-pointer group flex flex-col ${className}`}
+                className={`p-3 bg-white dark:bg-[#1a232e] rounded-lg border border-gray-200 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors cursor-pointer group flex flex-col ${className}`}
             >
-                <div className="aspect-video w-full relative rounded overflow-hidden mb-2 bg-gray-100 dark:bg-[#3b4754]">
+                <div className="aspect-video w-full relative rounded overflow-hidden mb-2 bg-gray-100 dark:bg-sidebar-border">
                     <FallbackImage
                         src={thumbnail_url || ''}
                         alt={title}
@@ -52,10 +52,10 @@ export function CardCourse({
                         type="course"
                     />
                 </div>
-                <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-[#137fec] text-left">
+                <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-brand text-left">
                     {title}
                 </p>
-                <p className="text-[11px] text-gray-600 dark:text-[#b0bfcc] text-left">
+                <p className="text-[11px] text-gray-600 dark:text-muted-foreground text-left">
                     {xp_reward} XP
                 </p>
             </Link>
@@ -68,9 +68,9 @@ export function CardCourse({
         return (
             <Link
                 href={href}
-                className={`group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] overflow-hidden hover:border-[#137fec]/50 transition-all cursor-pointer hover:shadow-xl hover:shadow-[#137fec]/5 ${className}`}
+                className={`group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden hover:border-brand/50 transition-all cursor-pointer hover:shadow-xl hover:shadow-[#137fec]/5 ${className}`}
             >
-                <div className="h-40 relative flex items-center justify-center bg-gray-100 dark:bg-[#3b4754] overflow-hidden">
+                <div className="h-40 relative flex items-center justify-center bg-gray-100 dark:bg-sidebar-border overflow-hidden">
                     <FallbackImage
                         src={thumbnail_url || ''}
                         alt={title}
@@ -85,11 +85,11 @@ export function CardCourse({
                     </div>
                 </div>
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-1">
+                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-brand transition-colors line-clamp-1">
                         {title}
                     </h3>
                     <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                        <span className="material-symbols-outlined text-sm text-[#137fec]">star</span>
+                        <span className="material-symbols-outlined text-sm text-brand">star</span>
                         <span>{xp_reward} XP</span>
                     </div>
                     {summary && (
@@ -108,7 +108,7 @@ export function CardCourse({
     return (
         <Link
             href={href}
-            className={`group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all cursor-pointer flex flex-col relative ${className}`}
+            className={`group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all cursor-pointer flex flex-col relative ${className}`}
         >
             {/* Thumbnail */}
             <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
@@ -129,7 +129,7 @@ export function CardCourse({
                             Completed
                         </span>
                     ) : (progress !== undefined && progress > 0) ? (
-                        <span className="bg-[#137fec] text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                        <span className="bg-brand text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                             {progress}%
                         </span>
                     ) : null}
@@ -156,32 +156,32 @@ export function CardCourse({
 
             {/* Content */}
             <div className="p-5 flex flex-col gap-3 flex-1">
-                <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">
+                <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-brand transition-colors">
                     {title}
                 </h4>
 
                 {instructor && (
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+                    <p className="text-gray-600 dark:text-muted-foreground text-xs">
                         {instructor}
                     </p>
                 )}
 
                 {/* Summary (if provided, usually for Drafts/Profile view but useful here too) */}
                 {!instructor && summary && (
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-xs line-clamp-2">
+                    <p className="text-gray-600 dark:text-muted-foreground text-xs line-clamp-2">
                         {summary}
                     </p>
                 )}
 
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-[#3b4754]">
+                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-sidebar-border">
                     <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined w-4 h-4 text-[#137fec]">star</span>
-                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs font-medium">{xp_reward} XP</span>
+                        <span className="material-symbols-outlined w-4 h-4 text-brand">star</span>
+                        <span className="text-gray-600 dark:text-muted-foreground text-xs font-medium">{xp_reward} XP</span>
                     </div>
                     {duration ? (
-                        <span className="text-gray-600 dark:text-[#b0bfcc] text-xs">{duration}</span>
+                        <span className="text-gray-600 dark:text-muted-foreground text-xs">{duration}</span>
                     ) : variant === 'draft' ? (
-                        <span className="text-[#137fec] text-xs font-bold">Continue Editing</span>
+                        <span className="text-brand text-xs font-bold">Continue Editing</span>
                     ) : null}
                 </div>
             </div>

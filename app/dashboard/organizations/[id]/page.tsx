@@ -41,15 +41,15 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
             <header className="mb-8">
                 <Link
                     href="/dashboard/organizations"
-                    className="text-sm text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] mb-4 inline-flex items-center gap-1 transition-colors"
+                    className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
                 >
                     <span className="material-symbols-outlined text-base">arrow_back</span>
                     Back to Organizations
                 </Link>
 
                 <div className="flex items-start gap-6 mt-4">
-                    <div className="w-20 h-20 rounded-xl bg-[#137fec]/20 flex items-center justify-center shrink-0">
-                        <span className="text-4xl font-bold text-[#137fec]">
+                    <div className="w-20 h-20 rounded-xl bg-brand/20 flex items-center justify-center shrink-0">
+                        <span className="text-4xl font-bold text-brand">
                             {org.name.charAt(0).toUpperCase()}
                         </span>
                     </div>
@@ -60,7 +60,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                 href={org.website_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#137fec] hover:underline flex items-center gap-1 font-medium"
+                                className="text-brand hover:underline flex items-center gap-1 font-medium"
                             >
                                 Visit Website
                                 <span className="material-symbols-outlined text-base">open_in_new</span>
@@ -77,8 +77,8 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                     {/* About */}
                     <section>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">About</h2>
-                        <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
-                            <p className="text-gray-600 dark:text-[#b0bfcc] whitespace-pre-wrap">
+                        <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
+                            <p className="text-gray-600 dark:text-muted-foreground whitespace-pre-wrap">
                                 {org.description || 'No description available.'}
                             </p>
                         </div>
@@ -93,11 +93,11 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                     <Link
                                         key={path.id}
                                         href={`/dashboard/paths/${path.id}`}
-                                        className="flex items-center justify-between p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all group"
+                                        className="flex items-center justify-between p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all group"
                                     >
                                         <div>
-                                            <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors">{path.title}</h3>
-                                            <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mt-1 line-clamp-1">{path.summary}</p>
+                                            <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors">{path.title}</h3>
+                                            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-1 line-clamp-1">{path.summary}</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-gray-500">
                                             <span className="material-symbols-outlined text-base">school</span>
@@ -119,7 +119,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                     <Link
                                         key={course.id}
                                         href={`/dashboard/courses/${course.id}`}
-                                        className="group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all overflow-hidden"
+                                        className="group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all overflow-hidden"
                                     >
                                         <div className="h-32 bg-gray-100 dark:bg-[#283039] relative">
                                             {course.thumbnail_url ? (
@@ -134,8 +134,8 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                             </div>
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col">
-                                            <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors line-clamp-2 mb-2">{course.title}</h3>
-                                            {course.summary && <p className="text-xs text-gray-600 dark:text-[#b0bfcc] line-clamp-2 mt-auto">{course.summary}</p>}
+                                            <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors line-clamp-2 mb-2">{course.title}</h3>
+                                            {course.summary && <p className="text-xs text-gray-600 dark:text-muted-foreground line-clamp-2 mt-auto">{course.summary}</p>}
                                         </div>
                                     </Link>
                                 ))}
@@ -146,15 +146,15 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
 
                 {/* Sidebar Stats */}
                 <div>
-                    <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6 sticky top-6">
+                    <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6 sticky top-6">
                         <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Organization Stats</h3>
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-600 dark:text-[#b0bfcc] text-sm">Paths Created</span>
+                                <span className="text-gray-600 dark:text-muted-foreground text-sm">Paths Created</span>
                                 <span className="font-bold text-gray-900 dark:text-white">{org.learning_paths?.length || 0}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-gray-600 dark:text-[#b0bfcc] text-sm">Courses Created</span>
+                                <span className="text-gray-600 dark:text-muted-foreground text-sm">Courses Created</span>
                                 <span className="font-bold text-gray-900 dark:text-white">{org.courses?.length || 0}</span>
                             </div>
                         </div>

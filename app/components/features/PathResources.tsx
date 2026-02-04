@@ -93,10 +93,10 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
     }
 
     return (
-        <div className="mt-8 rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+        <div className="mt-8 rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#137fec]">library_books</span>
+                    <span className="material-symbols-outlined text-brand">library_books</span>
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                         Recommended Resources
                     </h2>
@@ -104,7 +104,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                 {!isAdding ? (
                     <button
                         onClick={() => setIsAdding(true)}
-                        className="text-sm font-medium text-[#137fec] hover:underline flex items-center gap-1"
+                        className="text-sm font-medium text-brand hover:underline flex items-center gap-1"
                     >
                         <span className="material-symbols-outlined text-base">add</span>
                         Add Resource
@@ -121,7 +121,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
 
             {/* Add Form */}
             {isAdding && (
-                <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 dark:bg-[#111418] rounded-lg border border-gray-200 dark:border-[#3b4754]">
+                <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 dark:bg-[#111418] rounded-lg border border-gray-200 dark:border-sidebar-border">
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Title</label>
@@ -130,7 +130,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] text-sm"
+                                className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-sidebar-border bg-white dark:bg-[#1a232e] text-sm"
                                 placeholder="e.g. Official Documentation"
                             />
                         </div>
@@ -141,7 +141,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                 <select
                                     value={linkType}
                                     onChange={(e) => setLinkType(e.target.value as 'link' | 'text')}
-                                    className="px-3 py-2 rounded-md border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] text-sm"
+                                    className="px-3 py-2 rounded-md border border-gray-300 dark:border-sidebar-border bg-white dark:bg-[#1a232e] text-sm"
                                 >
                                     <option value="link">Link (URL)</option>
                                     <option value="text">Text / Concept</option>
@@ -156,7 +156,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     required
-                                    className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] text-sm"
+                                    className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-sidebar-border bg-white dark:bg-[#1a232e] text-sm"
                                     placeholder={linkType === 'link' ? 'https://...' : 'Explain the concept...'}
                                 />
                             </div>
@@ -166,7 +166,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className="px-4 py-2 bg-[#137fec] text-white rounded-md text-sm font-bold hover:bg-[#137fec]/90 disabled:opacity-50"
+                                className="px-4 py-2 bg-brand text-white rounded-md text-sm font-bold hover:bg-brand/90 disabled:opacity-50"
                             >
                                 {submitting ? 'Adding...' : 'Add Resource'}
                             </button>
@@ -181,7 +181,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                     {resources.map((resource) => (
                         <div
                             key={resource.id}
-                            className="flex items-start justify-between p-3 rounded-lg border border-gray-100 dark:border-[#3b4754] hover:bg-gray-50 dark:hover:bg-[#3b4754]/20 transition-colors group"
+                            className="flex items-start justify-between p-3 rounded-lg border border-gray-100 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-sidebar-border/20 transition-colors group"
                         >
                             <div className="flex items-start gap-3">
                                 <div className="mt-1">
@@ -194,7 +194,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                 <div>
                                     <h4 className="font-medium text-gray-900 dark:text-white text-sm">
                                         {resource.type === 'link' ? (
-                                            <a href={resource.content} target="_blank" rel="noopener noreferrer" className="hover:text-[#137fec] hover:underline">
+                                            <a href={resource.content} target="_blank" rel="noopener noreferrer" className="hover:text-brand hover:underline">
                                                 {resource.title}
                                                 <span className="material-symbols-outlined text-[10px] ml-1 align-top">open_in_new</span>
                                             </a>
@@ -202,7 +202,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                             <span>{resource.title}</span>
                                         )}
                                     </h4>
-                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mt-0.5">
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mt-0.5">
                                         {resource.type === 'link' ? resource.content : resource.content}
                                     </p>
                                     <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">

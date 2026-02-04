@@ -32,28 +32,28 @@ export default async function LeaderboardPage() {
         <div className="flex flex-wrap justify-between items-end gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Leaderboard</h2>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
+            <p className="text-gray-600 dark:text-muted-foreground text-base">
               Top {topUsers?.length || 0} learners ranked by experience
             </p>
           </div>
           {currentUserRank && (
-            <div className="bg-[#137fec]/20 border border-[#137fec]/30 rounded-lg px-4 py-2">
-              <p className="text-[#137fec] text-sm font-bold">Your Rank: #{currentUserRank}</p>
+            <div className="bg-brand/20 border border-brand/30 rounded-lg px-4 py-2">
+              <p className="text-brand text-sm font-bold">Your Rank: #{currentUserRank}</p>
             </div>
           )}
         </div>
       </header>
 
       {/* Leaderboard Table */}
-      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] overflow-hidden">
+      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#283039]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-[#b0bfcc] uppercase tracking-wider">Rank</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-[#b0bfcc] uppercase tracking-wider">Player</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-[#b0bfcc] uppercase tracking-wider">Level</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-[#b0bfcc] uppercase tracking-wider">Total XP</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Rank</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Player</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Level</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Total XP</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#3b4754]">
@@ -66,7 +66,7 @@ export default async function LeaderboardPage() {
                     <tr
                       key={profile.id}
                       className={`transition-colors ${isCurrentUser
-                        ? 'bg-[#137fec]/10 border-l-2 border-[#137fec]'
+                        ? 'bg-brand/10 border-l-2 border-brand'
                         : 'hover:bg-gray-50 dark:hover:bg-[#283039]'
                         }`}
                     >
@@ -81,7 +81,7 @@ export default async function LeaderboardPage() {
                               {rank}
                             </div>
                           ) : (
-                            <span className="text-gray-600 dark:text-[#b0bfcc] font-medium">#{rank}</span>
+                            <span className="text-gray-600 dark:text-muted-foreground font-medium">#{rank}</span>
                           )}
                         </div>
                       </td>
@@ -90,8 +90,8 @@ export default async function LeaderboardPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link href={`/dashboard/users/${profile.id}`}>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#137fec]/20 flex items-center justify-center">
-                            <span className="text-[#137fec] font-bold">
+                          <div className="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center">
+                            <span className="text-brand font-bold">
                               {profile.username?.charAt(0).toUpperCase() || '?'}
                             </span>
                           </div>
@@ -99,7 +99,7 @@ export default async function LeaderboardPage() {
                             <p className="text-gray-900 dark:text-white font-bold text-sm">
                               {profile.username || 'Anonymous'}
                               {isCurrentUser && (
-                                <span className="ml-2 text-xs text-[#137fec]">(You)</span>
+                                <span className="ml-2 text-xs text-brand">(You)</span>
                               )}
                             </p>
                           </div>
@@ -110,7 +110,7 @@ export default async function LeaderboardPage() {
                       {/* Level */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined w-5 h-5 text-[#137fec]">star</span>
+                          <span className="material-symbols-outlined w-5 h-5 text-brand">star</span>
                           <span className="text-gray-900 dark:text-white font-medium">Level {profile.level}</span>
                         </div>
                       </td>
@@ -127,7 +127,7 @@ export default async function LeaderboardPage() {
               ) : (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center">
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">No data available</p>
+                    <p className="text-gray-600 dark:text-muted-foreground">No data available</p>
                   </td>
                 </tr>
               )}
@@ -147,7 +147,7 @@ export default async function LeaderboardPage() {
             <p className="text-gray-900 dark:text-white font-bold text-sm text-center truncate w-full">
               {topUsers[1]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">{topUsers[1]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-xs">{topUsers[1]?.total_xp?.toLocaleString()} XP</p>
           </div>
 
           {/* 1st Place */}
@@ -161,7 +161,7 @@ export default async function LeaderboardPage() {
             <p className="text-gray-900 dark:text-white font-bold text-base text-center truncate w-full">
               {topUsers[0]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm">{topUsers[0]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm">{topUsers[0]?.total_xp?.toLocaleString()} XP</p>
           </div>
 
           {/* 3rd Place */}
@@ -172,7 +172,7 @@ export default async function LeaderboardPage() {
             <p className="text-gray-900 dark:text-white font-bold text-sm text-center truncate w-full">
               {topUsers[2]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">{topUsers[2]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-xs">{topUsers[2]?.total_xp?.toLocaleString()} XP</p>
           </div>
         </div>
       )}

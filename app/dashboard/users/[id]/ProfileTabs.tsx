@@ -26,11 +26,11 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
         <div>
             {/* Content Navigation Tabs */}
             <div className="mb-6">
-                <div className="flex border-b border-gray-200 dark:border-[#3b4754] px-4 gap-8">
+                <div className="flex border-b border-gray-200 dark:border-sidebar-border px-4 gap-8">
                     <button
                         onClick={() => setActiveTab('courses')}
                         className={`flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 transition-all ${activeTab === 'courses'
-                            ? 'border-[#137fec] text-[#137fec]'
+                            ? 'border-brand text-brand'
                             : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
@@ -39,7 +39,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                     <button
                         onClick={() => setActiveTab('paths')}
                         className={`flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 transition-all ${activeTab === 'paths'
-                            ? 'border-[#137fec] text-[#137fec]'
+                            ? 'border-brand text-brand'
                             : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
@@ -48,7 +48,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                     <button
                         onClick={() => setActiveTab('achievements')}
                         className={`flex flex-col items-center justify-center border-b-[3px] pb-[13px] pt-4 transition-all ${activeTab === 'achievements'
-                            ? 'border-[#137fec] text-[#137fec]'
+                            ? 'border-brand text-brand'
                             : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
@@ -112,20 +112,20 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                     <div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
                             {/* Hardcoded Badges for UI Demo */}
-                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] text-center shadow-sm">
+                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border text-center shadow-sm">
                                 <div className="size-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500">
                                     <span className="material-symbols-outlined text-3xl">emoji_events</span>
                                 </div>
                                 <span className="text-gray-900 dark:text-white text-[11px] font-bold uppercase tracking-tighter">Top Creator</span>
                             </div>
 
-                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] text-center shadow-sm">
-                                <div className="size-12 rounded-full bg-[#137fec]/20 flex items-center justify-center text-[#137fec]">
+                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border text-center shadow-sm">
+                                <div className="size-12 rounded-full bg-brand/20 flex items-center justify-center text-brand">
                                     <span className="material-symbols-outlined text-3xl">local_fire_department</span>
                                 </div>
                                 <span className="text-gray-900 dark:text-white text-[11px] font-bold uppercase tracking-tighter">30 Day Streak</span>
                             </div>
-                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] text-center shadow-sm opacity-50 grayscale">
+                            <div className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border text-center shadow-sm opacity-50 grayscale">
                                 <div className="size-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500">
                                     <span className="material-symbols-outlined text-3xl">diamond</span>
                                 </div>

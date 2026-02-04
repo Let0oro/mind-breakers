@@ -46,7 +46,7 @@ export default async function AdminSubmissionsPage() {
       <header className="mb-8">
         <Link
           href="/dashboard"
-          className="text-sm text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Dashboard
@@ -89,11 +89,11 @@ export default async function AdminSubmissionsPage() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2">
+                  <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2">
                     Curso: {submission.course_exercises.courses.title}
                   </p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-[#b0bfcc]">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-muted-foreground">
                     <span>
                       👤 {submission.profiles.username || 'Usuario anónimo'}
                     </span>
@@ -112,7 +112,7 @@ export default async function AdminSubmissionsPage() {
                         href={submission.file_path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#137fec]/20 px-3 py-2 text-sm font-medium text-[#137fec] hover:bg-[#137fec]/30 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-lg bg-brand/20 px-3 py-2 text-sm font-medium text-brand hover:bg-brand/30 transition-colors"
                       >
                         <span className="material-symbols-outlined h-4 w-4">download</span>
                         Descargar archivo
@@ -123,7 +123,7 @@ export default async function AdminSubmissionsPage() {
                         href={submission.drive_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#137fec]/20 px-3 py-2 text-sm font-medium text-[#137fec] hover:bg-[#137fec]/30 transition-colors"
+                        className="inline-flex items-center gap-2 rounded-lg bg-brand/20 px-3 py-2 text-sm font-medium text-brand hover:bg-brand/30 transition-colors"
                       >
                         <span className="material-symbols-outlined h-4 w-4">open_in_new</span>
                         Ver en Drive
@@ -144,7 +144,7 @@ export default async function AdminSubmissionsPage() {
                     )}
                     <Link
                       href={`/dashboard/courses/${submission.course_exercises.courses.id}`}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#3b4754]/50 px-3 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754] transition-colors"
+                      className="inline-flex items-center gap-2 rounded-lg bg-sidebar-border/50 px-3 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border transition-colors"
                     >
                       Ver curso
                     </Link>
@@ -176,8 +176,8 @@ export default async function AdminSubmissionsPage() {
             </div>
           ))
         ) : (
-          <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
-            <p className="text-gray-600 dark:text-[#b0bfcc]">No hay submissions para revisar.</p>
+          <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
+            <p className="text-gray-600 dark:text-muted-foreground">No hay submissions para revisar.</p>
           </div>
         )}
       </div>

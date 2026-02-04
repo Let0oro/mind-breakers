@@ -35,11 +35,12 @@ mind-breaker/
 │   ├── (auth)/           # Authentication routes (login, register)
 │   ├── (dashboard)/      # Protected dashboard routs
 │   ├── api/              # API Routes (Next.js server functions)
-│   └── components/       # Shared UI components
-├── components/           # (Legacy/Shared) Components
+│   ├── components/       # Components Directory
+│   │   ├── ui/           # Generic Reusable UI Components
+│   │   └── features/     # Feature-Specific Components
+│   └── lib/              # Utilities and Type Definitions
 ├── public/               # Static assets
-├── supabase/             # Supabase configurations and migrations
-└── types/                # TypeScript type definitions
+└── supabase/             # Supabase configurations
 ```
 
 ## Getting Started 🚀

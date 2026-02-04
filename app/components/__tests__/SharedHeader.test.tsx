@@ -3,6 +3,21 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import SharedHeader from '../shared-header'
 import * as navigation from 'next/navigation'
 
+// Mock matchMedia
+Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(), // deprecated
+        removeListener: vi.fn(), // deprecated
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+    })),
+})
+
 // Mock ThemeToggle Since it interacts with window/document
 vi.mock('../ThemeToggle', () => ({
     ThemeToggle: () => <div data-testid="theme-toggle">Toggle</div>

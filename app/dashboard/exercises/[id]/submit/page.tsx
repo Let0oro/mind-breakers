@@ -3,8 +3,8 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { FileUpload } from '@/components/FileUpload'
-import { GitHubRepoSelector } from '@/components/GitHubRepoSelector'
+import { FileUpload } from '@/components/ui/FileUpload'
+import { GitHubRepoSelector } from '@/components/features/GitHubRepoSelector'
 
 interface Exercise {
   id: string
@@ -111,7 +111,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
   if (!exercise) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="text-gray-600 dark:text-[#b0bfcc]">Cargando...</div>
+        <div className="text-gray-600 dark:text-muted-foreground">Cargando...</div>
       </div>
     )
   }
@@ -121,7 +121,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
       <header className="mb-8">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Volver
@@ -129,19 +129,19 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Entregar ejercicio
         </h1>
-        <p className="text-gray-600 dark:text-[#b0bfcc] mt-2">
+        <p className="text-gray-600 dark:text-muted-foreground mt-2">
           {exercise.title}
         </p>
       </header>
 
       <div className="max-w-2xl">
-        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
           {exercise.description && (
-            <div className="mb-6 rounded-lg bg-[#137fec]/10 border border-[#137fec]/30 p-4">
-              <h3 className="text-sm font-medium text-[#137fec] mb-2">
+            <div className="mb-6 rounded-lg bg-brand/10 border border-brand/30 p-4">
+              <h3 className="text-sm font-medium text-brand mb-2">
                 Descripción del ejercicio
               </h3>
-              <p className="text-sm text-gray-600 dark:text-[#b0bfcc] whitespace-pre-wrap">
+              <p className="text-sm text-gray-600 dark:text-muted-foreground whitespace-pre-wrap">
                 {exercise.description}
               </p>
             </div>
@@ -152,7 +152,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               <h3 className="text-sm font-medium text-amber-400 mb-2">
                 Requisitos
               </h3>
-              <p className="text-sm text-gray-600 dark:text-[#b0bfcc] whitespace-pre-wrap">
+              <p className="text-sm text-gray-600 dark:text-muted-foreground whitespace-pre-wrap">
                 {exercise.requirements}
               </p>
             </div>
@@ -182,8 +182,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   type="button"
                   onClick={() => setSubmissionType('text')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'text'
-                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
-                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
+                    ? 'border-brand bg-brand/20 text-brand'
+                    : 'border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   📝 Texto
@@ -192,8 +192,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   type="button"
                   onClick={() => setSubmissionType('zip')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'zip'
-                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
-                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
+                    ? 'border-brand bg-brand/20 text-brand'
+                    : 'border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   📦 Archivo ZIP
@@ -202,8 +202,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   type="button"
                   onClick={() => setSubmissionType('drive')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors ${submissionType === 'drive'
-                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
-                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
+                    ? 'border-brand bg-brand/20 text-brand'
+                    : 'border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   ☁️ Google Drive
@@ -212,8 +212,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   type="button"
                   onClick={() => setSubmissionType('github')}
                   className={`rounded-lg border-2 p-3 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${submissionType === 'github'
-                    ? 'border-[#137fec] bg-[#137fec]/20 text-[#137fec]'
-                    : 'border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:border-[#b0bfcc]/50'
+                    ? 'border-brand bg-brand/20 text-brand'
+                    : 'border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:border-[#b0bfcc]/50'
                     }`}
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -235,7 +235,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   onChange={(e) => setTextContent(e.target.value)}
                   rows={12}
                   required
-                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 font-mono text-sm text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
+                  className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 font-mono text-sm text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
                   placeholder="Pega tu código o respuesta aquí..."
                 />
               </div>
@@ -287,10 +287,10 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   value={driveUrl}
                   onChange={(e) => setDriveUrl(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                  className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                   placeholder="https://drive.google.com/..."
                 />
-                <p className="mt-2 text-xs text-gray-600 dark:text-[#b0bfcc]">
+                <p className="mt-2 text-xs text-gray-600 dark:text-muted-foreground">
                   Asegúrate de que el archivo/carpeta tenga permisos de visualización para cualquiera con el enlace
                 </p>
               </div>
@@ -315,7 +315,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                       href={githubRepoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-[#137fec] hover:underline mt-1 block truncate"
+                      className="text-xs text-brand hover:underline mt-1 block truncate"
                     >
                       {githubRepoUrl}
                     </a>
@@ -328,14 +328,14 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading || (submissionType === 'text' && !textContent) || (submissionType === 'zip' && !fileUrl) || (submissionType === 'drive' && !driveUrl) || (submissionType === 'github' && !githubRepoUrl)}
-                className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
+                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-brand/80 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Enviando...' : 'Enviar ejercicio'}
               </button>

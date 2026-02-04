@@ -101,9 +101,9 @@ export function FuzzyMatchSelect({
                     }}
                     onBlur={() => { }}
                     placeholder={placeholder}
-                    className={`w-full rounded-lg border bg-gray-50 dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:outline-none focus:ring-1 transition-all ${exactMatch
+                    className={`w-full rounded-lg border bg-gray-50 dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:outline-none focus:ring-1 transition-all ${exactMatch
                         ? 'border-yellow-500/50 focus:border-yellow-500 focus:ring-yellow-500/30'
-                        : 'border-gray-200 dark:border-[#3b4754] focus:border-[#137fec] focus:ring-[#137fec]'
+                        : 'border-gray-200 dark:border-sidebar-border focus:border-brand focus:ring-[#137fec]'
                         }`}
                 />
 
@@ -124,13 +124,13 @@ export function FuzzyMatchSelect({
                             <p className="text-sm text-yellow-400 font-medium">
                                 ¡Ya existe un item con este nombre!
                             </p>
-                            <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
+                            <p className="text-xs text-gray-600 dark:text-muted-foreground mt-1">
                                 &quot;{exactMatch.name}&quot; ya está registrado.
                                 {onSelectExisting && (
                                     <button
                                         type="button"
                                         onClick={() => onSelectExisting(exactMatch)}
-                                        className="ml-1 text-[#137fec] hover:underline"
+                                        className="ml-1 text-brand hover:underline"
                                     >
                                         Usar existente
                                     </button>
@@ -143,9 +143,9 @@ export function FuzzyMatchSelect({
 
             {/* Suggestions dropdown */}
             {isOpen && suggestions.length > 0 && !exactMatch && (
-                <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] shadow-xl">
-                    <div className="p-2 border-b border-gray-200 dark:border-[#3b4754]">
-                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc]">
+                <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] shadow-xl">
+                    <div className="p-2 border-b border-gray-200 dark:border-sidebar-border">
+                        <p className="text-xs text-gray-600 dark:text-muted-foreground">
                             <span className="material-symbols-outlined text-xs mr-1">lightbulb</span>
                             Items similares existentes:
                         </p>
@@ -163,7 +163,7 @@ export function FuzzyMatchSelect({
                                     }
                                     setIsOpen(false)
                                 }}
-                                className="w-full px-3 py-2 text-left hover:bg-[#3b4754]/50 transition-colors flex items-center justify-between group"
+                                className="w-full px-3 py-2 text-left hover:bg-sidebar-border/50 transition-colors flex items-center justify-between group"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-gray-900 dark:text-white">{item.name}</span>
@@ -171,12 +171,12 @@ export function FuzzyMatchSelect({
                                         ? 'bg-red-500/20 text-red-400'
                                         : item.score > 0.6
                                             ? 'bg-yellow-500/20 text-yellow-400'
-                                            : 'bg-[#3b4754] text-gray-600 dark:text-[#b0bfcc]'
+                                            : 'bg-sidebar-border text-gray-600 dark:text-muted-foreground'
                                         }`}>
                                         {Math.round(item.score * 100)}% similar
                                     </span>
                                 </div>
-                                <span className="text-xs text-[#137fec] opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-xs text-brand opacity-0 group-hover:opacity-100 transition-opacity">
                                     Usar este →
                                 </span>
                             </button>

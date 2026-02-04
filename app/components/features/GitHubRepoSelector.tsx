@@ -94,9 +94,9 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
     // Loading state
     if (loading) {
         return (
-            <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-[#3b4754] p-6 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#137fec] border-t-transparent mx-auto mb-3"></div>
-                <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">Loading your GitHub repositories...</p>
+            <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-sidebar-border p-6 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-brand border-t-transparent mx-auto mb-3"></div>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">Loading your GitHub repositories...</p>
             </div>
         )
     }
@@ -109,7 +109,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                     GitHub Account Required
                 </h4>
-                <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-4">
+                <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
                     To submit a GitHub repository, please log out and log back in using your GitHub account.
                 </p>
                 <a
@@ -133,7 +133,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                 <p className="text-sm text-red-400 mb-3">{error}</p>
                 <button
                     onClick={fetchRepos}
-                    className="text-sm text-[#137fec] hover:underline"
+                    className="text-sm text-brand hover:underline"
                 >
                     Try again
                 </button>
@@ -144,9 +144,9 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
     // Empty state
     if (repos.length === 0) {
         return (
-            <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-[#3b4754] p-6 text-center">
-                <span className="material-symbols-outlined text-4xl text-gray-600 dark:text-[#b0bfcc] mb-3">folder_off</span>
-                <p className="text-sm text-gray-600 dark:text-[#b0bfcc]">
+            <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-sidebar-border p-6 text-center">
+                <span className="material-symbols-outlined text-4xl text-gray-600 dark:text-muted-foreground mb-3">folder_off</span>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">
                     No public repositories found in your GitHub account.
                 </p>
             </div>
@@ -157,7 +157,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
         <div className="space-y-3">
             {/* Search */}
             <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc] text-lg">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground text-lg">
                     search
                 </span>
                 <input
@@ -165,14 +165,14 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search repositories..."
-                    className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 dark:border-[#3b4754] bg-gray-50 dark:bg-[#101922] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] text-sm"
+                    className="w-full h-10 pl-10 pr-4 rounded-lg border border-gray-200 dark:border-sidebar-border bg-gray-50 dark:bg-sidebar text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec] text-sm"
                 />
             </div>
 
             {/* Repo list */}
-            <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 dark:border-[#3b4754] divide-y divide-gray-200 dark:divide-[#3b4754]">
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 dark:border-sidebar-border divide-y divide-gray-200 dark:divide-[#3b4754]">
                 {filteredRepos.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-gray-600 dark:text-[#b0bfcc]">
+                    <div className="p-4 text-center text-sm text-gray-600 dark:text-muted-foreground">
                         No repositories match your search
                     </div>
                 ) : (
@@ -181,7 +181,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                             key={repo.id}
                             type="button"
                             onClick={() => onSelect(repo.url)}
-                            className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-[#1a232e] transition-colors ${selectedUrl === repo.url ? 'bg-[#137fec]/10 border-l-2 border-l-[#137fec]' : ''
+                            className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-[#1a232e] transition-colors ${selectedUrl === repo.url ? 'bg-brand/10 border-l-2 border-l-[#137fec]' : ''
                                 }`}
                         >
                             <div className="flex items-start justify-between gap-2">
@@ -191,15 +191,15 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                                             {repo.name}
                                         </span>
                                         {selectedUrl === repo.url && (
-                                            <span className="material-symbols-outlined text-[#137fec] text-base">check_circle</span>
+                                            <span className="material-symbols-outlined text-brand text-base">check_circle</span>
                                         )}
                                     </div>
                                     {repo.description && (
-                                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc] line-clamp-1 mt-0.5">
+                                        <p className="text-xs text-gray-600 dark:text-muted-foreground line-clamp-1 mt-0.5">
                                             {repo.description}
                                         </p>
                                     )}
-                                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600 dark:text-[#b0bfcc]">
+                                    <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-600 dark:text-muted-foreground">
                                         {repo.language && (
                                             <span className="flex items-center gap-1">
                                                 <span
@@ -223,7 +223,7 @@ export function GitHubRepoSelector({ onSelect, selectedUrl }: GitHubRepoSelector
                 )}
             </div>
 
-            <p className="text-xs text-gray-600 dark:text-[#b0bfcc]">
+            <p className="text-xs text-gray-600 dark:text-muted-foreground">
                 Showing {filteredRepos.length} of {repos.length} public repositories
             </p>
         </div>
