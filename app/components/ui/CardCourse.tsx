@@ -55,9 +55,9 @@ export function CardCourse({
                     ? 'border-green-500/50 bg-green-500/10'
                     : 'border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] hover:border-brand/50'
                     }`}>
-                    <div className="flex gap-4 relative">
+                    <div className="flex flex-col md:flex-row gap-4 relative">
                         {/* Thumbnail */}
-                        <div className="relative h-24 my-auto mx-0 w-40 shrink-0 align-center overflow-hidden rounded-lg bg-sidebar-border">
+                        <div className="relative h-24 md:my-auto md:mx-0 mx-auto my-0 w-40 shrink-0 align-center  overflow-hidden rounded-lg bg-sidebar-border">
                             <FallbackImage
                                 as="img"
                                 src={thumbnail_url || ''}
@@ -85,7 +85,7 @@ export function CardCourse({
                                             {title}
                                         </h3>
                                         {status !== 'published' && (
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                                            <span className={`absolute top-0 left-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
                                                 status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
                                                     'bg-red-100 text-red-800'
                                                 }`}>
@@ -106,7 +106,7 @@ export function CardCourse({
                                         )}
                                         <span className="text-brand">⚡ {xp_reward} XP</span>
                                         {exercisesCount !== undefined && exercisesCount > 0 && (
-                                            <span>✍️ {exercisesCount} ejercicio(s)</span>
+                                            <span>✍️ {exercisesCount}</span>
                                         )}
                                     </div>
                                 </div>
