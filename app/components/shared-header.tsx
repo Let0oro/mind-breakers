@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ThemeToggle } from './ThemeToggle'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import Image from 'next/image'
 
 export default function SharedHeader() {
@@ -50,11 +50,11 @@ export default function SharedHeader() {
                                 Back to Home
                             </Link>
                             {pathname?.startsWith('/login') ? (
-                                <Link href="/register" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-[#137fec] text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
+                                <Link href="/register" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
                                     <span className="truncate">Create account</span>
                                 </Link>
                             ) : (
-                                <Link href="/login" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-[#137fec] text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#137fec]/90 transition-colors">
+                                <Link href="/login" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
                                     <span className="truncate">Login</span>
                                 </Link>
                             )}

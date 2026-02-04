@@ -93,14 +93,14 @@ export default function Recommendations({ mode, contextId, contextType, title }:
                         href={`/dashboard/${contextType === 'path' || (!contextType && !item.path_id) ? 'paths' : 'courses'}/${item.id}`}
                         className="block group"
                     >
-                        <div className="bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] rounded-xl overflow-hidden hover:border-[#137fec] transition-colors">
+                        <div className="bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border rounded-xl overflow-hidden hover:border-brand transition-colors">
                             {item.thumbnail_url && (
                                 <div className="h-32 bg-gray-200 dark:bg-gray-700 relative">
                                     <img src={item.thumbnail_url} className="w-full h-full object-cover" alt={item.title} />
                                 </div>
                             )}
                             <div className="p-4">
-                                <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-[#137fec] transition-colors truncate">
+                                <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors truncate">
                                     {item.title}
                                 </h4>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">

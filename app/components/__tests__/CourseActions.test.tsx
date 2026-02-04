@@ -1,6 +1,6 @@
 import { expect, test, describe, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { CourseActions } from '../CourseActions'
+import { CourseActions } from '../features/CourseActions'
 import { createClient } from '@/utils/supabase/client'
 
 // Mocks

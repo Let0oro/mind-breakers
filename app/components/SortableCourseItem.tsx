@@ -28,7 +28,7 @@ export function SortableCourseItem({ id, children }: SortableCourseItemProps) {
 
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
-            <div className="flex items-center gap-3 p-3 bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] rounded-lg mb-2">
+            <div className="flex items-center gap-3 p-3 bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border rounded-lg mb-2">
                 {/* Drag Handle */}
                 <button
                     type="button"

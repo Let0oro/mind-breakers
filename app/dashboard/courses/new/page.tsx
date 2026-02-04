@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import SimilarItemsList from '@/components/SimilarItemsList'
+import SimilarItemsList from '@/components/features/SimilarItemsList'
 
 import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
 import { Course } from '@/lib/types'
@@ -283,20 +283,20 @@ export default function NewCoursePage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.back()}
-            className="text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
+            className="text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Create Course</h2>
         </div>
-        <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
+        <p className="text-gray-600 dark:text-muted-foreground text-base">
           Add a new course to an existing learning path
         </p>
       </header>
 
       <div className="flex gap-8 flex-col lg:flex-row items-start">
         {/* Form */}
-        <div className="flex-1 w-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8">
+        <div className="flex-1 w-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
@@ -318,7 +318,7 @@ export default function NewCoursePage() {
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
                     link
                   </span>
                   <input
@@ -326,7 +326,7 @@ export default function NewCoursePage() {
                     id="link_url"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                     placeholder="https://youtube.com/watch?v=... or any URL"
                   />
                 </div>
@@ -334,11 +334,11 @@ export default function NewCoursePage() {
                   type="button"
                   onClick={handleFetchMetadata}
                   disabled={!linkUrl.trim() || isFetchingMetadata}
-                  className="h-12 px-4 rounded-lg bg-[#137fec]/20 text-[#137fec] font-medium hover:bg-[#137fec]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="h-12 px-4 rounded-lg bg-brand/20 text-brand font-medium hover:bg-brand/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   {isFetchingMetadata ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#137fec] border-t-transparent"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-brand border-t-transparent"></div>
                       <span>Fetching...</span>
                     </>
                   ) : (
@@ -349,7 +349,7 @@ export default function NewCoursePage() {
                   )}
                 </button>
               </div>
-              <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+              <p className="text-gray-600 dark:text-muted-foreground text-xs">
                 Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
                 <span className="block mt-1 text-amber-600 dark:text-amber-400">
                   💡 Use public URLs (without login). If auto-fill doesn&apos;t work, you can enter the data manually.
@@ -373,7 +373,7 @@ export default function NewCoursePage() {
                 value={pathId}
                 onChange={(e) => setPathId(e.target.value)}
                 required
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               >
                 <option value="">Select a learning path</option>
                 {paths.map((path) => (
@@ -398,7 +398,7 @@ export default function NewCoursePage() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 placeholder="e.g., Introduction to React Hooks"
               />
               <SimilarItemsList
@@ -421,7 +421,7 @@ export default function NewCoursePage() {
                 id="summary"
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 placeholder="Brief one-liner about the course"
               />
             </div>
@@ -439,7 +439,7 @@ export default function NewCoursePage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
                 placeholder="What will students learn?"
               />
             </div>
@@ -454,7 +454,7 @@ export default function NewCoursePage() {
               </label>
               <div className="flex gap-4">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
                     image
                   </span>
                   <input
@@ -462,12 +462,12 @@ export default function NewCoursePage() {
                     id="thumbnail_url"
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
                 {thumbnailUrl && (
-                  <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-[#3b4754] flex-shrink-0">
+                  <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-sidebar-border flex-shrink-0">
                     <img
                       src={thumbnailUrl}
                       alt="Thumbnail preview"
@@ -491,7 +491,7 @@ export default function NewCoursePage() {
                   id="organization_id"
                   value={organizationId}
                   onChange={(e) => setOrganizationId(e.target.value)}
-                  className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                  className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 >
                   <option value="">None</option>
                   {organizations.map((org) => (
@@ -514,7 +514,7 @@ export default function NewCoursePage() {
                       onMouseEnter={() => setShowXpTooltip(true)}
                       onMouseLeave={() => !xpNeedsAttention && setShowXpTooltip(false)}
                       onClick={() => setShowXpTooltip(!showXpTooltip)}
-                      className="text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] transition-colors"
+                      className="text-gray-600 dark:text-muted-foreground hover:text-brand transition-colors"
                     >
                       <span className="material-symbols-outlined text-base">info</span>
                     </button>
@@ -548,9 +548,9 @@ export default function NewCoursePage() {
                   min={0}
                   max={300}
                   step={25}
-                  className={`w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all ${xpNeedsAttention
+                  className={`w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all ${xpNeedsAttention
                     ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
-                    : 'border-gray-200 dark:border-[#3b4754]'
+                    : 'border-gray-200 dark:border-sidebar-border'
                     }`}
                 />
               </div>
@@ -568,13 +568,13 @@ export default function NewCoursePage() {
                 value={orderIndex}
                 onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
                 min={0}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                 placeholder="0"
               />
-              <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">Lower numbers appear first (0 = first)</p>
+              <p className="text-gray-600 dark:text-muted-foreground text-xs">Lower numbers appear first (0 = first)</p>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-[#3b4754] my-8"></div>
+            <div className="border-t border-gray-200 dark:border-sidebar-border my-8"></div>
 
             {/* Exercise Section using Dynamic List */}
             <div className="space-y-6">
@@ -583,7 +583,7 @@ export default function NewCoursePage() {
                 <button
                   type="button"
                   onClick={addExercise}
-                  className="px-4 py-2 rounded-lg bg-[#137fec]/10 text-[#137fec] hover:bg-[#137fec]/20 font-medium transition-colors flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 font-medium transition-colors flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined">add</span>
                   Add Exercise
@@ -591,16 +591,16 @@ export default function NewCoursePage() {
               </div>
 
               {exercises.length === 0 ? (
-                <div className="text-center py-8 rounded-xl border border-dashed border-gray-300 dark:border-[#3b4754] bg-gray-50/50 dark:bg-[#1a232e]/50">
+                <div className="text-center py-8 rounded-xl border border-dashed border-gray-300 dark:border-sidebar-border bg-gray-50/50 dark:bg-[#1a232e]/50">
                   <p className="text-gray-500 dark:text-gray-400">No exercises added yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {exercises.map((exercise, index) => (
-                    <div key={exercise.id} className="rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] overflow-hidden">
+                    <div key={exercise.id} className="rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] overflow-hidden">
                       <div className="p-4 bg-gray-50 dark:bg-[#283039] flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#137fec] text-white text-xs font-bold">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white text-xs font-bold">
                             {index + 1}
                           </span>
                           <input
@@ -628,7 +628,7 @@ export default function NewCoursePage() {
                               value={exercise.description}
                               onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#137fec] transition-all resize-none"
+                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
                               placeholder="Brief description..."
                             />
                           </div>
@@ -638,7 +638,7 @@ export default function NewCoursePage() {
                               value={exercise.requirements}
                               onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white text-sm focus:outline-none focus:border-[#137fec] transition-all resize-none"
+                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
                               placeholder="- Validations&#10;- Tests"
                             />
                           </div>
@@ -651,11 +651,11 @@ export default function NewCoursePage() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-[#3b4754]">
+            <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-sidebar-border">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 h-12 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
+                className="px-6 h-12 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
               >
                 Cancel
               </button>
@@ -664,7 +664,7 @@ export default function NewCoursePage() {
                   type="button"
                   onClick={() => handleSaveClick('draft')}
                   disabled={loading}
-                  className={`px-6 h-12 rounded-lg border border-[#137fec] text-[#137fec] font-bold hover:bg-[#137fec]/10 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`px-6 h-12 rounded-lg border border-brand text-brand font-bold hover:bg-brand/10 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading ? 'Saving...' : 'Save Draft'}
                 </button>
@@ -672,7 +672,7 @@ export default function NewCoursePage() {
                   type="button"
                   onClick={() => handleSaveClick('published')}
                   disabled={loading}
-                  className={`px-6 h-12 rounded-lg bg-[#137fec] text-white font-bold hover:bg-[#137fec]/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`px-6 h-12 rounded-lg bg-brand text-white font-bold hover:bg-brand/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading ? (
                     <>
@@ -696,12 +696,12 @@ export default function NewCoursePage() {
         <div className="hidden lg:block w-80 space-y-6">
           {/* We can put tips here or even the similar items if we wanted a permanent place, 
                but for now SimilarItemsList is inline for better context */}
-          <div className="bg-[#137fec]/5 border border-[#137fec]/20 rounded-xl p-6">
-            <h4 className="font-bold text-[#137fec] mb-2 flex items-center gap-2">
+          <div className="bg-brand/5 border border-brand/20 rounded-xl p-6">
+            <h4 className="font-bold text-brand mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined">lightbulb</span>
               Pro Tips
             </h4>
-            <ul className="text-sm text-gray-600 dark:text-[#b0bfcc] space-y-3">
+            <ul className="text-sm text-gray-600 dark:text-muted-foreground space-y-3">
               <li>• Use clear, descriptive titles.</li>
               <li>• Add a high-quality thumbnail.</li>
               <li>• Check for existing courses before creating a new one to avoid duplicates.</li>

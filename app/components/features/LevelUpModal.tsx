@@ -49,10 +49,10 @@ export function LevelUpModal() {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="relative bg-white dark:bg-[#1a232e] rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-gray-200 dark:border-[#3b4754] animate-in zoom-in-95 duration-300">
+            <div className="relative bg-white dark:bg-[#1a232e] rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border border-gray-200 dark:border-sidebar-border animate-in zoom-in-95 duration-300">
 
                 {/* Glow effect behind the badge */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#137fec]/20 rounded-full blur-3xl -z-10"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-brand/20 rounded-full blur-3xl -z-10"></div>
 
                 <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#137fec] to-[#3b82f6] shadow-lg shadow-blue-500/30 text-white">
                     <span className="material-symbols-outlined text-6xl">military_tech</span>
@@ -62,13 +62,13 @@ export function LevelUpModal() {
                     LEVEL UP!
                 </h2>
 
-                <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-8">
-                    You&apos;ve reached <strong className="text-[#137fec]">Level {level}</strong>. Keep up the amazing work!
+                <p className="text-gray-600 dark:text-muted-foreground text-lg mb-8">
+                    You&apos;ve reached <strong className="text-brand">Level {level}</strong>. Keep up the amazing work!
                 </p>
 
                 <button
                     onClick={() => setIsOpen(false)}
-                    className="w-full py-3 px-6 rounded-xl bg-[#137fec] text-white font-bold text-base hover:bg-[#137fec]/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25"
+                    className="w-full py-3 px-6 rounded-xl bg-brand text-white font-bold text-base hover:bg-brand/90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/25"
                 >
                     Continue Learning
                 </button>

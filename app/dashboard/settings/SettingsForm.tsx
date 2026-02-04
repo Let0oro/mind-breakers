@@ -125,15 +125,15 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             )}
 
             {/* Profile Information Form */}
-            <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+            <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
                 <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#137fec]">person</span>
+                    <span className="material-symbols-outlined text-brand">person</span>
                     Profile Information
                 </h3>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                     <div>
-                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                             Profile Image
                         </label>
                         <div className="flex items-center gap-4">
@@ -143,60 +143,60 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                                     alt="Current Avatar"
                                     width={48}
                                     height={48}
-                                    className="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-[#3b4754]"
+                                    className="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-sidebar-border"
                                 />
                             )}
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-                                className="block w-full text-sm text-gray-600 dark:text-[#b0bfcc] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#137fec] file:text-gray-900 dark:text-white hover:file:bg-[#137fec]/90 cursor-pointer"
+                                className="block w-full text-sm text-gray-600 dark:text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-brand file:text-gray-900 dark:text-white hover:file:bg-brand/90 cursor-pointer"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                             Email
                         </label>
                         <input
                             type="email"
                             value={user.email}
                             disabled
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] cursor-not-allowed opacity-70"
+                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground cursor-not-allowed opacity-70"
                         />
-                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
+                        <p className="text-xs text-gray-600 dark:text-muted-foreground mt-1">
                             To change your email, please contact support or use the auth provider settings.
                         </p>
                     </div>
 
                     <div>
-                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                             Username
                         </label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                             placeholder="Enter username"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                        <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                             Bio
                         </label>
                         <textarea
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
-                            className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors resize-none"
+                            className="w-full h-32 px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors resize-none"
                             placeholder="Tell us about yourself..."
                         />
                     </div>
 
                     <div className="space-y-4">
-                        <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium">
+                        <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium">
                             Social Links
                         </label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,28 +204,28 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                                 type="text"
                                 value={socialLinks?.twitter || ''}
                                 onChange={(e) => setSocialLinks({ ...socialLinks, twitter: e.target.value })}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="Twitter URL"
                             />
                             <input
                                 type="text"
                                 value={socialLinks?.linkedin || ''}
                                 onChange={(e) => setSocialLinks({ ...socialLinks, linkedin: e.target.value })}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="LinkedIn URL"
                             />
                             <input
                                 type="text"
                                 value={socialLinks?.github || ''}
                                 onChange={(e) => setSocialLinks({ ...socialLinks, github: e.target.value })}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="GitHub URL"
                             />
                             <input
                                 type="text"
                                 value={socialLinks?.website || ''}
                                 onChange={(e) => setSocialLinks({ ...socialLinks, website: e.target.value })}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="Personal Website URL"
                             />
                         </div>
@@ -235,7 +235,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="h-10 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-10 px-6 rounded-lg bg-brand text-gray-900 dark:text-white font-medium hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Saving...' : 'Save Changes'}
                         </button>
@@ -245,35 +245,35 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
 
             {/* Change Password Form */}
             {user?.app_metadata?.provider === 'email' ? (
-                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
                     <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#137fec]">lock</span>
+                        <span className="material-symbols-outlined text-brand">lock</span>
                         Change Password
                     </h3>
 
                     <form onSubmit={handleChangePassword} className="space-y-4">
                         <div>
-                            <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                            <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                                 New Password
                             </label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="Enter new password"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-gray-600 dark:text-[#b0bfcc] text-sm font-medium mb-2">
+                            <label className="block text-gray-600 dark:text-muted-foreground text-sm font-medium mb-2">
                                 Confirm New Password
                             </label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white focus:outline-none focus:border-[#137fec] transition-colors"
+                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-colors"
                                 placeholder="Confirm new password"
                             />
                         </div>
@@ -282,7 +282,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                             <button
                                 type="submit"
                                 disabled={isLoading || !password}
-                                className="h-10 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-medium hover:bg-[#137fec]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-10 px-6 rounded-lg bg-brand text-gray-900 dark:text-white font-medium hover:bg-brand/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? 'Updating...' : 'Update Password'}
                             </button>
@@ -290,12 +290,12 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
                     </form>
                 </section>
             ) : (
-                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-6">
+                <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
                     <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#137fec]">lock</span>
+                        <span className="material-symbols-outlined text-brand">lock</span>
                         Security
                     </h3>
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">
+                    <p className="text-gray-600 dark:text-muted-foreground">
                         You are logged in via <span className="text-gray-900 dark:text-white font-semibold capitalize">{user?.app_metadata?.provider}</span>.
                         Please manage your password and security settings directly through their platform.
                     </p>

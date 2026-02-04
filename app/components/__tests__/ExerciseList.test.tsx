@@ -1,6 +1,6 @@
 import { expect, test, describe } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { ExerciseList } from '../ExerciseList'
+import { ExerciseList } from '../features/ExerciseList'
 
 describe('ExerciseList', () => {
     test('renders empty state', () => {

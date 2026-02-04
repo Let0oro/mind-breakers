@@ -49,11 +49,11 @@ vi.mock('next/navigation', () => ({
     notFound: vi.fn(),
 }))
 
-vi.mock('@/components/YouTubePlayer', () => ({
+vi.mock('@/components/ui/YouTubePlayer', () => ({
     YouTubePlayer: () => <div data-testid="youtube-player">Video</div>
 }))
 
-vi.mock('@/components/CourseActions', () => ({
+vi.mock('@/components/features/CourseActions', () => ({
     CourseActions: () => <button>Actions</button>
 }))
 

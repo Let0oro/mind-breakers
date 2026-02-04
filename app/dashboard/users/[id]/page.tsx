@@ -75,7 +75,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             <div className="layout-content-container flex flex-col max-w-[1024px] flex-1 px-4 sm:px-10">
 
                 {/* Profile Header Section */}
-                <div className="flex p-4 @container bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] mb-6 shadow-sm">
+                <div className="flex p-4 @container bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border mb-6 shadow-sm">
                     <div className="flex w-full flex-col gap-6 md:flex-row md:justify-between md:items-center">
                         <div className="flex flex-col md:flex-row gap-6">
                             <div className="relative">
@@ -94,7 +94,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                         </div>
                                     )}
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 bg-[#137fec] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1 border-2 border-white dark:border-[#1a232e]">
+                                <div className="absolute -bottom-2 -right-2 bg-brand text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1 border-2 border-white dark:border-[#1a232e]">
                                     <span className="material-symbols-outlined text-xs">star</span> LVL {currentLevel}
                                 </div>
                             </div>
@@ -104,7 +104,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                     <h1 className="text-gray-900 dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em]">
                                         {profile.username || 'Anonymous User'}
                                     </h1>
-                                    <span className="material-symbols-outlined text-[#137fec] text-xl" title="Verified Creator">verified</span>
+                                    <span className="material-symbols-outlined text-brand text-xl" title="Verified Creator">verified</span>
                                 </div>
                                 <p className="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal whitespace-pre-wrap">
                                     {profile.bio || 'Learning Enthusiast • Community Member'}
@@ -129,7 +129,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                             </a>
                                         )}
                                         {profile.social_links.website && (
-                                            <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#137fec] transition-colors">
+                                            <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-brand transition-colors">
                                                 <span className="material-symbols-outlined text-xl">language</span>
                                             </a>
                                         )}
@@ -167,8 +167,8 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                     <button
                                         type="submit"
                                         className={`flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 text-sm font-bold leading-normal tracking-[0.015em] transition-all shadow-lg ${isFollowing
-                                            ? 'bg-gray-100 dark:bg-[#3b4754] text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-[#3b4754]/80'
-                                            : 'bg-[#137fec] text-white hover:opacity-90 shadow-[#137fec]/20'
+                                            ? 'bg-gray-100 dark:bg-sidebar-border text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-sidebar-border/80'
+                                            : 'bg-brand text-white hover:opacity-90 shadow-[#137fec]/20'
                                             }`}
                                     >
                                         <span className="material-symbols-outlined mr-2 text-base">{isFollowing ? 'person_remove' : 'person_add'}</span>
@@ -176,13 +176,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                     </button>
                                 </form>
                             ) : (
-                                <Link href="/dashboard/settings" className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-gray-100 dark:bg-[#3b4754] text-gray-900 dark:text-white text-sm font-bold leading-normal hover:bg-gray-200 dark:hover:bg-[#3b4754]/80 transition-colors">
+                                <Link href="/dashboard/settings" className="flex min-w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-6 bg-gray-100 dark:bg-sidebar-border text-gray-900 dark:text-white text-sm font-bold leading-normal hover:bg-gray-200 dark:hover:bg-sidebar-border/80 transition-colors">
                                     <span className="material-symbols-outlined mr-2 text-base">edit</span>
                                     <span>Edit Profile</span>
                                 </Link>
                             )}
 
-                            {/* <button className="flex items-center justify-center rounded-lg h-11 w-11 bg-gray-100 dark:bg-[#3b4754] text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-[#3b4754]/80 transition-colors border border-gray-200 dark:border-[#3b4754]">
+                            {/* <button className="flex items-center justify-center rounded-lg h-11 w-11 bg-gray-100 dark:bg-sidebar-border text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-sidebar-border/80 transition-colors border border-gray-200 dark:border-sidebar-border">
                                 <span className="material-symbols-outlined">more_horiz</span>
                             </button> */}
                         </div>
@@ -191,11 +191,11 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
                 {/* XP and Social Stats */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="lg:col-span-2 flex flex-col gap-3 p-6 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] shadow-sm">
+                    <div className="lg:col-span-2 flex flex-col gap-3 p-6 bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border shadow-sm">
                         <div className="flex gap-6 justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 bg-[#137fec]/10 rounded-lg">
-                                    <span className="material-symbols-outlined text-[#137fec]">trending_up</span>
+                                <div className="p-2 bg-brand/10 rounded-lg">
+                                    <span className="material-symbols-outlined text-brand">trending_up</span>
                                 </div>
                                 <div>
                                     <p className="text-gray-900 dark:text-white text-base font-semibold leading-normal">Next Milestone: Level {currentLevel + 1}</p>
@@ -204,26 +204,26 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                                     </p>
                                 </div>
                             </div>
-                            <p className="text-[#137fec] text-lg font-bold leading-normal">{Math.round(progressPercent)}%</p>
+                            <p className="text-brand text-lg font-bold leading-normal">{Math.round(progressPercent)}%</p>
                         </div>
                         <div className="rounded-full bg-gray-100 dark:bg-gray-800 h-3 w-full overflow-hidden mt-2">
-                            <div className="h-full rounded-full bg-[#137fec]" style={{ width: `${progressPercent}%` }}></div>
+                            <div className="h-full rounded-full bg-brand" style={{ width: `${progressPercent}%` }}></div>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
+                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
                             <p className="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">
                                 {profile.total_xp?.toLocaleString() || 0}
                             </p>
                             <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider">Total XP</p>
                         </div>
                         {/* Placeholders for Social Stats */}
-                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
+                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
                             <p className="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">{followerCount}</p>
                             <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider">Followers</p>
                         </div>
-                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
+                        <div className="flex-1 min-w-[100px] flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] p-4 items-start shadow-sm">
                             <p className="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">{followingCount}</p>
                             <p className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wider">Following</p>
                         </div>

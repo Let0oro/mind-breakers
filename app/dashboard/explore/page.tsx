@@ -200,13 +200,13 @@ function ExplorePageContent() {
             {/* Header Section */}
             <header className="mb-8">
                 <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight mb-2">Explore</h2>
-                <p className="text-gray-600 dark:text-[#b0bfcc] text-base mb-6">
+                <p className="text-gray-600 dark:text-muted-foreground text-base mb-6">
                     Discover learning paths, courses, and organizations
                 </p>
 
                 {/* Search Bar */}
                 <div className="relative max-w-2xl">
-                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-[#b0bfcc]">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
                         search
                     </span>
                     <input
@@ -214,13 +214,13 @@ function ExplorePageContent() {
                         placeholder="Search for anything..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-14 pl-12 pr-4 rounded-lg bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                        className="w-full h-14 pl-12 pr-4 rounded-lg bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
                     />
                 </div>
             </header>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[#3b4754]">
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-sidebar-border">
                 {[
                     { key: 'all', label: 'All' },
                     { key: 'paths', label: 'Learning Paths' },
@@ -231,8 +231,8 @@ function ExplorePageContent() {
                         key={tab.key}
                         onClick={() => handleTabChange(tab.key as typeof activeTab)}
                         className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.key
-                            ? 'border-[#137fec] text-[#137fec]'
-                            : 'border-transparent text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white'
+                            ? 'border-brand text-brand'
+                            : 'border-transparent text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white'
                             }`}
                     >
                         {tab.label}
@@ -243,7 +243,7 @@ function ExplorePageContent() {
             {/* Results */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-[#3b4754] border-t-[#137fec]"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-sidebar-border border-t-[#137fec]"></div>
                 </div>
             ) : results.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -252,14 +252,14 @@ function ExplorePageContent() {
                     ))}
                 </div>
             ) : (
-                <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
+                <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-12 text-center">
                     <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">
                         search_off
                     </span>
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">
+                    <p className="text-gray-600 dark:text-muted-foreground text-lg mb-2">
                         {searchQuery ? 'No results found' : 'Start typing to search'}
                     </p>
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-sm">
+                    <p className="text-gray-600 dark:text-muted-foreground text-sm">
                         {searchQuery ? 'Try different keywords' : 'Search across paths, courses, and organizations'}
                     </p>
                 </div>
@@ -311,12 +311,12 @@ function ResultCard({ result }: { result: SearchResult }) {
     return (
         <Link
             href={getLink()}
-            className="group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/50 transition-all overflow-hidden relative"
+            className="group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all overflow-hidden relative"
         >
             {/* Type Badge & Icon */}
-            <div className="p-5 border-b border-gray-200 dark:border-[#3b4754]">
+            <div className="p-5 border-b border-gray-200 dark:border-sidebar-border">
                 <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-gray-600 dark:text-[#b0bfcc] uppercase tracking-wider">
+                    <span className="text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">
                         {getTypeLabel()}
                     </span>
                     <div className="flex items-center gap-2">
@@ -325,12 +325,12 @@ function ResultCard({ result }: { result: SearchResult }) {
                                 bookmark
                             </span>
                         )}
-                        <span className="material-symbols-outlined text-[#137fec]">
+                        <span className="material-symbols-outlined text-brand">
                             {getIcon()}
                         </span>
                     </div>
                 </div>
-                <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-[#137fec] transition-colors line-clamp-2">
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-brand transition-colors line-clamp-2">
                     {result.title}
                 </h3>
             </div>
@@ -338,13 +338,13 @@ function ResultCard({ result }: { result: SearchResult }) {
             {/* Content */}
             <div className="p-5">
                 {result.summary && (
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2 mb-3">
+                    <p className="text-gray-600 dark:text-muted-foreground text-sm line-clamp-2 mb-3">
                         {result.summary}
                     </p>
                 )}
 
                 {result.description && !result.summary && (
-                    <p className="text-gray-600 dark:text-[#b0bfcc] text-sm line-clamp-2 mb-3">
+                    <p className="text-gray-600 dark:text-muted-foreground text-sm line-clamp-2 mb-3">
                         {result.description}
                     </p>
                 )}
@@ -352,25 +352,25 @@ function ResultCard({ result }: { result: SearchResult }) {
                 {/* Metadata */}
                 <div className="flex flex-wrap gap-3 text-xs">
                     {result.organization && (
-                        <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-muted-foreground">
                             <span className="material-symbols-outlined text-sm">business</span>
                             <span>{result.organization}</span>
                         </div>
                     )}
                     {result.xp_reward && (
-                        <div className="flex items-center gap-1 text-[#137fec]">
+                        <div className="flex items-center gap-1 text-brand">
                             <span className="material-symbols-outlined text-sm">star</span>
                             <span className="font-bold">{result.xp_reward} XP</span>
                         </div>
                     )}
                     {result.courseCount !== undefined && result.courseCount > 0 && (
-                        <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-muted-foreground">
                             <span className="material-symbols-outlined text-sm">school</span>
                             <span>{result.courseCount} courses</span>
                         </div>
                     )}
                     {result.pathCount !== undefined && result.pathCount > 0 && (
-                        <div className="flex items-center gap-1 text-gray-600 dark:text-[#b0bfcc]">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-muted-foreground">
                             <span className="material-symbols-outlined text-sm">route</span>
                             <span>{result.pathCount} paths</span>
                         </div>

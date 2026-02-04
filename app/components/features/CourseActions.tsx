@@ -189,7 +189,7 @@ export function CourseActions({
           ) : (
             <a
               href="#exercises"
-              className="rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-white hover:bg-[#137fec]/90 transition-colors"
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors"
             >
               Vamos con el proyecto final!
             </a>
