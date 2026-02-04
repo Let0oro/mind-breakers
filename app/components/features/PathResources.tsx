@@ -94,7 +94,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
 
     return (
         <div className="mt-8 rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap gap-3 items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-brand">library_books</span>
                     <h2 className="text-lg font-bold text-gray-900 dark:text-white">
