@@ -45,19 +45,19 @@ describe('CourseActions', () => {
             status="published"
         />)
 
-        const saveButton = screen.getByText('☆ Guardar')
+        const saveButton = screen.getByText('Guardar')
         fireEvent.click(saveButton)
 
         await waitFor(() => {
-            expect(screen.getByText('★ Guardado')).toBeInTheDocument()
+            expect(screen.getByText('Guardado')).toBeInTheDocument()
             // Verify insert was called (since it was not saved)
             expect(mockSupabase.from).toHaveBeenCalledWith('saved_courses')
         })
 
         // Click again to unsave
-        fireEvent.click(screen.getByText('★ Guardado'))
+        fireEvent.click(screen.getByText('Guardado'))
         await waitFor(() => {
-            expect(screen.getByText('☆ Guardar')).toBeInTheDocument()
+            expect(screen.getByText('Guardar')).toBeInTheDocument()
         })
     })
 
@@ -71,13 +71,13 @@ describe('CourseActions', () => {
             status="published"
         />)
 
-        const completeButton = screen.getByText('✓ Completar')
+        const completeButton = screen.getByText('Completar')
         fireEvent.click(completeButton)
 
         await waitFor(() => {
             expect(mockRouterRefresh).toHaveBeenCalled()
             // Should show "No completado" button now aka "Mark Incomplete" which implies it is completed
-            expect(screen.getByText('✕ No completado')).toBeInTheDocument()
+            expect(screen.getByText('No completado')).toBeInTheDocument()
             expect(mockSupabase.from).toHaveBeenCalledWith('user_course_progress')
         })
     })
@@ -94,12 +94,12 @@ describe('CourseActions', () => {
             status="published"
         />)
 
-        const incompleteButton = screen.getByText('✕ No completado')
+        const incompleteButton = screen.getByText('No completado')
         fireEvent.click(incompleteButton)
 
         await waitFor(() => {
             expect(mockRouterRefresh).toHaveBeenCalled()
-            expect(screen.getByText('✓ Completar')).toBeInTheDocument()
+            expect(screen.getByText('Completar')).toBeInTheDocument()
         })
     })
 })

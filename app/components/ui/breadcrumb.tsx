@@ -100,7 +100,7 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
                         ) : (
                             <>
                                 <Link
-                                    href={item.href || '#'}
+                                    href={item.href?.includes("organizations") ? "/dashboard/organizations/new" : item.href || '#'}
                                     className="text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     {item.label}
