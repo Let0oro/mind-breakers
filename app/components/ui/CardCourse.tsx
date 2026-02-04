@@ -57,7 +57,7 @@ export function CardCourse({
                     }`}>
                     <div className="flex flex-col md:flex-row gap-4 relative">
                         {/* Thumbnail */}
-                        <div className="relative h-24 md:my-auto md:mx-0 mx-auto my-0 w-40 shrink-0 align-center  overflow-hidden rounded-lg bg-sidebar-border">
+                        <div className="relative aspect-video w-full md:w-auto md:h-24 md:my-auto md:mx-0 mx-auto my-0 w-40 shrink-0 align-center  overflow-hidden rounded-lg bg-sidebar-border">
                             <FallbackImage
                                 as="img"
                                 src={thumbnail_url || ''}
@@ -65,7 +65,7 @@ export function CardCourse({
                                 className="h-full w-full object-cover"
                             />
                             {!thumbnail_url && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="absolute h-full w-full inset-0 flex items-center justify-center pointer-events-none">
                                     <span className="material-symbols-outlined h-10 w-10 text-gray-600 dark:text-muted-foreground">image</span>
                                 </div>
                             )}
