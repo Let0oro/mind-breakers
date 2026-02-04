@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { FuzzyMatchSelect } from '@/components/FuzzyMatchSelect'
+import { FuzzyMatchSelect } from '@/components/ui/FuzzyMatchSelect'
 
 
 
@@ -237,15 +237,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderOrganizations = () => (
         <div className="space-y-4">
             {pendingItems.organizations.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
+                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
                     <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">No hay organizaciones pendientes de validación</p>
+                    <p className="text-gray-600 dark:text-muted-foreground">No hay organizaciones pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.organizations.map((org) => (
                     <div
                         key={org.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30 transition-colors"
+                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
@@ -256,19 +256,19 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     </span>
                                 </div>
                                 {org.description && (
-                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 line-clamp-2">{org.description}</p>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">{org.description}</p>
                                 )}
                                 {org.website_url && (
                                     <a
                                         href={org.website_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-xs text-[#137fec] hover:underline"
+                                        className="text-xs text-brand hover:underline"
                                     >
                                         {org.website_url}
                                     </a>
                                 )}
-                                <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
                                     Creado: {new Date(org.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -282,7 +282,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         description: org.description,
                                         websiteUrl: org.website_url,
                                     })}
-                                    className="p-2 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                                    className="p-2 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
                                     title="Editar"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
@@ -320,9 +320,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderCourses = () => (
         <div className="space-y-4">
             {pendingItems.courses.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
+                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
                     <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">No hay cursos pendientes de validación</p>
+                    <p className="text-gray-600 dark:text-muted-foreground">No hay cursos pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.courses.map((course) => {
@@ -335,7 +335,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                             key={course.id}
                             className={`rounded-xl bg-white dark:bg-[#1a232e] p-6 border transition-colors ${isShadowDraft
                                 ? 'border-purple-500/30 hover:border-purple-500/50'
-                                : 'border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30'
+                                : 'border-gray-200 dark:border-sidebar-border hover:border-brand/30'
                                 }`}
                         >
                             <div className="flex items-start justify-between gap-4">
@@ -354,7 +354,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 line-clamp-2">
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">
                                         {isShadowDraft && draft?.summary ? draft.summary : course.summary}
                                     </p>
 
@@ -365,11 +365,11 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     )}
 
                                     {getOrgName(course.organizations) && (
-                                        <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mt-1">
+                                        <p className="text-xs text-gray-600 dark:text-muted-foreground mt-1">
                                             Organización: {getOrgName(course.organizations)}
                                         </p>
                                     )}
-                                    <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                    <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
                                         Actualizado: {new Date(course.created_at).toLocaleDateString('es-ES')}
                                     </p>
                                 </div>
@@ -415,15 +415,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderPaths = () => (
         <div className="space-y-4">
             {pendingItems.paths.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
+                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
                     <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">No hay learning paths pendientes de validación</p>
+                    <p className="text-gray-600 dark:text-muted-foreground">No hay learning paths pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.paths.map((path) => (
                     <div
                         key={path.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30 transition-colors"
+                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
@@ -434,14 +434,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     </span>
                                 </div>
                                 {path.summary && (
-                                    <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 line-clamp-2">{path.summary}</p>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">{path.summary}</p>
                                 )}
                                 {getOrgName(path.organizations) && (
-                                    <p className="text-xs text-gray-600 dark:text-[#b0bfcc]">
+                                    <p className="text-xs text-gray-600 dark:text-muted-foreground">
                                         Organización: {getOrgName(path.organizations)}
                                     </p>
                                 )}
-                                <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
                                     Creado: {new Date(path.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -454,7 +454,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         name: path.title,
                                         description: path.summary,
                                     })}
-                                    className="p-2 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                                    className="p-2 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
                                     title="Editar"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
@@ -491,15 +491,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderEdits = () => (
         <div className="space-y-4">
             {pendingItems.edits.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-[#3b4754]">
+                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
                     <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-[#b0bfcc]">No hay ediciones pendientes de validación</p>
+                    <p className="text-gray-600 dark:text-muted-foreground">No hay ediciones pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.edits.map((item) => (
                     <div
                         key={item.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754] hover:border-[#137fec]/30 transition-colors"
+                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
@@ -511,19 +511,19 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         {item.resource_type}
                                     </span>
                                 </div>
-                                <p className="text-sm text-gray-600 dark:text-[#b0bfcc] mb-2 font-medium">
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 font-medium">
                                     Razón: {item.reason || 'Sin razón especificada'}
                                 </p>
 
                                 {/* Diff Preview could go here */}
                                 <details className="mt-2 text-xs">
-                                    <summary className="cursor-pointer text-[#137fec]">Ver cambios JSON</summary>
+                                    <summary className="cursor-pointer text-brand">Ver cambios JSON</summary>
                                     <pre className="mt-2 p-2 bg-gray-100 dark:bg-black rounded overflow-x-auto">
                                         {JSON.stringify(item.data, null, 2)}
                                     </pre>
                                 </details>
 
-                                <p className="text-xs text-gray-600 dark:text-[#b0bfcc]/60 mt-2">
+                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
                                     Solicitado: {new Date(item.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -555,14 +555,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     return (
         <>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[#3b4754] pb-4 overflow-x-auto">
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-sidebar-border pb-4 overflow-x-auto">
                 {tabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
-                            ? 'bg-[#137fec] text-gray-900 dark:text-white'
-                            : 'text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50'
+                            ? 'bg-brand text-gray-900 dark:text-white'
+                            : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50'
                             }`}
                     >
                         {tab.label}
@@ -588,12 +588,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     {/* ... Existing Modal Content ... */}
-                    <div className="w-full max-w-lg rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] p-6 mx-4">
+                    <div className="w-full max-w-lg rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border p-6 mx-4">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Editar Item</h2>
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="p-2 text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
+                                className="p-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -617,7 +617,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         type="url"
                                         value={editingItem.websiteUrl || ''}
                                         onChange={(e) => setEditingItem({ ...editingItem, websiteUrl: e.target.value })}
-                                        className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                                        className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                                         placeholder="https://..."
                                     />
                                 </div>
@@ -631,7 +631,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     value={editingItem.description || ''}
                                     onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
                                     rows={3}
-                                    className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
+                                    className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
                                 />
                             </div>
                         </div>
@@ -639,14 +639,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleSaveEdit}
                                 disabled={loading === editingItem.id}
-                                className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
+                                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-brand/80 disabled:opacity-50 transition-colors"
                             >
                                 {loading === editingItem.id ? 'Guardando...' : 'Guardar y Aprobar'}
                             </button>
@@ -657,12 +657,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {/* Rejection Modal */}
             {rejectionModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-[#3b4754] p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Motivo del Rechazo</h2>
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="p-2 text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
+                                className="p-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -677,7 +677,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                     rows={4}
-                                    className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
+                                    className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
                                     placeholder="Ej: El contenido es inapropiado, faltan secciones, etc."
                                     autoFocus
                                 />
@@ -687,7 +687,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
                             >
                                 Cancelar
                             </button>
@@ -757,8 +757,8 @@ function FuzzyMatchSuggestions({
     if (similarItems.length === 0) return null
 
     return (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#3b4754]">
-            <p className="text-xs text-gray-600 dark:text-[#b0bfcc] mb-2 flex items-center gap-1">
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-sidebar-border">
+            <p className="text-xs text-gray-600 dark:text-muted-foreground mb-2 flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm text-yellow-400">warning</span>
                 Items similares existentes:
             </p>
@@ -767,7 +767,7 @@ function FuzzyMatchSuggestions({
                     <button
                         key={item.id}
                         onClick={() => onMerge(item.id)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#3b4754]/50 hover:bg-gray-100 dark:hover:bg-[#3b4754] transition-colors group"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sidebar-border/50 hover:bg-gray-100 dark:hover:bg-sidebar-border transition-colors group"
                     >
                         <span className="text-sm text-gray-900 dark:text-white">{item.name}</span>
                         <span className={`text-xs px-1.5 py-0.5 rounded ${item.score > 0.8
@@ -776,7 +776,7 @@ function FuzzyMatchSuggestions({
                             }`}>
                             {Math.round(item.score * 100)}%
                         </span>
-                        <span className="text-xs text-[#137fec] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-xs text-brand opacity-0 group-hover:opacity-100 transition-opacity">
                             Fusionar →
                         </span>
                     </button>

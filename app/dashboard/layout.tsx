@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 
-import Breadcrumb from '@/components/breadcrumb'
-import { NotificationBell } from '@/components/NotificationBell'
+import Breadcrumb from '@/components/ui/breadcrumb'
+import { NotificationBell } from '@/components/features/NotificationBell'
 import { Sidebar } from './Sidebar'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { LevelUpModal } from '@/components/LevelUpModal'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LevelUpModal } from '@/components/features/LevelUpModal'
 
 export default async function DashboardLayout({
     children,
@@ -25,15 +25,8 @@ export default async function DashboardLayout({
         .single()
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#f6f7f8] dark:bg-[#101922]">
-            <style>{`
-        :root {
-          --primary: #137fec;
-          --background-light: #f6f7f8;
-          --background-dark: #101922;
-        }
-      `}</style>
-
+        <div className="flex h-screen overflow-hidden bg-background-alt dark:bg-background-alt">
+            {/* Sidebar matches standardized Background Alt */}
             <Sidebar user={user} profile={profile} />
 
             {/* Main Content Area */}

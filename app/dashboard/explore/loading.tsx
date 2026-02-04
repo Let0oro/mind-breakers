@@ -13,7 +13,7 @@ export default function ExploreLoading() {
             </div>
 
             {/* Tabs Skeleton */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[#3b4754]">
+            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-sidebar-border">
                 {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="px-4 py-2">
                         <div className="h-4 w-24 bg-white dark:bg-[#1a232e] rounded"></div>
@@ -24,27 +24,27 @@ export default function ExploreLoading() {
             {/* Results Grid Skeleton */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] overflow-hidden">
+                    <div key={i} className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden">
                         {/* Type Badge & Icon area */}
-                        <div className="p-5 border-b border-gray-200 dark:border-[#3b4754]">
+                        <div className="p-5 border-b border-gray-200 dark:border-sidebar-border">
                             <div className="flex items-center justify-between mb-3">
-                                <div className="h-3 w-20 bg-[#3b4754] rounded"></div>
-                                <div className="w-6 h-6 bg-[#3b4754] rounded"></div>
+                                <div className="h-3 w-20 bg-sidebar-border rounded"></div>
+                                <div className="w-6 h-6 bg-sidebar-border rounded"></div>
                             </div>
-                            <div className="h-6 w-3/4 bg-[#3b4754] rounded mb-1"></div>
+                            <div className="h-6 w-3/4 bg-sidebar-border rounded mb-1"></div>
                         </div>
 
                         {/* Content area */}
                         <div className="p-5">
                             <div className="space-y-2 mb-3">
-                                <div className="h-3 w-full bg-[#3b4754] rounded"></div>
-                                <div className="h-3 w-5/6 bg-[#3b4754] rounded"></div>
+                                <div className="h-3 w-full bg-sidebar-border rounded"></div>
+                                <div className="h-3 w-5/6 bg-sidebar-border rounded"></div>
                             </div>
 
                             {/* Metadata */}
                             <div className="flex flex-wrap gap-3">
-                                <div className="h-4 w-24 bg-[#3b4754] rounded-full"></div>
-                                <div className="h-4 w-16 bg-[#3b4754] rounded-full"></div>
+                                <div className="h-4 w-24 bg-sidebar-border rounded-full"></div>
+                                <div className="h-4 w-16 bg-sidebar-border rounded-full"></div>
                             </div>
                         </div>
                     </div>

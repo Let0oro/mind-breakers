@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Toast } from './ui/Toast'
+import { Toast } from '@/components/ui/Toast'
 
 interface Notification {
   id: string

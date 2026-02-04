@@ -87,21 +87,21 @@ export default async function PathsListPage() {
       <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">My Learning Paths</h2>
-          <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
+          <p className="text-gray-600 dark:text-muted-foreground text-base">
             {paths.length} paths in your journey
           </p>
         </div>
         <div className="flex gap-3">
           <Link
             href="/dashboard/explore?tab=paths"
-            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium transition-all hover:bg-gray-50 dark:hover:bg-[#283039]"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white font-medium transition-all hover:bg-gray-50 dark:hover:bg-[#283039]"
           >
             <span className="material-symbols-outlined w-5 h-5">search</span>
             <span>Explore Paths</span>
           </Link>
           <Link
             href="/dashboard/paths/new"
-            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-brand text-gray-900 dark:text-white font-bold transition-all hover:bg-brand/80"
           >
             <span className="material-symbols-outlined w-5 h-5">add_circle</span>
             <span>Create Path</span>
@@ -142,15 +142,15 @@ export default async function PathsListPage() {
             )
           })
         ) : (
-          <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-12 text-center">
+          <div className="col-span-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-12 text-center">
             <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block mx-auto">
               route
             </span>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-lg mb-2">No active learning paths</p>
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm mb-4">Start your journey by finding a learning path</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-lg mb-2">No active learning paths</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm mb-4">Start your journey by finding a learning path</p>
             <Link
               href="/dashboard/explore?tab=paths"
-              className="inline-block bg-[#137fec] hover:bg-[#137fec]/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+              className="inline-block bg-brand hover:bg-brand/80 text-gray-900 dark:text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors"
             >
               Explore Paths
             </Link>

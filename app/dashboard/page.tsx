@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { CardCourse } from '@/components/ui/CardCourse'
 import { CardPath } from '@/components/ui/CardPath'
-import Recommendations from '@/components/Recommendations'
+import Recommendations from '@/components/features/Recommendations'
 import { getLevelProgress } from '@/lib/gamification'
 
 interface DashboardCourse {
@@ -268,12 +268,12 @@ export default async function DashboardPage() {
       <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Welcome back, {profile?.username?.split(' ')[0] || 'Scholar'}!</h2>
-          <p className="text-gray-600 dark:text-[#b0bfcc] text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
+          <p className="text-gray-600 dark:text-muted-foreground text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
         </div>
         {resumeTarget && (
           <Link
             href={resumeTarget.href}
-            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold transition-all hover:bg-[#137fec]/80"
+            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-brand text-gray-900 dark:text-white font-bold transition-all hover:bg-brand/80"
           >
             <span className="material-symbols-outlined w-5 h-5">play_arrow</span>
             <span>{resumeTarget.label}</span>
@@ -284,13 +284,13 @@ export default async function DashboardPage() {
       {/* Stats & Leveling Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* XP Card */}
-        <div className="lg:col-span-2 flex flex-col gap-4 p-6 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e]">
+        <div className="lg:col-span-2 flex flex-col gap-4 p-6 rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e]">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined w-8 h-8 text-[#137fec]">star</span>
+              <span className="material-symbols-outlined w-8 h-8 text-brand">star</span>
               <div>
                 <p className="text-gray-900 dark:text-white text-sm font-medium">Level {profile?.level || 1} - {profile?.title || 'Scholar'}</p>
-                <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">
+                <p className="text-gray-600 dark:text-muted-foreground text-xs">
                   {(() => {
                     const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
                     return `${xpProgress.required - xpProgress.current} XP to Level ${(profile?.level || 1) + 1}`
@@ -305,9 +305,9 @@ export default async function DashboardPage() {
               })()}
             </p>
           </div>
-          <div className="h-3 w-full rounded-full bg-gray-200 dark:bg-[#3b4754] overflow-hidden">
+          <div className="h-3 w-full rounded-full bg-gray-200 dark:bg-sidebar-border overflow-hidden">
             <div
-              className="h-full bg-[#137fec] rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]"
+              className="h-full bg-brand rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]"
               style={{
                 width: `${getLevelProgress(profile?.total_xp || 0, profile?.level || 1).percentage}%`
               }}
@@ -322,9 +322,9 @@ export default async function DashboardPage() {
         </div>
 
         {/* Streak Stats */}
-        <div className="flex flex-col justify-between p-6 rounded-xl border border-gray-200 dark:border-[#3b4754] bg-white dark:bg-[#1a232e]">
+        <div className="flex flex-col justify-between p-6 rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e]">
           <div className="flex justify-between items-start">
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm font-medium uppercase tracking-wider">Current Streak</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm font-medium uppercase tracking-wider">Current Streak</p>
             <span className="material-symbols-outlined w-6 h-6 text-orange-500">local_fire_department</span>
           </div>
           <div>
@@ -346,10 +346,10 @@ export default async function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">library_books</span>
+              <span className="material-symbols-outlined w-6 h-6 text-brand">library_books</span>
               My Enrolled Courses
             </h3>
-            <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/courses">View All</Link>
+            <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/courses">View All</Link>
           </div>
 
           {enrolledCourses.length > 0 ? (
@@ -370,9 +370,9 @@ export default async function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
-              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven&apos;t enrolled in any courses yet.</p>
-              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Courses</Link>
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8 text-center">
+              <p className="text-gray-600 dark:text-muted-foreground mb-4">You haven&apos;t enrolled in any courses yet.</p>
+              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-brand text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-brand/80 transition-colors">Browse Courses</Link>
             </div>
           )}
         </section>
@@ -385,7 +385,7 @@ export default async function DashboardPage() {
                 <span className="material-symbols-outlined w-6 h-6 text-yellow-500">edit_document</span>
                 My Drafts
               </h3>
-              <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/drafts">View All</Link>
+              <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/drafts">View All</Link>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -410,10 +410,10 @@ export default async function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">route</span>
+              <span className="material-symbols-outlined w-6 h-6 text-brand">route</span>
               Learning Paths
             </h3>
-            <Link className="text-[#137fec] text-sm font-medium hover:underline" href="/dashboard/paths">View All</Link>
+            <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/paths">View All</Link>
           </div>
           {learningPathsList.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -431,9 +431,9 @@ export default async function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 text-center">
-              <p className="text-gray-600 dark:text-[#b0bfcc] mb-4">You haven&apos;t started any learning paths yet.</p>
-              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-[#137fec] text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-[#137fec]/80 transition-colors">Browse Paths</Link>
+            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8 text-center">
+              <p className="text-gray-600 dark:text-muted-foreground mb-4">You haven&apos;t started any learning paths yet.</p>
+              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-brand text-gray-900 dark:text-white rounded-lg font-bold text-sm hover:bg-brand/80 transition-colors">Browse Paths</Link>
             </div>
           )}
         </section>
@@ -442,7 +442,7 @@ export default async function DashboardPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-              <span className="material-symbols-outlined w-6 h-6 text-[#137fec]">bookmark</span>
+              <span className="material-symbols-outlined w-6 h-6 text-brand">bookmark</span>
               Saved for Later
             </h3>
           </div>
@@ -458,12 +458,12 @@ export default async function DashboardPage() {
                   variant="compact"
                 />
               ))}
-              <div className="p-3 border border-dashed border-gray-200 dark:border-[#3b4754] rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
+              <div className="p-3 border border-dashed border-gray-200 dark:border-sidebar-border rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-white/5">
                 <span className="material-symbols-outlined w-6 h-6 text-[#3b4754] mb-1">add</span>
-                <Link href="/dashboard/explore" className="text-[11px] text-gray-600 dark:text-[#b0bfcc]">Explore More</Link>
+                <Link href="/dashboard/explore" className="text-[11px] text-gray-600 dark:text-muted-foreground">Explore More</Link>
               </div>
             </div>) : (
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-sm italic">You haven&apos;t saved any courses yet.</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-sm italic">You haven&apos;t saved any courses yet.</p>
           )}
         </section>
       </div>

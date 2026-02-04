@@ -81,7 +81,7 @@ export default function SimilarItemsList({ type, query, currentId, onAdapt }: Si
                             <button
                                 type="button"
                                 onClick={() => onAdapt(item)}
-                                className="mt-2 text-xs font-bold text-[#137fec] hover:text-[#137fec]/80 flex items-center gap-1"
+                                className="mt-2 text-xs font-bold text-brand hover:text-brand/80 flex items-center gap-1"
                             >
                                 <span className="material-symbols-outlined text-sm">fork_right</span>
                                 Adapt this course

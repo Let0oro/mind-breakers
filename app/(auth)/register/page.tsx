@@ -133,58 +133,58 @@ export default function RegisterPage() {
   return (
     <div>
 
-      <main className="flex-1 flex flex-col lg:flex-row mx-auto w-full min-h-screen bg-[#f6f7f8] dark:bg-[#101922]">
+      <main className="flex-1 flex flex-col lg:flex-row mx-auto w-full min-h-screen bg-sidebar dark:bg-sidebar">
         {/* Sidebar: Benefits & Gamification */}
         <aside className="hidden lg:flex w-100 flex-col justify-between p-10 bg-white dark:bg-[#111418] border-r border-[#e5e7eb] dark:border-[#283039]">
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-3">
 
               <h1 className="text-black dark:text-white text-3xl font-bold leading-tight">Unlock your potential.</h1>
-              <p className="text-gray-600 dark:text-[#b0bfcc] text-base leading-relaxed">Join 50,000+ learners building their future through community-driven paths and gamified challenges.</p>
+              <p className="text-gray-600 dark:text-muted-foreground text-base leading-relaxed">Join 50,000+ learners building their future through community-driven paths and gamified challenges.</p>
             </div>
             <div className="flex flex-col gap-4">
               {/* Benefit 1 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
-                <div className="size-10 rounded-full bg-[#137fec] flex items-center justify-center text-white shrink-0">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-brand/30 transition-all">
+                <div className="size-10 rounded-full bg-brand flex items-center justify-center text-white shrink-0">
                   <span className="material-symbols-outlined w-5 h-5">school</span>
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">10k+ Learning Paths</p>
-                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">User-generated curriculum for every skill</p>
+                  <p className="text-gray-500 dark:text-muted-foreground text-xs">User-generated curriculum for every skill</p>
                 </div>
               </div>
               {/* Benefit 2 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-brand/30 transition-all">
                 <div className="size-10 rounded-full bg-orange-500 flex items-center justify-center text-white shrink-0">
                   <span className="material-symbols-outlined w-5 h-5">military_tech</span>
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">Earn XP & Badges</p>
-                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">Get recognized for your consistency</p>
+                  <p className="text-gray-500 dark:text-muted-foreground text-xs">Get recognized for your consistency</p>
                 </div>
               </div>
               {/* Benefit 3 */}
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-[#137fec]/30 transition-all">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[#283039] border border-transparent hover:border-brand/30 transition-all">
                 <div className="size-10 rounded-full bg-purple-500 flex items-center justify-center text-white shrink-0">
                   <span className="material-symbols-outlined w-5 h-5">public</span>
                 </div>
                 <div>
                   <p className="text-black dark:text-white text-sm font-bold">Global Leaderboard</p>
-                  <p className="text-gray-500 dark:text-[#b0bfcc] text-xs">Compete with learners worldwide</p>
+                  <p className="text-gray-500 dark:text-muted-foreground text-xs">Compete with learners worldwide</p>
                 </div>
               </div>
             </div>
           </div>
           {/* Mini Leaderboard Preview */}
-          <div className="mt-10 p-4 bg-[#137fec]/5 rounded-xl border border-[#137fec]/10">
-            <p className="text-xs font-bold text-[#137fec] uppercase tracking-wider mb-3">Community Spotlight</p>
+          <div className="mt-10 p-4 bg-brand/5 rounded-xl border border-brand/10">
+            <p className="text-xs font-bold text-brand uppercase tracking-wider mb-3">Community Spotlight</p>
             <div className="flex items-center gap-3">
               <div className="size-8 rounded-full bg-cover bg-center border-2 border-white dark:border-gray-800 shadow-sm bg-[url('https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah')]"></div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold dark:text-white truncate">Sarah Jenkins</p>
                 <p className="text-[10px] text-gray-500 truncate">Just reached Level 42 • UI Design</p>
               </div>
-              <span className="text-xs font-bold text-[#137fec] shrink-0">+250 XP</span>
+              <span className="text-xs font-bold text-brand shrink-0">+250 XP</span>
             </div>
           </div>
         </aside>
@@ -196,17 +196,17 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-3 mb-8">
               <div className="flex justify-between items-end">
                 <p className="text-black dark:text-white text-sm font-semibold">Step 1 of 2: Account Details</p>
-                <p className="text-[#137fec] text-sm font-bold">50%</p>
+                <p className="text-brand text-sm font-bold">50%</p>
               </div>
-              <div className="h-2 rounded-full bg-gray-200 dark:bg-[#3b4754] overflow-hidden">
-                <div className="h-full bg-[#137fec] transition-all duration-500 w-1/2"></div>
+              <div className="h-2 rounded-full bg-gray-200 dark:bg-sidebar-border overflow-hidden">
+                <div className="h-full bg-brand transition-all duration-500 w-1/2"></div>
               </div>
             </div>
 
             {/* Headline */}
             <div className="mb-8">
               <h2 className="text-black dark:text-white text-3xl font-bold mb-2">Create your account</h2>
-              <p className="text-gray-600 dark:text-[#b0bfcc] text-base">Enter your details to start your learning journey.</p>
+              <p className="text-gray-600 dark:text-muted-foreground text-base">Enter your details to start your learning journey.</p>
             </div>
 
             {/* Social Sign Up */}
@@ -238,7 +238,7 @@ export default function RegisterPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200 dark:border-[#283039]"></div>
               </div>
-              <span className="relative bg-[#f6f7f8] dark:bg-[#101922] px-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or continue with email</span>
+              <span className="relative bg-sidebar dark:bg-sidebar px-4 text-xs font-medium text-gray-500 uppercase tracking-widest">Or continue with email</span>
             </div>
 
             {/* Error & Message */}
@@ -340,8 +340,8 @@ export default function RegisterPage() {
                       type="button"
                       onClick={() => toggleInterest(interest.id)}
                       className={`px-4 py-2 rounded-full border text-xs font-bold flex items-center gap-2 transition-all ${selectedInterests.includes(interest.id)
-                        ? 'border-[#137fec] bg-[#137fec]/10 text-[#137fec]'
-                        : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-[#b0bfcc] hover:border-[#137fec]/50'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-gray-200 dark:border-[#283039] text-gray-600 dark:text-muted-foreground hover:border-brand/50'
                         }`}
                     >
                       <span className="material-symbols-outlined w-4 h-4">
@@ -361,20 +361,20 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-14 bg-[#137fec] hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-lg shadow-[#137fec]/20 transition-all active:scale-[0.98]"
+                  className="w-full h-14 bg-brand hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-lg shadow-[#137fec]/20 transition-all active:scale-[0.98]"
                 >
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
                 <p className="text-center text-xs text-gray-500 dark:text-gray-400">
                   By signing up, you agree to our
-                  <Link className="text-[#137fec] hover:underline ml-1" href="#">Terms of Service</Link> and
-                  <Link className="text-[#137fec] hover:underline ml-1" href="#">Privacy Policy</Link>.
+                  <Link className="text-brand hover:underline ml-1" href="#">Terms of Service</Link> and
+                  <Link className="text-brand hover:underline ml-1" href="#">Privacy Policy</Link>.
                 </p>
               </div>
 
               <div className="text-center text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Already have an account? </span>
-                <Link href="/login" className="font-bold text-[#137fec] hover:underline">
+                <Link href="/login" className="font-bold text-brand hover:underline">
                   Log In
                 </Link>
               </div>

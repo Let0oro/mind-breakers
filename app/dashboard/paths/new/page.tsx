@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import SimilarItemsList from '@/components/SimilarItemsList'
+import SimilarItemsList from '@/components/features/SimilarItemsList'
 
 export default function NewPathPage() {
   const [loading, setLoading] = useState(false)
@@ -52,19 +52,19 @@ export default function NewPathPage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.back()}
-            className="text-gray-600 dark:text-[#b0bfcc] hover:text-gray-900 dark:text-white transition-colors"
+            className="text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Create Learning Path</h2>
         </div>
-        <p className="text-gray-600 dark:text-[#b0bfcc] text-base">
+        <p className="text-gray-600 dark:text-muted-foreground text-base">
           Define a structured learning journey for others to follow
         </p>
       </header>
 
       {/* Form */}
-      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-[#3b4754] p-8 max-w-3xl">
+      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Message */}
           {error && (
@@ -88,7 +88,7 @@ export default function NewPathPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="e.g., Full-Stack Web Development"
             />
             <SimilarItemsList
@@ -106,10 +106,10 @@ export default function NewPathPage() {
               type="text"
               id="summary"
               name="summary"
-              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+              className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
               placeholder="Brief description (1-2 lines)"
             />
-            <p className="text-gray-600 dark:text-[#b0bfcc] text-xs">This will appear in search results and path listings</p>
+            <p className="text-gray-600 dark:text-muted-foreground text-xs">This will appear in search results and path listings</p>
           </div>
 
           {/* Description */}
@@ -121,17 +121,17 @@ export default function NewPathPage() {
               id="description"
               name="description"
               rows={6}
-              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc] focus:outline-none focus:border-[#137fec] focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+              className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
               placeholder="Describe what learners will achieve, who it's for, and what makes this path unique..."
             />
           </div>
 
           {/* Info Box */}
-          <div className="bg-[#137fec]/10 border border-[#137fec]/30 rounded-lg p-4">
+          <div className="bg-brand/10 border border-brand/30 rounded-lg p-4">
             <div className="flex gap-3">
-              <span className="material-symbols-outlined text-[#137fec] mt-0.5">info</span>
+              <span className="material-symbols-outlined text-brand mt-0.5">info</span>
               <div>
-                <p className="text-[#137fec] text-sm font-bold mb-1">Next Steps</p>
+                <p className="text-brand text-sm font-bold mb-1">Next Steps</p>
                 <p className="text-gray-900 dark:text-white text-sm">
                   After creating your path, you&apos;ll be able to add courses and organize the learning sequence.
                 </p>
@@ -144,14 +144,14 @@ export default function NewPathPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 h-12 rounded-lg border border-gray-200 dark:border-[#3b4754] text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
+              className="flex-1 h-12 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 h-12 rounded-lg bg-[#137fec] text-gray-900 dark:text-white font-bold hover:bg-[#137fec]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+              className="flex-1 h-12 rounded-lg bg-brand text-gray-900 dark:text-white font-bold hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

@@ -22,7 +22,7 @@ import {
 // Import our new component (assuming it's in components folder relative to app root or alias)
 // Since we used write_to_file in dashboard/paths/[id]/edit context previously? No, app/components.
 import { SortableCourseItem } from '@/components/SortableCourseItem'
-import { ManageCoOwners } from '@/components/ManageCoOwners'
+import { ManageCoOwners } from '@/components/features/ManageCoOwners'
 import type { AdminRequest } from '@/lib/types'
 
 interface LearningPath {
@@ -299,7 +299,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
   if (!path && !error) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="text-gray-600 dark:text-[#b0bfcc]">Cargando...</div>
+        <div className="text-gray-600 dark:text-muted-foreground">Cargando...</div>
       </div>
     )
   }
@@ -317,7 +317,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       <header className="mb-8">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-600 dark:text-[#b0bfcc] hover:text-[#137fec] mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Volver
@@ -328,7 +328,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       </header>
 
       <div className="max-w-2xl">
-        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-[#3b4754]">
+        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4 text-sm text-red-400">
@@ -368,7 +368,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   name="title"
                   required
                   defaultValue={path?.title}
-                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                  className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                 />
               </div>
 
@@ -381,7 +381,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   id="summary"
                   name="summary"
                   defaultValue={path?.summary || ''}
-                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                  className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec]"
                 />
               </div>
 
@@ -394,7 +394,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   name="description"
                   rows={6}
                   defaultValue={path?.description || ''}
-                  className="w-full rounded-lg border border-gray-200 dark:border-[#3b4754] bg-[#f6f7f8] dark:bg-[#101922] px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-[#b0bfcc]/50 focus:border-[#137fec] focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
+                  className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
                 />
               </div>
 
@@ -405,7 +405,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 </label>
                 <p className="text-xs text-gray-500 mb-3">Arrastra para reordenar. El orden se guardará al hacer clic en &quot;Guardar cambios&quot;.</p>
 
-                <div className="bg-gray-50 dark:bg-[#151b24] p-4 rounded-lg border border-gray-200 dark:border-[#3b4754]">
+                <div className="bg-gray-50 dark:bg-[#151b24] p-4 rounded-lg border border-gray-200 dark:border-sidebar-border">
                   {courses.length > 0 ? (
                     <DndContext
                       sensors={sensors}
@@ -435,25 +435,25 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-gray-200 dark:border-[#3b4754] px-4 py-2 text-sm font-medium text-gray-600 dark:text-[#b0bfcc] hover:bg-gray-100 dark:hover:bg-[#3b4754]/50 transition-colors"
+                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 rounded-lg bg-[#137fec] px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-[#137fec]/80 disabled:opacity-50 transition-colors"
+                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-brand/80 disabled:opacity-50 transition-colors"
               >
                 {loading ? 'Procesando...' : (isAdmin ? 'Guardar cambios' : 'Solicitar Validación')}
               </button>
             </div>
           </form>
 
-          <div className="mt-8 border-t border-gray-200 dark:border-[#3b4754] pt-8">
+          <div className="mt-8 border-t border-gray-200 dark:border-sidebar-border pt-8">
             <ManageCoOwners pathId={id} createdBy={path?.created_by || ''} />
           </div>
 
-          <div className="mt-8 border-t border-gray-200 dark:border-[#3b4754] pt-8">
+          <div className="mt-8 border-t border-gray-200 dark:border-sidebar-border pt-8">
             <h3 className="text-sm font-medium text-red-500 mb-4">Zona peligrosa</h3>
             <button
               onClick={handleDelete}
