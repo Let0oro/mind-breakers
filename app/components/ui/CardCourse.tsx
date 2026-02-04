@@ -14,9 +14,12 @@ interface CardCourseProps {
     progress?: number
     status?: string
     href?: string
-    variant?: 'grid' | 'compact' | 'profile' | 'draft'
+    variant?: 'grid' | 'compact' | 'profile' | 'draft' | 'list'
     isSaved?: boolean
     className?: string
+    index?: number
+    exercisesCount?: number
+    organizationName?: string
 }
 
 export function CardCourse({
@@ -32,8 +35,95 @@ export function CardCourse({
     href = `/dashboard/courses/${id}`,
     variant = 'grid',
     isSaved,
-    className = ''
+    className = '',
+    index,
+    exercisesCount,
+    organizationName
 }: CardCourseProps) {
+
+    // VARIANT: LIST (Horizontal card with details)
+    // Used in: Path Detail Page
+    if (variant === 'list') {
+        const isCompleted = progress === 100
+
+        return (
+            <Link
+                href={href}
+                className={`block group ${className}`}
+            >
+                <div className={`rounded-xl border-2 p-6 transition-all ${isCompleted
+                    ? 'border-green-500/50 bg-green-500/10'
+                    : 'border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] hover:border-brand/50'
+                    }`}>
+                    <div className="flex gap-4 relative">
+                        {/* Thumbnail */}
+                        <div className="relative h-24 my-auto mx-0 w-40 shrink-0 align-center overflow-hidden rounded-lg bg-sidebar-border">
+                            <FallbackImage
+                                as="img"
+                                src={thumbnail_url || ''}
+                                alt={title}
+                                className="h-full w-full object-cover"
+                            />
+                            {!thumbnail_url && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <span className="material-symbols-outlined h-10 w-10 text-gray-600 dark:text-muted-foreground">image</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3">
+                                        {index !== undefined && (
+                                            <span className="flex min-h-8 min-w-8 items-center justify-center rounded-full bg-sidebar-border text-sm font-medium text-gray-900 dark:text-white">
+                                                {index + 1}
+                                            </span>
+                                        )}
+                                        <h3 className="overflow-hidden text-ellipsis md:line-clamp-1 line-clamp-2 text-lg font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors">
+                                            {title}
+                                        </h3>
+                                        {status !== 'published' && (
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                                                status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
+                                                    'bg-red-100 text-red-800'
+                                                }`}>
+                                                {status}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {summary && (
+                                        <p className="overflow-hidden text-ellipsis line-clamp-3 mt-2 text-sm text-gray-600 dark:text-muted-foreground">
+                                            {summary}
+                                        </p>
+                                    )}
+
+                                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-600 dark:text-muted-foreground">
+                                        {organizationName && (
+                                            <span>📚 {organizationName}</span>
+                                        )}
+                                        <span className="text-brand">⚡ {xp_reward} XP</span>
+                                        {exercisesCount !== undefined && exercisesCount > 0 && (
+                                            <span>✍️ {exercisesCount} ejercicio(s)</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {isCompleted && (
+                                    <div className="ml-4 flex items-center gap-2 text-green-400">
+                                        <span className="material-symbols-outlined h-6 w-6">check_circle</span>
+                                        <span className="text-sm font-medium">Completado</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Link>
+        )
+    }
 
     // VARIANT: COMPACT (Small, horizontal/tile)
     // Used in: Dashboard Saved Courses
@@ -145,8 +235,8 @@ export function CardCourse({
                     {/* Status Badge */}
                     {status !== 'published' && (
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                                status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
-                                    'bg-red-100 text-red-800'
+                            status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
+                                'bg-red-100 text-red-800'
                             }`}>
                             {status}
                         </span>

@@ -142,7 +142,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/organizations')}
-                            href="/dashboard/organizations"
+                            href="/dashboard/organizations/new"
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">business</span>

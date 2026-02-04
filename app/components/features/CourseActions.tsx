@@ -173,7 +173,7 @@ export function CourseActions({
           : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
           } disabled:opacity-50`}
       >
-        {isSaved ? '★ Guardado' : '☆ Guardar'}
+        {isSaved ? 'Guardado' : 'Guardar'}
       </button>
 
       {status === 'published' && (
@@ -184,7 +184,7 @@ export function CourseActions({
               disabled={loading}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
             >
-              {loading ? 'Guardando...' : '✓ Completar'}
+              {loading ? 'Guardando...' : 'Completar'}
             </button>
           ) : (
             <a
@@ -200,7 +200,7 @@ export function CourseActions({
             disabled={loading}
             className="rounded-lg border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50"
           >
-            {loading ? 'Guardando...' : '✕ No completado'}
+            {loading ? 'Guardando...' : 'No completado'}
           </button>
         )
       )}

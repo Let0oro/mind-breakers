@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import Link from 'next/link'
 import { FallbackImage } from '@/components/ui/FallbackImage'
+import { CardCourse } from '@/components/ui/CardCourse'
 import type { Course, PathResource } from '@/lib/types'
 
 import RecommendedCourses from './RecommendedCourses'
@@ -346,72 +347,20 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 const isCompleted = course.user_course_progress?.[0]?.completed
 
                 return (
-                  <Link
+                  <CardCourse
                     key={course.id}
-                    href={`/dashboard/courses/${course.id}`}
-                    className="block group"
-                  >
-                    <div className={`rounded-xl border-2 p-6 transition-all ${isCompleted
-                      ? 'border-green-500/50 bg-green-500/10'
-                      : 'border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] hover:border-brand/50'
-                      }`}>
-                      <div className="flex gap-4">
-                        {/* Thumbnail */}
-                        <div className="relative h-24 w-40 shrink-0 overflow-hidden rounded-lg bg-sidebar-border">
-                          <FallbackImage
-                            as="img"
-                            src={course.thumbnail_url || ''}
-                            alt={course.title}
-                            className="h-full w-full object-cover"
-                          />
-                          {!course.thumbnail_url && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                              <span className="material-symbols-outlined h-10 w-10 text-gray-600 dark:text-muted-foreground">image</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3">
-                                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-border text-sm font-medium text-gray-900 dark:text-white">
-                                  {index + 1}
-                                </span>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors">
-                                  {course.title}
-                                </h3>
-                              </div>
-
-                              {course.summary && (
-                                <p className="mt-2 text-sm text-gray-600 dark:text-muted-foreground">
-                                  {course.summary}
-                                </p>
-                              )}
-
-                              <div className="mt-3 flex items-center gap-4 text-xs text-gray-600 dark:text-muted-foreground">
-                                {course.organizations && (
-                                  <span>📚 {course.organizations.name}</span>
-                                )}
-                                <span className="text-brand">⚡ {course.xp_reward} XP</span>
-                                {course.course_exercises && course.course_exercises.length > 0 && (
-                                  <span>✍️ {course.course_exercises.length} ejercicio(s)</span>
-                                )}
-                              </div>
-                            </div>
-
-                            {isCompleted && (
-                              <div className="ml-4 flex items-center gap-2 text-green-400">
-                                <span className="material-symbols-outlined h-6 w-6">check_circle</span>
-                                <span className="text-sm font-medium">Completado</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                    id={course.id}
+                    title={course.title}
+                    thumbnail_url={course.thumbnail_url}
+                    summary={course.summary || undefined}
+                    xp_reward={course.xp_reward}
+                    variant="list"
+                    index={index}
+                    organizationName={course.organizations?.name}
+                    exercisesCount={course.course_exercises?.length || 0}
+                    progress={isCompleted ? 100 : 0}
+                    status={course.status}
+                  />
                 )
               })
             ) : (
@@ -435,11 +384,6 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           <RecommendedCourses pathId={id} />
           <div className="mt-10">
             <Recommendations mode="similar" contextId={path.id} contextType="path" />
-          </div>
-
-          {/* Path Resources */}
-          <div className="mt-10">
-            <PathResources pathId={path.id} initialResources={initialResources || []} />
           </div>
         </div>
       </div >
