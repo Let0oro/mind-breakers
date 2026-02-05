@@ -192,7 +192,6 @@ function ExplorePageContent() {
         performSearch()
     }, [performSearch])
 
-    console.log(results);
 
 
     return (
