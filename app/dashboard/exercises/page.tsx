@@ -8,9 +8,9 @@ export const metadata = {
 }
 
 interface PageProps {
-    searchParams?: {
+    searchParams: Promise<{
         filter?: 'all' | 'completed' | 'in_progress' | 'pending_review'
-    }
+    }>
 }
 
 export default async function ExercisesPage({ searchParams }: PageProps) {
@@ -19,7 +19,8 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    const filter = searchParams?.filter || 'all'
+    const resolvedSearchParams = await searchParams
+    const filter = resolvedSearchParams?.filter || 'all'
 
     // Fetch exercises relevant to the user:
     // 1. From courses they are enrolled in (progress)
