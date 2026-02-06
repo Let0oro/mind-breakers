@@ -55,7 +55,6 @@ export default function SimilarItemsList({ type, query, currentId, onAdapt }: Si
         return () => clearTimeout(timeoutId)
     }, [fetchSimilar])
 
-    console.log({ query, items })
 
     if (!query || items.length === 0) return null
 

@@ -202,7 +202,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                             <span>{resource.title}</span>
                                         )}
                                     </h4>
-                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mt-0.5">
+                                    <p className="text-sm text-gray-600 text-wrap break-all line-clamp-2 max-w-xs truncate dark:text-muted-foreground mt-0.5">
                                         {resource.type === 'link' ? resource.content : resource.content}
                                     </p>
                                     <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
