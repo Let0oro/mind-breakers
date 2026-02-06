@@ -18,16 +18,24 @@ const space_grotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'MindBreaker - Learning Tracker',
   authors: [{ name: 'Juan Manuel Montero' }],
+  manifest: '/manifest.json',
   icons: {
     icon: '/icon.png',
     apple: '/icon.png',
   },
   appleWebApp: {
-    title: 'MindBreaker',
+    capable: true,
     statusBarStyle: 'default',
+    title: 'MindBreaker',
   },
   description: 'Plataforma de seguimiento de cursos y learning paths con gamificación',
   keywords: ['learning', 'courses', 'education', 'tracking', 'gamification'],
+  formatDetection: {
+    telephone: false,
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  }
 }
 
 export default function RootLayout({
@@ -38,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#F5F2E2" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
