@@ -32,7 +32,7 @@ export function CardCourse({
     duration,
     progress,
     status = 'published',
-    href = `/dashboard/courses/${id}`,
+    href = `/dashboard/quests/${id}`,
     variant = 'grid',
     isSaved,
     className = '',
@@ -41,8 +41,7 @@ export function CardCourse({
     organizationName
 }: CardCourseProps) {
 
-    // VARIANT: LIST (Horizontal card with details)
-    // Used in: Path Detail Page
+    // VARIANT: LIST (Horizontal card - Path Detail Page)
     if (variant === 'list') {
         const isCompleted = progress === 100
 
@@ -51,72 +50,64 @@ export function CardCourse({
                 href={href}
                 className={`block group ${className}`}
             >
-                <div className={`rounded-xl border-2 p-6 transition-all ${isCompleted
-                    ? 'border-green-500/50 bg-green-500/10'
-                    : 'border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] hover:border-brand/50'
+                <div className={`border p-4 transition-all ${isCompleted
+                    ? 'border-text-main bg-inverse/5'
+                    : 'border-border bg-main hover:border-text-main'
                     }`}>
                     <div className="flex flex-col md:flex-row gap-4 relative">
+                        {/* Index Number */}
+                        {index !== undefined && (
+                            <div className="hidden md:flex items-center justify-center w-8 shrink-0">
+                                <span className="text-muted text-sm font-medium">
+                                    {String(index + 1).padStart(2, '0')}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Thumbnail */}
-                        <div className="relative aspect-video w-full md:w-auto md:h-24 md:my-auto md:mx-0 mx-auto my-0 w-40 shrink-0 align-center  overflow-hidden rounded-lg bg-sidebar-border">
+                        <div className="relative aspect-video w-full md:w-32 md:h-20 shrink-0 overflow-hidden bg-surface-dark grayscale">
                             <FallbackImage
                                 as="img"
                                 src={thumbnail_url || ''}
                                 alt={title}
                                 className="h-full w-full object-cover"
                             />
-                            {!thumbnail_url && (
-                                <div className="absolute h-full w-full inset-0 flex items-center justify-center pointer-events-none">
-                                    <span className="material-symbols-outlined h-10 w-10 text-gray-600 dark:text-muted-foreground">image</span>
-                                </div>
-                            )}
                         </div>
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between">
+                            <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-3">
-                                        {index !== undefined && (
-                                            <span className="flex min-h-8 min-w-8 items-center justify-center rounded-full bg-sidebar-border text-sm font-medium text-gray-900 dark:text-white">
-                                                {index + 1}
-                                            </span>
-                                        )}
-                                        <h3 className="overflow-hidden text-ellipsis md:line-clamp-1 line-clamp-2 text-lg font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors">
-                                            {title}
-                                        </h3>
-                                        {status !== 'published' && (
-                                            <span className={`absolute top-0 left-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                                                status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
-                                                    'bg-red-100 text-red-800'
-                                                }`}>
-                                                {status}
-                                            </span>
-                                        )}
-                                    </div>
+                                    <h3 className="uppercase font-bold text-sm tracking-wide text-text-main group-hover:underline line-clamp-1">
+                                        {title}
+                                    </h3>
 
-                                    {summary && (
-                                        <p className="overflow-hidden text-ellipsis line-clamp-3 mt-2 text-sm text-gray-600 dark:text-muted-foreground">
-                                            {summary}
+                                    {organizationName && (
+                                        <p className="text-muted text-xs mt-1 uppercase tracking-wider">
+                                            {organizationName}
                                         </p>
                                     )}
 
-                                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-600 dark:text-muted-foreground">
-                                        {organizationName && (
-                                            <span>📚 {organizationName}</span>
-                                        )}
-                                        <span className="text-brand">⚡ {xp_reward} XP</span>
+                                    <div className="mt-2 flex items-center gap-4 text-xs text-muted">
+                                        <span>{xp_reward} XP</span>
                                         {exercisesCount !== undefined && exercisesCount > 0 && (
-                                            <span>✍️ {exercisesCount}</span>
+                                            <span>{exercisesCount} exercises</span>
                                         )}
+                                        {duration && <span>{duration}</span>}
                                     </div>
                                 </div>
 
-                                {isCompleted && (
-                                    <div className="ml-4 flex items-center gap-2 text-green-400">
-                                        <span className="material-symbols-outlined h-6 w-6">check_circle</span>
-                                        <span className="text-sm font-medium">Completado</span>
-                                    </div>
-                                )}
+                                {/* Status indicators */}
+                                <div className="flex items-center gap-2 shrink-0">
+                                    {status !== 'published' && (
+                                        <span className="px-2 py-0.5 border border-current text-[10px] font-bold uppercase tracking-widest text-muted">
+                                            {status}
+                                        </span>
+                                    )}
+                                    {isCompleted && (
+                                        <span className="material-symbols-outlined text-text-main">check</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -125,15 +116,14 @@ export function CardCourse({
         )
     }
 
-    // VARIANT: COMPACT (Small, horizontal/tile)
-    // Used in: Dashboard Saved Courses
+    // VARIANT: COMPACT (Small tile - Saved Courses)
     if (variant === 'compact') {
         return (
             <Link
                 href={href}
-                className={`p-3 bg-white dark:bg-[#1a232e] rounded-lg border border-gray-200 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors cursor-pointer group flex flex-col ${className}`}
+                className={`p-3 border border-border hover:border-text-main bg-main transition-colors cursor-pointer group flex flex-col ${className}`}
             >
-                <div className="aspect-video w-full relative rounded overflow-hidden mb-2 bg-gray-100 dark:bg-sidebar-border">
+                <div className="aspect-video w-full relative overflow-hidden mb-2 bg-surface-dark grayscale group-hover:grayscale-0 transition-all">
                     <FallbackImage
                         src={thumbnail_url || ''}
                         alt={title}
@@ -142,10 +132,10 @@ export function CardCourse({
                         type="course"
                     />
                 </div>
-                <p className="text-xs font-bold text-gray-900 dark:text-white truncate group-hover:text-brand text-left">
+                <p className="text-xs font-bold uppercase tracking-wide text-text-main truncate text-left">
                     {title}
                 </p>
-                <p className="text-[11px] text-gray-600 dark:text-muted-foreground text-left">
+                <p className="text-[11px] text-muted text-left">
                     {xp_reward} XP
                 </p>
             </Link>
@@ -153,14 +143,13 @@ export function CardCourse({
     }
 
     // VARIANT: PROFILE (Simpler vertical card)
-    // Used in: ProfileTabs
     if (variant === 'profile') {
         return (
             <Link
                 href={href}
-                className={`group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden hover:border-brand/50 transition-all cursor-pointer hover:shadow-xl hover:shadow-[#137fec]/5 ${className}`}
+                className={`group flex flex-col border border-border hover:border-text-main bg-main overflow-hidden transition-all cursor-pointer ${className}`}
             >
-                <div className="h-40 relative flex items-center justify-center bg-gray-100 dark:bg-sidebar-border overflow-hidden">
+                <div className="h-40 relative flex items-center justify-center bg-surface-dark overflow-hidden grayscale group-hover:grayscale-0 transition-all">
                     <FallbackImage
                         src={thumbnail_url || ''}
                         alt={title}
@@ -169,21 +158,18 @@ export function CardCourse({
                         type="course"
                     />
                     <div className="absolute top-2 right-2">
-                        <span className="bg-gray-900/80 text-white text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest backdrop-blur-sm">
+                        <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
                             Course
                         </span>
                     </div>
                 </div>
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-brand transition-colors line-clamp-1">
+                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline line-clamp-1">
                         {title}
                     </h3>
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                        <span className="material-symbols-outlined text-sm text-brand">star</span>
-                        <span>{xp_reward} XP</span>
-                    </div>
+                    <p className="text-muted text-xs">{xp_reward} XP</p>
                     {summary && (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mt-auto">
+                        <p className="text-muted text-xs line-clamp-2 mt-auto">
                             {summary}
                         </p>
                     )}
@@ -193,51 +179,43 @@ export function CardCourse({
     }
 
     // VARIANT: GRID / DEFAULT (Detailed vertical card)
-    // Used in: Dashboard My Courses, Courses List, Drafts
     // Also handles 'draft' styling via status check
+    const isCompleted = progress === 100
+    const hasProgress = progress !== undefined && progress > 0
+
     return (
         <Link
             href={href}
-            className={`group bg-white dark:bg-[#1a232e] rounded-xl overflow-hidden border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all cursor-pointer flex flex-col relative ${className}`}
+            className={`group border border-border hover:border-text-main bg-main overflow-hidden transition-all cursor-pointer flex flex-col relative ${className}`}
         >
             {/* Thumbnail */}
-            <div className="h-40 bg-gradient-to-br from-[#137fec]/20 to-[#137fec]/5 relative overflow-hidden shrink-0">
+            <div className="h-40 bg-surface-dark relative overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all">
                 <FallbackImage
                     src={thumbnail_url || ''}
                     alt={title}
                     as="img"
                     className="object-cover w-full h-full"
-                    type={variant === 'draft' ? 'default' : 'course'} // maybe specific draft icon?
+                    type={variant === 'draft' ? 'default' : 'course'}
                 />
 
                 {/* Right Top Badges */}
                 <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
-                    {/* Progress Badge */}
-                    {progress === 100 ? (
-                        <span className="bg-green-500 text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                            <span className="material-symbols-outlined w-3 h-3">check</span>
-                            Completed
+                    {isCompleted && (
+                        <span className="bg-inverse text-main-alt px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">check</span>
+                            Complete
                         </span>
-                    ) : (progress !== undefined && progress > 0) ? (
-                        <span className="bg-brand text-gray-900 dark:text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                            {progress}%
-                        </span>
-                    ) : null}
+                    )}
 
-                    {/* Saved Badge */}
-                    {isSaved && (progress === undefined || progress === 0) && (
-                        <span className="bg-gray-900/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm border border-white/10">
-                            <span className="material-symbols-outlined w-3 h-3">bookmark</span>
+                    {isSaved && !hasProgress && (
+                        <span className="bg-inverse text-main-alt px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">bookmark</span>
                             Saved
                         </span>
                     )}
 
-                    {/* Status Badge */}
                     {status !== 'published' && (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                            status === 'pending' ? 'bg-amber-100 text-amber-800 animate-pulse' :
-                                'bg-red-100 text-red-800'
-                            }`}>
+                        <span className="border border-current px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-inverse bg-main-alt">
                             {status}
                         </span>
                     )}
@@ -245,34 +223,46 @@ export function CardCourse({
             </div>
 
             {/* Content */}
-            <div className="p-5 flex flex-col gap-3 flex-1">
-                <h4 className="font-bold text-base line-clamp-2 text-gray-900 dark:text-white group-hover:text-brand transition-colors">
+            <div className="p-4 flex flex-col gap-2 flex-1">
+                <h4 className="font-bold uppercase tracking-wide text-sm line-clamp-2 text-text-main group-hover:underline">
                     {title}
                 </h4>
 
                 {instructor && (
-                    <p className="text-gray-600 dark:text-muted-foreground text-xs">
+                    <p className="text-muted text-xs uppercase tracking-wider">
                         {instructor}
                     </p>
                 )}
 
-                {/* Summary (if provided, usually for Drafts/Profile view but useful here too) */}
                 {!instructor && summary && (
-                    <p className="text-gray-600 dark:text-muted-foreground text-xs line-clamp-2">
+                    <p className="text-muted text-xs line-clamp-2">
                         {summary}
                     </p>
                 )}
 
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-200 dark:border-sidebar-border">
-                    <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined w-4 h-4 text-brand">star</span>
-                        <span className="text-gray-600 dark:text-muted-foreground text-xs font-medium">{xp_reward} XP</span>
+                {/* Progress Bar */}
+                {hasProgress && (
+                    <div className="mt-auto pt-3">
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-muted text-[10px] uppercase tracking-widest">Progress</span>
+                            <span className="text-text-main text-xs font-bold">{progress}%</span>
+                        </div>
+                        <div className="h-1 w-full bg-surface-dark">
+                            <div
+                                className="h-full bg-inverse transition-all"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
                     </div>
-                    {duration ? (
-                        <span className="text-gray-600 dark:text-muted-foreground text-xs">{duration}</span>
-                    ) : variant === 'draft' ? (
-                        <span className="text-brand text-xs font-bold">Continue Editing</span>
-                    ) : null}
+                )}
+
+                {/* Footer */}
+                <div className={`flex items-center justify-between ${hasProgress ? 'pt-2' : 'mt-auto pt-3 border-t border-border'}`}>
+                    <span className="text-muted text-xs">{xp_reward} XP</span>
+                    {duration && <span className="text-muted text-xs">{duration}</span>}
+                    {variant === 'draft' && (
+                        <span className="text-text-main text-xs font-bold uppercase tracking-wider">Edit →</span>
+                    )}
                 </div>
             </div>
         </Link>

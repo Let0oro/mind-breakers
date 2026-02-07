@@ -41,7 +41,7 @@ export function FallbackImage({
     return (<>
         <Activity mode={!throwImage ? 'visible' : 'hidden'} >
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-                <span className={`material-symbols-outlined text-4xl text-white/80`}>{iconFallback}</span>
+                <span className={`material-symbols-outlined text-4xl text-text-main/80`}>{iconFallback}</span>
             </div>
         </Activity>
 

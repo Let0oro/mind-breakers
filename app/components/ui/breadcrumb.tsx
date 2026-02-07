@@ -88,24 +88,24 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
                 return (
                     <div key={index} className="flex items-center gap-2">
                         {item.icon && (
-                            <span className="material-symbols-outlined text-sm text-muted-foreground">
+                            <span className="material-symbols-outlined text-sm text-muted">
                                 {item.icon}
                             </span>
                         )}
 
                         {isLast ? (
-                            <span className="text-foreground dark:text-white">
+                            <span className="text-text-main dark:text-text-main">
                                 {item.label}
                             </span>
                         ) : (
                             <>
                                 <Link
                                     href={item.href?.includes("organizations") ? "/dashboard/organizations/new" : item.href || '#'}
-                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                    className="text-muted hover:text-text-main transition-colors"
                                 >
                                     {item.label}
                                 </Link>
-                                <span className="material-symbols-outlined text-sm text-muted-foreground">
+                                <span className="material-symbols-outlined text-sm text-muted">
                                     chevron_right
                                 </span>
                             </>

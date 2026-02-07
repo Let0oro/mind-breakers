@@ -19,7 +19,7 @@ interface Organization {
 }
 
 export default function NewCoursePage() {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState({ "draft": false, "published": false })
   const [error, setError] = useState<string | null>(null)
   const [paths, setPaths] = useState<LearningPath[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
@@ -201,19 +201,19 @@ export default function NewCoursePage() {
   }
 
   const processSave = async (targetStatus: 'draft' | 'published') => {
-    setLoading(true)
+    setLoading(p => ({ ...p, [targetStatus]: true }))
     setError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setError('You must be logged in to create a course')
-      setLoading(false)
+      setLoading(p => ({ ...p, [targetStatus]: false }))
       return
     }
 
     if (!pathId) {
       setError("Please select a learning path")
-      setLoading(false)
+      setLoading(p => ({ ...p, [targetStatus]: false }))
       return
     }
 
@@ -247,7 +247,7 @@ export default function NewCoursePage() {
 
     if (insertError) {
       setError(insertError.message)
-      setLoading(false)
+      setLoading(p => ({ ...p, [targetStatus]: false }))
       return
     }
 
@@ -271,7 +271,7 @@ export default function NewCoursePage() {
       }
     }
 
-    router.push(`/dashboard/courses/${courseData.id}`)
+    router.push(`/dashboard/quests/${courseData.id}`)
   }
 
   const handleSubmit = (e: React.FormEvent) => e.preventDefault()
@@ -283,20 +283,20 @@ export default function NewCoursePage() {
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => router.back()}
-            className="text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
+            className="text-muted dark:text-muted hover:text-text-main transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
-          <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Create Course</h2>
+          <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Create Course</h2>
         </div>
-        <p className="text-gray-600 dark:text-muted-foreground text-base">
+        <p className="text-muted dark:text-muted text-base">
           Add a new course to an existing learning path
         </p>
       </header>
 
       <div className="flex gap-8 flex-col lg:flex-row items-start">
         {/* Form */}
-        <div className="flex-1 w-full bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8">
+        <div className="flex-1 w-full bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
@@ -310,7 +310,7 @@ export default function NewCoursePage() {
 
             {/* Course URL */}
             <div className="space-y-2">
-              <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="link_url" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Course URL
                 {metadataFetched && (
                   <span className="ml-2 text-xs font-normal text-green-500">✓ Metadata loaded</span>
@@ -318,7 +318,7 @@ export default function NewCoursePage() {
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
                     link
                   </span>
                   <input
@@ -326,7 +326,7 @@ export default function NewCoursePage() {
                     id="link_url"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                     placeholder="https://youtube.com/watch?v=... or any URL"
                   />
                 </div>
@@ -349,7 +349,7 @@ export default function NewCoursePage() {
                   )}
                 </button>
               </div>
-              <p className="text-gray-600 dark:text-muted-foreground text-xs">
+              <p className="text-muted dark:text-muted text-xs">
                 Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
                 <span className="block mt-1 text-amber-600 dark:text-amber-400">
                   💡 Use public URLs (without login). If auto-fill doesn&apos;t work, you can enter the data manually.
@@ -365,7 +365,7 @@ export default function NewCoursePage() {
 
             {/* Learning Path */}
             <div className="space-y-2">
-              <label htmlFor="path_id" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="path_id" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Learning Path <span className="text-red-500">*</span>
               </label>
               <select
@@ -373,7 +373,7 @@ export default function NewCoursePage() {
                 value={pathId}
                 onChange={(e) => setPathId(e.target.value)}
                 required
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
               >
                 <option value="">Select a learning path</option>
                 {paths.map((path) => (
@@ -386,7 +386,7 @@ export default function NewCoursePage() {
 
             {/* Title */}
             <div className="space-y-2">
-              <label htmlFor="title" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="title" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Course Title <span className="text-red-500">*</span>
                 {metadataFetched && title && (
                   <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
@@ -398,7 +398,7 @@ export default function NewCoursePage() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                 placeholder="e.g., Introduction to React Hooks"
               />
               <SimilarItemsList
@@ -410,7 +410,7 @@ export default function NewCoursePage() {
 
             {/* Summary */}
             <div className="space-y-2">
-              <label htmlFor="summary" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="summary" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Summary
                 {metadataFetched && summary && (
                   <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
@@ -421,14 +421,14 @@ export default function NewCoursePage() {
                 id="summary"
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                 placeholder="Brief one-liner about the course"
               />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <label htmlFor="description" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="description" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Description
                 {metadataFetched && description && (
                   <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
@@ -439,14 +439,14 @@ export default function NewCoursePage() {
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+                className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all resize-none"
                 placeholder="What will students learn?"
               />
             </div>
 
             {/* Thumbnail URL */}
             <div className="space-y-2">
-              <label htmlFor="thumbnail_url" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="thumbnail_url" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Thumbnail URL
                 {metadataFetched && thumbnailUrl && (
                   <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
@@ -454,7 +454,7 @@ export default function NewCoursePage() {
               </label>
               <div className="flex gap-4">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
                     image
                   </span>
                   <input
@@ -462,12 +462,13 @@ export default function NewCoursePage() {
                     id="thumbnail_url"
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
                 {thumbnailUrl && (
-                  <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-sidebar-border flex-shrink-0">
+                  <div className="w-20 h-12 rounded-lg overflow-hidden border border-border dark:border-border shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={thumbnailUrl}
                       alt="Thumbnail preview"
@@ -484,14 +485,14 @@ export default function NewCoursePage() {
             {/* Row: Organization & XP Reward */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="organization_id" className="block text-gray-900 dark:text-white text-sm font-bold">
+                <label htmlFor="organization_id" className="block text-text-main dark:text-text-main text-sm font-bold">
                   Organization
                 </label>
                 <select
                   id="organization_id"
                   value={organizationId}
                   onChange={(e) => setOrganizationId(e.target.value)}
-                  className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                  className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                 >
                   <option value="">None</option>
                   {organizations.map((org) => (
@@ -503,7 +504,7 @@ export default function NewCoursePage() {
               </div>
 
               <div className="space-y-2 relative">
-                <label htmlFor="xp_reward" className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-bold">
+                <label htmlFor="xp_reward" className="flex items-center gap-2 text-text-main dark:text-text-main text-sm font-bold">
                   XP Reward
                   {metadataFetched && xpReward > 0 && (
                     <span className="text-xs font-normal text-green-500">Auto-calculated</span>
@@ -514,12 +515,12 @@ export default function NewCoursePage() {
                       onMouseEnter={() => setShowXpTooltip(true)}
                       onMouseLeave={() => !xpNeedsAttention && setShowXpTooltip(false)}
                       onClick={() => setShowXpTooltip(!showXpTooltip)}
-                      className="text-gray-600 dark:text-muted-foreground hover:text-brand transition-colors"
+                      className="text-muted dark:text-muted hover:text-brand transition-colors"
                     >
                       <span className="material-symbols-outlined text-base">info</span>
                     </button>
                     {showXpTooltip && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg shadow-xl z-50 animate-fade-in">
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-surface-dark text-text-main text-xs rounded-lg shadow-xl z-50 animate-fade-in">
                         <p className="font-bold mb-2">📊 XP by Duration:</p>
                         <ul className="space-y-1">
                           <li>&lt; 2h → 25 XP</li>
@@ -532,7 +533,7 @@ export default function NewCoursePage() {
                         {xpNeedsAttention && (
                           <p className="mt-2 text-amber-400 font-medium">⚠️ Duration not found. Please set XP manually.</p>
                         )}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-inverse dark:border-t-border"></div>
                       </div>
                     )}
                   </div>
@@ -548,9 +549,9 @@ export default function NewCoursePage() {
                   min={0}
                   max={300}
                   step={25}
-                  className={`w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all ${xpNeedsAttention
+                  className={`w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border text-text-main dark:text-text-main placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all ${xpNeedsAttention
                     ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
-                    : 'border-gray-200 dark:border-sidebar-border'
+                    : 'border-border dark:border-border'
                     }`}
                 />
               </div>
@@ -559,7 +560,7 @@ export default function NewCoursePage() {
 
             {/* Order Index */}
             <div className="space-y-2">
-              <label htmlFor="order_index" className="block text-gray-900 dark:text-white text-sm font-bold">
+              <label htmlFor="order_index" className="block text-text-main dark:text-text-main text-sm font-bold">
                 Order in Path
               </label>
               <input
@@ -568,18 +569,18 @@ export default function NewCoursePage() {
                 value={orderIndex}
                 onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
                 min={0}
-                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                 placeholder="0"
               />
-              <p className="text-gray-600 dark:text-muted-foreground text-xs">Lower numbers appear first (0 = first)</p>
+              <p className="text-muted dark:text-muted text-xs">Lower numbers appear first (0 = first)</p>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-sidebar-border my-8"></div>
+            <div className="border-t border-border dark:border-border my-8"></div>
 
             {/* Exercise Section using Dynamic List */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Exercises</h3>
+                <h3 className="text-xl font-bold text-text-main dark:text-text-main">Exercises</h3>
                 <button
                   type="button"
                   onClick={addExercise}
@@ -591,16 +592,16 @@ export default function NewCoursePage() {
               </div>
 
               {exercises.length === 0 ? (
-                <div className="text-center py-8 rounded-xl border border-dashed border-gray-300 dark:border-sidebar-border bg-gray-50/50 dark:bg-[#1a232e]/50">
-                  <p className="text-gray-500 dark:text-gray-400">No exercises added yet.</p>
+                <div className="text-center py-8 rounded-xl border border-dashed border-border dark:border-border bg-surface/50 dark:bg-surface/50">
+                  <p className="text-muted dark:text-muted">No exercises added yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {exercises.map((exercise, index) => (
-                    <div key={exercise.id} className="rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] overflow-hidden">
-                      <div className="p-4 bg-gray-50 dark:bg-[#283039] flex items-center justify-between">
+                    <div key={exercise.id} className="rounded-xl border border-border dark:border-border bg-main dark:bg-surface overflow-hidden">
+                      <div className="p-4 bg-surface dark:bg-surface-dark flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white text-xs font-bold">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-text-main text-xs font-bold">
                             {index + 1}
                           </span>
                           <input
@@ -608,13 +609,13 @@ export default function NewCoursePage() {
                             value={exercise.title}
                             onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
                             placeholder="Exercise Title"
-                            className="bg-transparent border-none text-gray-900 dark:text-white font-bold focus:ring-0 p-0 w-64"
+                            className="bg-transparent border-none text-text-main dark:text-text-main font-bold focus:ring-0 p-0 w-64"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => removeExercise(exercise.id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          className="text-muted hover:text-red-500 transition-colors"
                         >
                           <span className="material-symbols-outlined">delete</span>
                         </button>
@@ -623,22 +624,22 @@ export default function NewCoursePage() {
                       <div className="p-4 space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="block text-xs font-bold text-gray-500 uppercase">Description</label>
+                            <label className="block text-xs font-bold text-muted uppercase">Description</label>
                             <textarea
                               value={exercise.description}
                               onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                              className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
                               placeholder="Brief description..."
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="block text-xs font-bold text-gray-500 uppercase">Requirements</label>
+                            <label className="block text-xs font-bold text-muted uppercase">Requirements</label>
                             <textarea
                               value={exercise.requirements}
                               onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                              className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
                               placeholder="- Validations&#10;- Tests"
                             />
                           </div>
@@ -651,11 +652,11 @@ export default function NewCoursePage() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-sidebar-border">
+            <div className="flex gap-3 pt-8 border-t border-border dark:border-border">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 h-12 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-[#283039] transition-colors"
+                className="px-6 h-12 rounded-lg border border-border dark:border-border text-text-main dark:text-text-main font-medium hover:bg-surface dark:hover:bg-surface-dark transition-colors"
               >
                 Cancel
               </button>
@@ -663,7 +664,7 @@ export default function NewCoursePage() {
                 <button
                   type="button"
                   onClick={() => handleSaveClick('draft')}
-                  disabled={loading}
+                  disabled={loading['draft']}
                   className={`px-6 h-12 rounded-lg border border-brand text-brand font-bold hover:bg-brand/10 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading ? 'Saving...' : 'Save Draft'}
@@ -671,8 +672,8 @@ export default function NewCoursePage() {
                 <button
                   type="button"
                   onClick={() => handleSaveClick('published')}
-                  disabled={loading}
-                  className={`px-6 h-12 rounded-lg bg-brand text-white font-bold hover:bg-brand/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loading['published']}
+                  className={`px-6 h-12 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {loading ? (
                     <>
@@ -701,7 +702,7 @@ export default function NewCoursePage() {
               <span className="material-symbols-outlined">lightbulb</span>
               Pro Tips
             </h4>
-            <ul className="text-sm text-gray-600 dark:text-muted-foreground space-y-3">
+            <ul className="text-sm text-muted dark:text-muted space-y-3">
               <li>• Use clear, descriptive titles.</li>
               <li>• Add a high-quality thumbnail.</li>
               <li>• Check for existing courses before creating a new one to avoid duplicates.</li>

@@ -5,18 +5,18 @@ export default function LeaderboardLoading() {
             <div className="flex flex-col gap-4 mb-8">
                 <div className="flex flex-wrap justify-between items-end gap-6">
                     <div className="flex flex-col gap-2">
-                        <div className="h-8 w-48 bg-white dark:bg-[#1a232e] rounded-lg"></div>
-                        <div className="h-4 w-64 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                        <div className="h-8 w-48 bg-main dark:bg-surface rounded-lg"></div>
+                        <div className="h-4 w-64 bg-main dark:bg-surface rounded-lg"></div>
                     </div>
-                    <div className="h-9 w-32 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                    <div className="h-9 w-32 bg-main dark:bg-surface rounded-lg"></div>
                 </div>
             </div>
 
             {/* Leaderboard Table Skeleton */}
-            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden">
+            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-[#283039]">
+                        <thead className="bg-surface-dark">
                             <tr>
                                 {[1, 2, 3, 4].map((i) => (
                                     <th key={i} className="px-6 py-4">
@@ -25,7 +25,7 @@ export default function LeaderboardLoading() {
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#3b4754]">
+                        <tbody className="divide-y divide-border">
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
                                 <tr key={i}>
                                     {/* Rank */}

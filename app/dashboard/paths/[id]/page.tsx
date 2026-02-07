@@ -57,10 +57,10 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
         <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">pending</span>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-2xl font-bold text-text-main dark:text-text-main mb-2">
           Contenido no disponible
         </h1>
-        <p className="text-gray-600 dark:text-muted-foreground max-w-md">
+        <p className="text-muted dark:text-muted max-w-md">
           Este learning path está pendiente de validación por un administrador.
           Vuelve más tarde.
         </p>
@@ -163,7 +163,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
       <header className="mb-8">
         <Link
           href="/dashboard"
-          className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
           Volver al dashboard
@@ -171,16 +171,16 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
         <div className="flex items-start justify-between mt-2 gap-4">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-3xl font-bold text-text-main dark:text-text-main">
               {path.title}
             </h1>
             {path.summary && (
-              <p className="mt-2 text-lg text-gray-600 dark:text-muted-foreground">
+              <p className="mt-2 text-lg text-muted dark:text-muted">
                 {path.summary}
               </p>
             )}
             {path.organizations && (
-              <p className="mt-2 text-sm text-gray-600 dark:text-muted-foreground">
+              <p className="mt-2 text-sm text-muted dark:text-muted">
                 Por {path.organizations.name}
               </p>
             )}
@@ -213,7 +213,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 type="submit"
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isSaved
                   ? 'bg-brand/20 text-brand hover:bg-brand/30'
-                  : 'border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50'
+                  : 'border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50'
                   }`}
               >
                 {isSaved ? 'Guardado' : 'Guardar'}
@@ -223,7 +223,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             {/* Edit button visible to all - permissions handled in edit page */}
             <Link
               href={`/dashboard/paths/${path.id}/edit`}
-              className="rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
+              className="rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
             >
               Editar
             </Link>
@@ -240,31 +240,31 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
       <div className="flex flex-col md:grid gap-6 lg:grid-cols-3">
         {/* Descripción y detalles */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+            <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
               Acerca de este path
             </h2>
             {path.description ? (
-              <p className="text-sm text-gray-600 dark:text-muted-foreground whitespace-pre-wrap">
+              <p className="text-sm text-muted dark:text-muted whitespace-pre-wrap">
                 {path.description}
               </p>
             ) : (
-              <p className="text-sm text-gray-600 dark:text-muted-foreground/70 italic">
+              <p className="text-sm text-muted dark:text-muted/70 italic">
                 Sin descripción
               </p>
             )}
 
             <div className="mt-6 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-muted-foreground">Total de cursos:</span>
-                <span className="font-medium text-gray-900 dark:text-white">{totalCourses}</span>
+                <span className="text-muted dark:text-muted">Total de cursos:</span>
+                <span className="font-medium text-text-main dark:text-text-main">{totalCourses}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-muted-foreground">Completados:</span>
+                <span className="text-muted dark:text-muted">Completados:</span>
                 <span className="font-medium text-green-400">{completedCourses}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-muted-foreground">XP total:</span>
+                <span className="text-muted dark:text-muted">XP total:</span>
                 <span className="font-medium text-brand">
                   {path.courses?.reduce((sum: number, c: Course) => sum + c.xp_reward, 0)} XP
                 </span>
@@ -273,8 +273,8 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
             {path.created_by === user.id && (
               <Link
-                href={`/dashboard/courses/new?pathId=${path.id}`}
-                className="mt-6 block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-medium text-gray-900 dark:text-white hover:bg-brand/80 transition-colors"
+                href={`/dashboard/quests/new?pathId=${path.id}`}
+                className="mt-6 block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 transition-colors"
               >
                 + Agregar curso
               </Link>
@@ -282,10 +282,10 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           {/* Leaderboard Section */}
-          <div className="mt-6 rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
+          <div className="mt-6 rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
             <div className="flex items-center gap-2 mb-4">
               <span className="material-symbols-outlined text-yellow-500">trophy</span>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-text-main dark:text-text-main">
                 Top Estudiantes
               </h2>
             </div>
@@ -296,16 +296,16 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                   <Link
                     key={student.userId}
                     href={`/dashboard/users/${student.userId}`}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-sidebar-border/30 rounded-lg transition-colors"
+                    className="flex items-center gap-3 p-2 hover:bg-surface dark:hover:bg-sidebar-border/30 rounded-lg transition-colors"
                   >
                     <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                      index === 1 ? 'bg-surface text-text-main' :
                         index === 2 ? 'bg-orange-100 text-orange-700' :
-                          'text-gray-500'
+                          'text-muted'
                       }`}>
                       {index + 1}
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div className="w-8 h-8 rounded-full bg-main-dark dark:bg-gray-700 overflow-hidden">
                       <FallbackImage
                         as="img"
                         src={student.avatarUrl || ''}
@@ -315,10 +315,10 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <p className="text-sm font-medium text-text-main dark:text-text-main truncate">
                         {student.username}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted dark:text-muted">
                         {student.completedCount} cursos completados
                       </p>
                     </div>
@@ -329,7 +329,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+              <p className="text-sm text-muted dark:text-muted italic">
                 Sé el primero en completar cursos de este path.
               </p>
             )}
@@ -364,13 +364,13 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 )
               })
             ) : (
-              <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
-                <p className="text-gray-600 dark:text-muted-foreground">
+              <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
+                <p className="text-muted dark:text-muted">
                   Este path aún no tiene cursos.
                 </p>
                 {path.created_by === user.id && (
                   <Link
-                    href={`/dashboard/courses/new?pathId=${path.id}`}
+                    href={`/dashboard/quests/new?pathId=${path.id}`}
                     className="mt-4 inline-block text-brand hover:text-brand/80"
                   >
                     Agrega el primer curso →

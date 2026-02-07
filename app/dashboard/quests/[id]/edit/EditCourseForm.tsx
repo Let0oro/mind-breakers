@@ -317,7 +317,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         // Show success?
         if (targetStatus === 'published' && courseStatus === 'draft') {
-            router.push(`/dashboard/courses/${courseId}`)
+            router.push(`/dashboard/quests/${courseId}`)
         }
     }
 
@@ -368,7 +368,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 setError(error.message)
                 setSaving(false)
             } else {
-                router.push('/dashboard/courses')
+                router.push('/dashboard/quests')
             }
         } else {
             // Hard Delete
@@ -381,7 +381,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 setError(error.message)
                 setSaving(false)
             } else {
-                router.push('/dashboard/courses')
+                router.push('/dashboard/quests')
             }
         }
     }
@@ -398,11 +398,11 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 <div className="flex items-center gap-3 mb-4">
                     <button
                         onClick={() => router.back()}
-                        className="text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
+                        className="text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
-                    <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Edit Course</h2>
+                    <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Edit Course</h2>
                 </div>
                 <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 p-3 rounded-lg w-fit text-sm">
                     <span className="material-symbols-outlined text-lg">warning</span>
@@ -412,7 +412,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
 
             {/* Form */}
-            <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-8 max-w-3xl">
+            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 max-w-3xl">
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                     {/* Error Message */}
                     {error && (
@@ -426,12 +426,12 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                     {/* Course URL */}
                     <div className="space-y-2">
-                        <label htmlFor="link_url" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="link_url" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Course URL
                         </label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
                                     link
                                 </span>
                                 <input
@@ -439,7 +439,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                     id="link_url"
                                     value={linkUrl}
                                     onChange={(e) => setLinkUrl(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                                     placeholder="https://youtube.com/watch?v=..."
                                 />
                             </div>
@@ -463,7 +463,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                     {/* Learning Path */}
                     <div className="space-y-2">
-                        <label htmlFor="path_id" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="path_id" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Learning Path <span className="text-red-500">*</span>
                         </label>
                         <select
@@ -471,7 +471,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             required
                             value={pathId}
                             onChange={(e) => setPathId(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                         >
                             <option value="">Select a learning path</option>
                             {paths.map((path) => (
@@ -484,7 +484,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                     {/* Title */}
                     <div className="space-y-2">
-                        <label htmlFor="title" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="title" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Course Title <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -493,13 +493,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             required
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                         />
                     </div>
 
                     {/* Summary */}
                     <div className="space-y-2">
-                        <label htmlFor="summary" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="summary" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Summary
                         </label>
                         <input
@@ -507,13 +507,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             id="summary"
                             value={summary}
                             onChange={(e) => setSummary(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                         />
                     </div>
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <label htmlFor="description" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="description" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Description
                         </label>
                         <textarea
@@ -521,18 +521,18 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             rows={4}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all resize-none"
+                            className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all resize-none"
                         />
                     </div>
 
                     {/* Thumbnail URL */}
                     <div className="space-y-2">
-                        <label htmlFor="thumbnail_url" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="thumbnail_url" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Thumbnail URL
                         </label>
                         <div className="flex gap-4">
                             <div className="relative flex-1">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 dark:text-muted-foreground">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
                                     image
                                 </span>
                                 <input
@@ -540,11 +540,11 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                     id="thumbnail_url"
                                     value={thumbnailUrl}
                                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:placeholder:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                                 />
                             </div>
                             {thumbnailUrl && (
-                                <div className="w-20 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-sidebar-border flex-shrink-0">
+                                <div className="w-20 h-12 rounded-lg overflow-hidden border border-border dark:border-border flex-shrink-0">
                                     <img
                                         src={thumbnailUrl}
                                         alt="Preview"
@@ -561,14 +561,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     {/* Row: Organization & XP Reward */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label htmlFor="organization_id" className="block text-gray-900 dark:text-white text-sm font-bold">
+                            <label htmlFor="organization_id" className="block text-text-main dark:text-text-main text-sm font-bold">
                                 Organization
                             </label>
                             <select
                                 id="organization_id"
                                 value={organizationId}
                                 onChange={(e) => setOrganizationId(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                             >
                                 <option value="">None</option>
                                 {organizations.map((org) => (
@@ -580,10 +580,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         </div>
 
                         <div className="space-y-2 relative">
-                            <label htmlFor="xp_reward" className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-bold">
+                            <label htmlFor="xp_reward" className="flex items-center gap-2 text-text-main dark:text-text-main text-sm font-bold">
                                 XP Reward
                                 <div className="relative">
-                                    <button type="button" className="text-gray-600 dark:text-muted-foreground">
+                                    <button type="button" className="text-muted dark:text-muted">
                                         <span className="material-symbols-outlined text-base">info</span>
                                     </button>
                                     {/* Tooltip content same as before ... */}
@@ -594,14 +594,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                 id="xp_reward"
                                 value={xpReward}
                                 onChange={(e) => setXpReward(parseInt(e.target.value) || 0)}
-                                className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white focus:outline-none focus:border-brand transition-all"
+                                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand transition-all"
                             />
                         </div>
                     </div>
 
                     {/* Order Index */}
                     <div className="space-y-2">
-                        <label htmlFor="order_index" className="block text-gray-900 dark:text-white text-sm font-bold">
+                        <label htmlFor="order_index" className="block text-text-main dark:text-text-main text-sm font-bold">
                             Order in Path
                         </label>
                         <input
@@ -609,16 +609,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             id="order_index"
                             value={orderIndex}
                             onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
-                            className="w-full h-12 px-4 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground focus:outline-none focus:border-brand focus:ring-2 focus:ring-[#137fec]/20 transition-all"
+                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
                         />
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-sidebar-border my-8"></div>
+                    <div className="border-t border-border dark:border-border my-8"></div>
 
                     {/* Exercise Section */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Exercises</h3>
+                            <h3 className="text-xl font-bold text-text-main dark:text-text-main">Exercises</h3>
                             <button
                                 type="button"
                                 onClick={addExercise}
@@ -631,10 +631,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                         <div className="space-y-4">
                             {exercises.map((exercise, index) => (
-                                <div key={exercise.id} className="rounded-xl border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] overflow-hidden">
-                                    <div className="p-4 bg-gray-50 dark:bg-[#283039] flex items-center justify-between">
+                                <div key={exercise.id} className="rounded-xl border border-border dark:border-border bg-main dark:bg-surface overflow-hidden">
+                                    <div className="p-4 bg-surface dark:bg-surface-dark flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-white text-xs font-bold">
+                                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-text-main text-xs font-bold">
                                                 {index + 1}
                                             </span>
                                             <input
@@ -642,13 +642,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                                 value={exercise.title}
                                                 onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
                                                 placeholder="Exercise Title"
-                                                className="bg-transparent border-none text-gray-900 dark:text-white font-bold focus:ring-0 p-0 w-64"
+                                                className="bg-transparent border-none text-text-main dark:text-text-main font-bold focus:ring-0 p-0 w-64"
                                             />
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => removeExercise(exercise.id)}
-                                            className="text-gray-400 hover:text-red-500 transition-colors"
+                                            className="text-muted hover:text-red-500 transition-colors"
                                         >
                                             <span className="material-symbols-outlined">delete</span>
                                         </button>
@@ -660,14 +660,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                                 value={exercise.description}
                                                 onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
                                                 rows={3}
-                                                className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                                                className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
                                                 placeholder="Description..."
                                             />
                                             <textarea
                                                 value={exercise.requirements}
                                                 onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
                                                 rows={3}
-                                                className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                                                className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
                                                 placeholder="Requirements..."
                                             />
                                         </div>
@@ -684,32 +684,32 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             {/* Edit Reason Modal */}
             {showEditReasonModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-[#1a232e] rounded-xl p-6 max-w-md w-full shadow-2xl border border-gray-200 dark:border-sidebar-border">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Update Published Course</h3>
-                        <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
+                    <div className="bg-main dark:bg-surface rounded-xl p-6 max-w-md w-full shadow-2xl border border-border dark:border-border">
+                        <h3 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Update Published Course</h3>
+                        <p className="text-sm text-muted dark:text-muted mb-4">
                             Since this course is published, your changes will be saved as a draft for admin review. The live version will remain unchanged until approved.
                         </p>
-                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        <label className="block text-sm font-bold text-text-main dark:text-text-main mb-2">
                             Reason for changes <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={editReason}
                             onChange={(e) => setEditReason(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg bg-gray-50 dark:bg-[#111418] border border-gray-200 dark:border-sidebar-border text-gray-900 dark:text-white mb-6 focus:outline-none focus:border-brand resize-none"
+                            className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main mb-6 focus:outline-none focus:border-brand resize-none"
                             placeholder="e.g. Fixed typo in summary..."
                             rows={3}
                         />
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setShowEditReasonModal(false)}
-                                className="px-4 py-2 rounded-lg text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-[#283039]"
+                                className="px-4 py-2 rounded-lg text-muted dark:text-muted hover:bg-surface dark:hover:bg-surface-dark"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => processSave('published', editReason)}
                                 disabled={!editReason.trim() || saving}
-                                className="px-4 py-2 rounded-lg bg-brand text-white font-bold hover:bg-brand/90 disabled:opacity-50"
+                                className="px-4 py-2 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 disabled:opacity-50"
                             >
                                 {saving ? 'Submitting...' : 'Submit for Review'}
                             </button>
@@ -719,7 +719,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             )}
 
             {/* Actions Footer */}
-            <div className="flex gap-3 pt-8 border-t border-gray-200 dark:border-sidebar-border mt-8">
+            <div className="flex gap-3 pt-8 border-t border-border dark:border-border mt-8">
 
                 <button
                     type="button"
@@ -750,7 +750,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         type="button"
                         onClick={() => handleSaveClick('published')}
                         disabled={saving || !isFormValidForPublish()}
-                        className="px-6 h-12 rounded-lg bg-brand text-white font-bold hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        className="px-6 h-12 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                     >
                         {courseStatus === 'published' ? (
                             <>

@@ -25,7 +25,7 @@ export default async function DashboardLayout({
         .single()
 
     return (
-        <div className="flex h-screen overflow-hidden bg-background-alt dark:bg-background-alt">
+        <div className="flex h-screen overflow-hidden bg-main-alt dark:bg-main-alt">
             {/* Sidebar matches standardized Background Alt */}
             <Sidebar user={user} profile={profile} />
 

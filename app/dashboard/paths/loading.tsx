@@ -4,16 +4,16 @@ export default function PathsListLoading() {
             {/* Header Section */}
             <div className="flex flex-wrap justify-between items-end gap-6 mb-8">
                 <div className="flex flex-col gap-2">
-                    <div className="h-8 w-48 bg-white dark:bg-[#1a232e] rounded-lg"></div>
-                    <div className="h-4 w-32 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                    <div className="h-8 w-48 bg-main dark:bg-surface rounded-lg"></div>
+                    <div className="h-4 w-32 bg-main dark:bg-surface rounded-lg"></div>
                 </div>
-                <div className="h-11 w-40 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                <div className="h-11 w-40 bg-main dark:bg-surface rounded-lg"></div>
             </div>
 
             {/* Paths Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6 flex flex-col gap-4">
+                    <div key={i} className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6 flex flex-col gap-4">
                         {/* Header */}
                         <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 space-y-2">

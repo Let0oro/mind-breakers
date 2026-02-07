@@ -62,7 +62,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} ${space_grotesk.className} bg-sidebar dark:bg-sidebar font-display text-slate-900 dark:text-white transition-colors duration-300`} suppressHydrationWarning>
+      <body className={`${inter.className} ${space_grotesk.className} bg-sidebar dark:bg-sidebar font-display text-text-main dark:text-text-main transition-colors duration-300`} suppressHydrationWarning>
         {children}
       </body>
     </html>

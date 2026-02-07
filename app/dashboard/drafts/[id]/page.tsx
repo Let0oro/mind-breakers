@@ -40,7 +40,7 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <Link
                     href={`/dashboard/drafts/${course.id}/edit`}
-                    className="px-4 py-2 rounded-lg bg-yellow-500 text-white font-bold hover:bg-yellow-600 transition-colors flex items-center gap-2"
+                    className="px-4 py-2 rounded-lg bg-yellow-500 text-text-main font-bold hover:bg-yellow-600 transition-colors flex items-center gap-2"
                 >
                     <span className="material-symbols-outlined text-sm">edit</span>
                     Continuar Editando
@@ -51,7 +51,7 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
             <header className="mb-8">
                 <Link
                     href="/dashboard/drafts"
-                    className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+                    className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
                 >
                     <span className="material-symbols-outlined text-base">arrow_back</span>
                     Volver a Mis Borradores
@@ -59,18 +59,18 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
 
                 <div className="flex lg:items-end text-center sm:text-left lg:justify-between mt-2 lg:gap-4 flex-wrap-reverse justify-center items-center gap-8">
                     <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-text-main dark:text-text-main flex items-center gap-3">
                             {course.title}
                             <span className="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20">
                                 Borrador
                             </span>
                         </h1>
                         {course.summary && (
-                            <p className="mt-2 text-lg text-gray-600 dark:text-muted-foreground">
+                            <p className="mt-2 text-lg text-muted dark:text-muted">
                                 {course.summary}
                             </p>
                         )}
-                        <div className="mt-3 flex items-center gap-4 text-sm text-gray-600 dark:text-muted-foreground">
+                        <div className="mt-3 flex items-center gap-4 text-sm text-muted dark:text-muted">
                             {course.organizations && (
                                 <span>📚 {course.organizations.name}</span>
                             )}
@@ -84,7 +84,7 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                     <div className="flex items-center gap-3">
                         <Link
                             href={`/dashboard/drafts/${course.id}/edit`}
-                            className="rounded-lg bg-brand px-6 py-3 text-white font-bold hover:bg-brand/90 transition-colors flex items-center gap-2"
+                            className="rounded-lg bg-brand px-6 py-3 text-text-main font-bold hover:bg-brand/90 transition-colors flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-sm">edit</span>
                             Editar Borrador
@@ -97,16 +97,16 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
             <div className="grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2 space-y-6">
                     {/* Description */}
-                    <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+                        <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
                             Descripción
                         </h2>
                         {course.description ? (
-                            <div className="prose prose-sm prose-invert max-w-none text-gray-600 dark:text-muted-foreground">
+                            <div className="prose prose-sm prose-invert max-w-none text-muted dark:text-muted">
                                 <p className="whitespace-pre-wrap">{course.description}</p>
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-500 dark:text-muted-foreground/70 italic">
+                            <p className="text-sm text-muted dark:text-muted/70 italic">
                                 Sin descripción. Añade una en el editor.
                             </p>
                         )}
@@ -114,14 +114,14 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
 
                     {/* Exercises Preview */}
                     {course.course_exercises && course.course_exercises.length > 0 && (
-                        <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+                            <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
                                 Ejercicios ({course.course_exercises.length})
                             </h2>
                             <div className="space-y-3">
                                 {course.course_exercises.map((ex: { id: string; title: string }, i: number) => (
-                                    <div key={ex.id} className="p-3 rounded-lg bg-gray-50 dark:bg-sidebar border border-gray-200 dark:border-sidebar-border">
-                                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    <div key={ex.id} className="p-3 rounded-lg bg-surface dark:bg-sidebar border border-border dark:border-border">
+                                        <span className="text-sm font-medium text-text-main dark:text-text-main">
                                             {i + 1}. {ex.title || 'Sin título'}
                                         </span>
                                     </div>
@@ -133,27 +133,27 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
 
                 {/* Sidebar Info */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                    <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+                        <h3 className="text-sm font-semibold text-text-main dark:text-text-main mb-4">
                             Información del Borrador
                         </h3>
                         <dl className="space-y-3 text-sm">
                             {course.learning_paths && (
                                 <div>
-                                    <dt className="text-gray-600 dark:text-muted-foreground">Learning Path</dt>
-                                    <dd className="mt-1 font-medium text-gray-900 dark:text-white">
+                                    <dt className="text-muted dark:text-muted">Learning Path</dt>
+                                    <dd className="mt-1 font-medium text-text-main dark:text-text-main">
                                         {course.learning_paths.title}
                                     </dd>
                                 </div>
                             )}
                             <div>
-                                <dt className="text-gray-600 dark:text-muted-foreground">Recompensa XP</dt>
+                                <dt className="text-muted dark:text-muted">Recompensa XP</dt>
                                 <dd className="mt-1 font-medium text-brand">
                                     {course.xp_reward} XP
                                 </dd>
                             </div>
                             <div>
-                                <dt className="text-gray-600 dark:text-muted-foreground">Estado</dt>
+                                <dt className="text-muted dark:text-muted">Estado</dt>
                                 <dd className="mt-1 font-medium text-yellow-500">
                                     Borrador (no publicado)
                                 </dd>

@@ -49,7 +49,7 @@ export function CardPath({
         return (
             <Link
                 href={href}
-                className={`p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1a232e] dark:to-[#111827] border border-gray-200 dark:border-sidebar-border flex gap-6 items-center hover:shadow-lg transition-all ${className}`}
+                className={`p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-surface dark:to-main border border-border dark:border-border flex gap-6 items-center hover:shadow-lg transition-all ${className}`}
             >
                 <div className={`h-20 w-20 shrink-0 rounded-lg ${color === 'primary' ? 'bg-brand/20' : 'bg-purple-500/20'} flex items-center justify-center`}>
                     {color === 'primary' ? (
@@ -59,29 +59,29 @@ export function CardPath({
                     )}
                 </div>
                 <div className="flex-1">
-                    <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1">{title}</h4>
-                    <p className="text-gray-600 dark:text-muted-foreground text-xs mb-4">Path {completedCourses} of {totalCourses} courses completed</p>
+                    <h4 className="font-bold text-lg text-text-main dark:text-text-main mb-1">{title}</h4>
+                    <p className="text-muted dark:text-muted text-xs mb-4">Path {completedCourses} of {totalCourses} courses completed</p>
                     <div className="flex items-center gap-2">
                         <div className="flex -space-x-2">
                             {/* Render completed dots */}
                             {[...Array(Math.min(completedCourses, 5))].map((_, i) => (
-                                <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-[#111827]">
-                                    <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">check</span>
+                                <div key={i} className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center border border-inverse">
+                                    <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-text-main dark:text-text-main">check</span>
                                 </div>
                             ))}
                             {/* Render active pulse if not fully complete */}
                             {completedCourses < totalCourses && (
-                                <div className="w-6 h-6 rounded-full bg-brand flex items-center justify-center border border-[#111827] animate-pulse">
-                                    <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-gray-900 dark:text-white">play_arrow</span>
+                                <div className="w-6 h-6 rounded-full bg-brand flex items-center justify-center border border-inverse animate-pulse">
+                                    <span className="material-symbols-outlined w-3 h-3 transform translate-y-[-50%] translate-x-[-50%] text-text-main dark:text-text-main">play_arrow</span>
                                 </div>
                             )}
                             {/* Render empty dots (limit to remainders up to some max visual) */}
                             {[...Array(Math.min(totalCourses - completedCourses, 3))].map((_, i) => (
-                                <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-sidebar-border border border-[#111827]"></div>
+                                <div key={`empty-${i}`} className="w-6 h-6 rounded-full bg-sidebar-border border border-inverse"></div>
                             ))}
                         </div>
                         {nextCourse && (
-                            <span className="text-[11px] text-gray-600 dark:text-muted-foreground ml-2">Next: {nextCourse}</span>
+                            <span className="text-[11px] text-muted dark:text-muted ml-2">Next: {nextCourse}</span>
                         )}
                     </div>
                 </div>
@@ -95,9 +95,9 @@ export function CardPath({
         return (
             <Link
                 href={href}
-                className={`group flex flex-col bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden hover:border-brand/50 transition-all cursor-pointer hover:shadow-xl hover:shadow-[#137fec]/5 ${className}`}
+                className={`group flex flex-col bg-main dark:bg-surface rounded-xl border border-border dark:border-border overflow-hidden hover:border-brand/50 transition-all cursor-pointer hover:shadow-xl hover:shadow-ring/5 ${className}`}
             >
-                <div className="h-40 relative flex items-center justify-center bg-gray-100 dark:bg-sidebar-border overflow-hidden">
+                <div className="h-40 relative flex items-center justify-center bg-surface dark:bg-sidebar-border overflow-hidden">
                     <FallbackImage
                         src={thumbnailUrl || ''}
                         alt={title}
@@ -106,25 +106,25 @@ export function CardPath({
                         type="path"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-                        <span className="material-symbols-outlined text-4xl text-white/80">workspace_premium</span>
+                        <span className="material-symbols-outlined text-4xl text-text-main/80">workspace_premium</span>
                     </div>
                     <div className="absolute top-2 right-2">
-                        <span className="bg-brand/90 text-white text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm">
+                        <span className="bg-brand/90 text-text-main text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest backdrop-blur-sm shadow-sm">
                             Path
                         </span>
                     </div>
                 </div>
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-brand transition-colors line-clamp-1">
+                    <h3 className="text-text-main dark:text-text-main font-bold text-lg group-hover:text-brand transition-colors line-clamp-1">
                         {title}
                     </h3>
                     {summary && (
-                        <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">
+                        <p className="text-muted dark:text-muted text-sm line-clamp-2">
                             {summary}
                         </p>
                     )}
                     {createdAt && (
-                        <div className="mt-auto pt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="mt-auto pt-2 flex items-center gap-2 text-xs text-muted dark:text-muted">
                             <span className="material-symbols-outlined text-sm">calendar_today</span>
                             <span>{new Date(createdAt).toLocaleDateString()}</span>
                         </div>
@@ -139,16 +139,16 @@ export function CardPath({
     return (
         <Link
             href={href}
-            className={`group bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border hover:border-brand/50 transition-all p-6 flex flex-col gap-4 ${className}`}
+            className={`group bg-main dark:bg-surface rounded-xl border border-border dark:border-border hover:border-brand/50 transition-all p-6 flex flex-col gap-4 ${className}`}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg group-hover:text-brand transition-colors line-clamp-2">
+                    <h3 className="text-text-main dark:text-text-main font-bold text-lg group-hover:text-brand transition-colors line-clamp-2">
                         {title}
                     </h3>
                     {organizationName && (
-                        <p className="text-gray-600 dark:text-muted-foreground text-sm mt-1">
+                        <p className="text-muted dark:text-muted text-sm mt-1">
                             by {organizationName}
                         </p>
                     )}
@@ -156,7 +156,7 @@ export function CardPath({
                 <div className="flex items-center gap-2">
                     {/* Pending Badge */}
                     {!isValidated && isOwner && (
-                        <span className="inline-flex items-center gap-1 bg-amber-500 text-gray-900 px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                        <span className="inline-flex items-center gap-1 bg-amber-500 text-text-main px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
                             <span className="material-symbols-outlined text-xs">pending</span>
                             Pendiente
                         </span>
@@ -171,14 +171,14 @@ export function CardPath({
 
             {/* Summary */}
             {summary && (
-                <p className="text-gray-600 dark:text-muted-foreground text-sm line-clamp-2 flex-1">
+                <p className="text-muted dark:text-muted text-sm line-clamp-2 flex-1">
                     {summary}
                 </p>
             )}
 
             {/* Stats */}
             <div className="flex items-center gap-4 text-sm mt-auto">
-                <div className="flex items-center gap-1 text-gray-600 dark:text-muted-foreground">
+                <div className="flex items-center gap-1 text-muted dark:text-muted">
                     <span className="material-symbols-outlined text-base">school</span>
                     <span>{totalCourses} courses</span>
                 </div>
@@ -194,8 +194,8 @@ export function CardPath({
             {totalCourses > 0 && (
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs">
-                        <span className="text-gray-600 dark:text-muted-foreground">Progress</span>
-                        <span className="text-gray-900 dark:text-white font-medium">{Math.round(progressPercent)}%</span>
+                        <span className="text-muted dark:text-muted">Progress</span>
+                        <span className="text-text-main dark:text-text-main font-medium">{Math.round(progressPercent)}%</span>
                     </div>
                     <div className="h-2 bg-sidebar-border rounded-full overflow-hidden">
                         <div

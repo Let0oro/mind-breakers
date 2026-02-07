@@ -75,14 +75,14 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
     return (
         <div className="space-y-6">
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-gray-200 dark:border-sidebar-border">
+            <div className="flex gap-2 border-b border-border dark:border-border">
                 {(['pending', 'approved', 'rejected'] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors capitalize ${activeTab === tab
                             ? 'border-brand text-brand'
-                            : 'border-transparent text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white'
+                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:text-text-main'
                             }`}
                     >
                         {tab} ({requests.filter(r => r.status === tab).length})
@@ -96,7 +96,7 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                     {filteredRequests.map((request) => (
                         <div
                             key={request.id}
-                            className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6"
+                            className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
@@ -105,22 +105,22 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                                             <span className="material-symbols-outlined text-brand">person</span>
                                         </div>
                                         <div>
-                                            <h3 className="text-gray-900 dark:text-white font-bold">{request.profiles?.username || 'Unknown User'}</h3>
-                                            <p className="text-gray-600 dark:text-muted-foreground text-xs">
+                                            <h3 className="text-text-main dark:text-text-main font-bold">{request.profiles?.username || 'Unknown User'}</h3>
+                                            <p className="text-muted dark:text-muted text-xs">
                                                 Requested on {new Date(request.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="mt-4">
-                                        <p className="text-gray-600 dark:text-muted-foreground text-sm font-medium mb-1">Reason:</p>
-                                        <p className="text-gray-900 dark:text-white text-sm bg-gray-50 dark:bg-[#111418] rounded-lg p-3 border border-gray-200 dark:border-sidebar-border">
+                                        <p className="text-muted dark:text-muted text-sm font-medium mb-1">Reason:</p>
+                                        <p className="text-text-main dark:text-text-main text-sm bg-surface dark:bg-main rounded-lg p-3 border border-border dark:border-border">
                                             {request.reason}
                                         </p>
                                     </div>
 
                                     {request.reviewed_at && (
-                                        <p className="text-gray-600 dark:text-muted-foreground text-xs mt-3">
+                                        <p className="text-muted dark:text-muted text-xs mt-3">
                                             Reviewed on {new Date(request.reviewed_at).toLocaleDateString()}
                                         </p>
                                     )}
@@ -169,9 +169,9 @@ export function AdminRequestsClient({ initialRequests }: { initialRequests: Admi
                     ))}
                 </div>
             ) : (
-                <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-12 text-center">
-                    <span className="material-symbols-outlined text-6xl text-[#3b4754] mb-4 block">inbox</span>
-                    <p className="text-gray-600 dark:text-muted-foreground text-lg">No {activeTab} requests</p>
+                <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-12 text-center">
+                    <span className="material-symbols-outlined text-6xl text-muted mb-4 block">inbox</span>
+                    <p className="text-muted dark:text-muted text-lg">No {activeTab} requests</p>
                 </div>
             )}
         </div>

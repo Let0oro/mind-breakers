@@ -2,14 +2,14 @@ export default function AdminRequestsLoading() {
     return (
         <div className="animate-pulse">
             <header className="mb-8">
-                <div className="h-8 w-48 bg-white dark:bg-[#1a232e] rounded-lg mb-2"></div>
-                <div className="h-4 w-64 bg-white dark:bg-[#1a232e] rounded-lg"></div>
+                <div className="h-8 w-48 bg-main dark:bg-surface rounded-lg mb-2"></div>
+                <div className="h-4 w-64 bg-main dark:bg-surface rounded-lg"></div>
             </header>
 
             {/* Requests List */}
             <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
+                    <div key={i} className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6">
                         <div className="flex flex-col md:flex-row gap-6 justify-between items-start">
                             <div className="flex-1 space-y-4">
                                 <div className="flex items-center gap-4">
@@ -20,7 +20,7 @@ export default function AdminRequestsLoading() {
                                     </div>
                                 </div>
 
-                                <div className="p-4 rounded-lg bg-[#283039] border border-gray-200 dark:border-sidebar-border">
+                                <div className="p-4 rounded-lg bg-surface-dark border border-border dark:border-border">
                                     <div className="h-4 w-24 bg-sidebar-border rounded mb-2"></div>
                                     <div className="h-3 w-full bg-sidebar-border rounded"></div>
                                 </div>

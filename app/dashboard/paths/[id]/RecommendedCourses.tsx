@@ -11,10 +11,10 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
     return (
         <div className="mt-8 rounded-lg border border-indigo-100 bg-indigo-50/50 p-6 backdrop-blur-sm">
             <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-text-main">
                     ✨ También te podría interesar
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted">
                     Encontramos estos recursos adicionales en paths similares al que estás viendo.
                 </p>
             </div>
@@ -26,10 +26,10 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
                         href={rec.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative block h-full overflow-hidden rounded-xl border border-white/50 bg-white/60 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md hover:bg-white/80"
+                        className="group relative block h-full overflow-hidden rounded-xl border border-white/50 bg-main/60 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md hover:bg-main/80"
                     >
                         {/* Image / Placeholder */}
-                        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+                        <div className="relative aspect-video w-full overflow-hidden bg-surface">
                             {rec.image ? (
                                 <Image
                                     src={rec.image}
@@ -45,24 +45,24 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
                             )}
 
                             {/* Badge indicando origen */}
-                            <div className="absolute top-2 right-2 rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-600 shadow-sm backdrop-blur-md">
+                            <div className="absolute top-2 right-2 rounded-full bg-main/90 px-2 py-1 text-xs font-medium text-muted shadow-sm backdrop-blur-md">
                                 Visto en otro path
                             </div>
                         </div>
 
                         {/* Content */}
                         <div className="p-4">
-                            <h3 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900 group-hover:text-indigo-600">
+                            <h3 className="mb-2 line-clamp-2 text-base font-semibold text-text-main group-hover:text-indigo-600">
                                 {rec.title || 'Recurso Recomendado'}
                             </h3>
 
                             {rec.description && (
-                                <p className="mb-4 line-clamp-2 text-xs text-gray-500">
+                                <p className="mb-4 line-clamp-2 text-xs text-muted">
                                     {rec.description}
                                 </p>
                             )}
 
-                            <div className="mt-auto flex items-center justify-between text-xs text-gray-400">
+                            <div className="mt-auto flex items-center justify-between text-xs text-muted">
                                 <span className="truncate max-w-[70%]">
                                     De: {rec.sourcePathTitle}
                                 </span>

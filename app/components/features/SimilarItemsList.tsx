@@ -66,12 +66,12 @@ export default function SimilarItemsList({ type, query, currentId, onAdapt }: Si
             </h3>
             <div className="space-y-3">
                 {items.map((item) => (
-                    <div key={item.id} className="bg-white dark:bg-[#1a232e] border border-amber-100 dark:border-amber-900/20 p-3 rounded-lg shadow-sm">
-                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">
+                    <div key={item.id} className="bg-main dark:bg-surface border border-amber-100 dark:border-amber-900/20 p-3 rounded-lg shadow-sm">
+                        <h4 className="font-bold text-text-main dark:text-text-main text-sm">
                             {item.title || item.name}
                         </h4>
                         {item.description && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                            <p className="text-xs text-muted dark:text-muted mt-1 line-clamp-2">
                                 {item.description}
                             </p>
                         )}

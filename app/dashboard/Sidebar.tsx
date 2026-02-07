@@ -35,7 +35,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
         const active = isActive(path)
         return `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active
             ? 'bg-brand/10 text-brand dark:bg-sidebar-accent dark:text-white'
-            : 'text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-sidebar-accent/10'
+            : 'text-muted dark:text-muted hover:text-main dark:hover:text-white hover:bg-surface dark:hover:bg-sidebar-accent/10'
             }`
     }
 
@@ -44,7 +44,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
             {/* Mobile Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-4 left-4 size-11 z-50 px-2 py-2.5 bg-sidebar dark:bg-sidebar text-gray-900 dark:text-white rounded-md border border-gray-200 dark:border-sidebar-border hover:bg-gray-50 dark:hover:bg-sidebar-accent"
+                className="md:hidden fixed top-4 left-4 size-11 z-50 px-2 py-2.5 bg-sidebar dark:bg-sidebar text-main dark:text-white rounded-md border border-border dark:border-border hover:bg-surface dark:hover:bg-sidebar-accent"
                 aria-label="Toggle Menu"
             >
                 <span className="material-symbols-outlined">{isOpen ? 'close' : 'menu'}</span>
@@ -61,13 +61,13 @@ export function Sidebar({ user, profile }: SidebarProps) {
             {/* Sidebar Container */}
             <aside
                 className={`
-          fixed inset-y-0 left-0 z-50 w-64 flex flex-col justify-between border-r border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar p-4 
+          fixed inset-y-0 left-0 z-50 w-64 flex flex-col justify-between border-r border-border dark:border-border bg-sidebar dark:bg-sidebar p-4 
           transition-transform duration-300 ease-in-out
           md:relative md:translate-x-0 overflow-y-auto
           ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
         `}
             >
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-4">
                     {/* User Profile */}
                     <Link href={`/dashboard/users/${user.id}`} className={`flex items-center gap-3 px-2 mt-8 md:mt-0 ${getLinkClassName(`/dashboard/users/${user.id}`)}`}>
                         <div
@@ -75,22 +75,22 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             style={{ backgroundImage: `url("${profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}")` }}
                         />
                         <div className="flex flex-col">
-                            <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[140px]">
+                            <h1 className="text-sm/6 md:text-sm/4 font-bold text-main dark:text-white truncate max-w-[140px]">
                                 {profile?.username || user.email}
                             </h1>
-                            <p className="text-gray-600 dark:text-muted-foreground text-xs">Scholar • Lvl {profile?.level || 1}</p>
+                            <p className="text-muted dark:text-muted text-xs">Scholar • Lvl {profile?.level || 1}</p>
                         </div>
                     </Link>
 
                     {/* Navigation */}
-                    <nav className="flex flex-col gap-1">
+                    <nav className="flex flex-col">
                         <Link
                             className={getLinkClassName('/dashboard')}
                             href="/dashboard"
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">home</span>
-                            <span className="text-sm font-medium">Home</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Home</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/explore')}
@@ -98,15 +98,15 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">explore</span>
-                            <span className="text-sm font-medium">Explore</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Explore</span>
                         </Link>
                         <Link
-                            className={getLinkClassName('/dashboard/courses')}
-                            href="/dashboard/courses"
+                            className={getLinkClassName('/dashboard/quests')}
+                            href="/dashboard/quests"
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">school</span>
-                            <span className="text-sm font-medium">Courses</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Courses</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/drafts')}
@@ -114,7 +114,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">edit_document</span>
-                            <span className="text-sm font-medium">My Drafts</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">My Drafts</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/paths')}
@@ -122,7 +122,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">route</span>
-                            <span className="text-sm font-medium">Learning Paths</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Learning Paths</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/exercises')}
@@ -130,7 +130,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">assignment</span>
-                            <span className="text-sm font-medium">Exercises</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Exercises</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/leaderboard')}
@@ -138,7 +138,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">leaderboard</span>
-                            <span className="text-sm font-medium">Leaderboard</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Leaderboard</span>
                         </Link>
                         <Link
                             className={getLinkClassName('/dashboard/organizations')}
@@ -146,7 +146,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">business</span>
-                            <span className="text-sm font-medium">Organizations</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Organizations</span>
                         </Link>
 
                         <div className="h-px bg-sidebar-border my-4"></div>
@@ -157,7 +157,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                             onClick={() => setIsOpen(false)}
                         >
                             <span className="material-symbols-outlined w-6 h-6">settings</span>
-                            <span className="text-sm font-medium">Settings</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Settings</span>
                         </Link>
 
                         {profile?.is_admin && (
@@ -168,7 +168,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <span className="material-symbols-outlined w-6 h-6">fact_check</span>
-                                    <span className="text-sm font-medium">Validations</span>
+                                    <span className="text-sm/6 md:text-sm/4 font-medium">Validations</span>
                                 </Link>
                                 <Link
                                     className={getLinkClassName('/dashboard/admin/submissions')}
@@ -176,7 +176,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <span className="material-symbols-outlined w-6 h-6">assignment_turned_in</span>
-                                    <span className="text-sm font-medium">Submissions</span>
+                                    <span className="text-sm/6 md:text-sm/4 font-medium">Submissions</span>
                                 </Link>
                                 <Link
                                     className={getLinkClassName('/dashboard/admin/requests')}
@@ -184,7 +184,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                     onClick={() => setIsOpen(false)}
                                 >
                                     <span className="material-symbols-outlined w-6 h-6">admin_panel_settings</span>
-                                    <span className="text-sm font-medium">Admin Requests</span>
+                                    <span className="text-sm/6 md:text-sm/4 font-medium">Admin Requests</span>
                                 </Link>
                             </>
                         )}
@@ -193,10 +193,10 @@ export function Sidebar({ user, profile }: SidebarProps) {
 
                         <button
                             onClick={handleSignOut}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white hover:bg-white/5 w-full text-left"
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-muted dark:text-muted hover:text-main dark:text-white hover:bg-main/5 w-full text-left"
                         >
                             <span className="material-symbols-outlined w-6 h-6">logout</span>
-                            <span className="text-sm font-medium">Log Out</span>
+                            <span className="text-sm/6 md:text-sm/4 font-medium">Log Out</span>
                         </button>
                     </nav>
                 </div>

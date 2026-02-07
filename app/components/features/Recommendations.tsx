@@ -78,12 +78,12 @@ export default function Recommendations({ mode, contextId, contextType, title }:
         fetchRecommendations()
     }, [mode, contextId, contextType, supabase])
 
-    if (loading) return <div className="animate-pulse h-20 bg-gray-100 dark:bg-gray-800 rounded-xl"></div>
+    if (loading) return <div className="animate-pulse h-20 bg-surface dark:bg-surface-dark rounded-xl"></div>
     if (items.length === 0) return null
 
     return (
         <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            <h3 className="text-xl font-bold text-text-main dark:text-text-main mb-4">
                 {title || (mode === 'social' ? 'From your network' : 'You might also like')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -93,22 +93,22 @@ export default function Recommendations({ mode, contextId, contextType, title }:
                         href={`/dashboard/${contextType === 'path' || (!contextType && !item.path_id) ? 'paths' : 'courses'}/${item.id}`}
                         className="block group"
                     >
-                        <div className="bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border rounded-xl overflow-hidden hover:border-brand transition-colors">
+                        <div className="bg-main dark:bg-surface border border-border dark:border-border rounded-xl overflow-hidden hover:border-brand transition-colors">
                             {item.thumbnail_url && (
-                                <div className="h-32 bg-gray-200 dark:bg-gray-700 relative">
+                                <div className="h-32 bg-main-dark dark:bg-gray-700 relative">
                                     <img src={item.thumbnail_url} className="w-full h-full object-cover" alt={item.title} />
                                 </div>
                             )}
                             <div className="p-4">
-                                <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-brand transition-colors truncate">
+                                <h4 className="font-bold text-text-main dark:text-text-main group-hover:text-brand transition-colors truncate">
                                     {item.title}
                                 </h4>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                                <p className="text-sm text-muted dark:text-muted mt-1 line-clamp-2">
                                     {item.summary || item.description}
                                 </p>
                                 {item.profiles && (
-                                    <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                                        <div className="w-5 h-5 rounded-full bg-gray-200 overflow-hidden">
+                                    <div className="mt-3 flex items-center gap-2 text-xs text-muted">
+                                        <div className="w-5 h-5 rounded-full bg-main-dark overflow-hidden">
                                             {item.profiles.avatar_url && <img src={item.profiles.avatar_url} />}
                                         </div>
                                         <span>{item.profiles.username}</span>

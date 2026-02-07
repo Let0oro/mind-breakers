@@ -12,24 +12,24 @@ export default function SharedHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
-        <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md px-4 sm:px-6 lg:px-20 py-4">
+        <header className="sticky top-0 z-50 border-b border-main bg-main/80 backdrop-blur-md px-4 sm:px-6 lg:px-20 py-2">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
-                    <Link href="/" className="flex items-center gap-2 sm:gap-3 text-primary hover:opacity-80 transition-opacity">
-                        <Image src="/icon.png" alt="MindBreaker" width={42} height={42} />
+                    <Link href="/" className="flex items-center gap-2 sm:gap-3 text-foreground hover:opacity-80 transition-opacity">
+                        <Image src="/icon.png" alt="MindBreaker" width={38} height={38} />
                         <h2 className="text-foreground text-xl sm:text-2xl font-bold tracking-tight">MindBreaker</h2>
                     </Link>
 
                     {!isAuthPage && (
                         <nav className="hidden md:flex items-center gap-8">
                             <Link
-                                className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+                                className="text-muted hover:text-text-main text-sm font-medium transition-colors"
                                 href="/#explore"
                             >
                                 Explore
                             </Link>
                             <Link
-                                className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+                                className="text-muted hover:text-text-main text-sm font-medium transition-colors"
                                 href="/#quests"
                             >
                                 Quests
@@ -45,16 +45,16 @@ export default function SharedHeader() {
                         <div className="flex items-center gap-2 sm:gap-4">
                             <Link
                                 href="/"
-                                className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                className="hidden sm:block text-sm font-medium text-muted hover:text-text-main transition-colors"
                             >
                                 Back to Home
                             </Link>
                             {pathname?.startsWith('/login') ? (
-                                <Link href="/register" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
+                                <Link href="/register" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-text-main text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
                                     <span className="truncate">Create account</span>
                                 </Link>
                             ) : (
-                                <Link href="/login" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-white text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
+                                <Link href="/login" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-text-main text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
                                     <span className="truncate">Login</span>
                                 </Link>
                             )}
@@ -64,13 +64,13 @@ export default function SharedHeader() {
                             {/* Desktop buttons */}
                             <Link
                                 href="/login"
-                                className="hidden sm:block text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                className="hidden sm:block text-sm font-medium text-muted hover:text-text-main transition-colors"
                             >
                                 Login
                             </Link>
                             <Link
                                 href="/register"
-                                className="hidden sm:flex bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 py-2 rounded-xl font-bold text-sm transition-all"
+                                className="hidden sm:flex bg-inverse hover:bg-inverse/90 text-main px-4 sm:px-6 py-2 rounded-xs font-bold text-sm transition-all"
                             >
                                 Sign Up
                             </Link>
@@ -78,7 +78,7 @@ export default function SharedHeader() {
                             {/* Mobile menu button */}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="sm:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+                                className="sm:hidden p-2 text-muted hover:text-text-main transition-colors"
                                 aria-label="Toggle menu"
                             >
                                 <span className="material-symbols-outlined">
@@ -92,33 +92,33 @@ export default function SharedHeader() {
 
             {/* Mobile menu dropdown */}
             {mobileMenuOpen && !isAuthPage && (
-                <div className="md:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg">
+                <div className="md:hidden absolute top-full left-0 right-0 bg-main border-b border-main shadow-lg">
                     <nav className="flex flex-col p-4 gap-2 items-stretch text-center">
                         <Link
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors py-2"
+                            className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
                             href="/#explore"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Explore
                         </Link>
                         <Link
-                            className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors py-2"
+                            className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
                             href="/#quests"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Quests
                         </Link>
-                        <div className="border-t border-border mt-2 pt-4 flex flex-col items-stretch text-center gap-2">
+                        <div className="border-t border-main mt-2 pt-4 flex flex-col items-stretch text-center gap-2">
                             <Link
                                 href="/login"
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                                className="text-sm font-medium text-muted hover:text-text-main transition-colors py-2"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Login
                             </Link>
                             <Link
                                 href="/register"
-                                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
+                                className="bg-inverse hover:bg-inverse/90 text-text-mainse px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Sign Up

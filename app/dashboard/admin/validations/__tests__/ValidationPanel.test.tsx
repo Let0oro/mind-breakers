@@ -48,14 +48,14 @@ describe('ValidationPanel', () => {
 
     it('renders pending courses', () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
+        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
         expect(screen.getByText('Pending Course 1')).toBeInTheDocument()
         expect(screen.getByText(/Org 1/)).toBeInTheDocument()
     })
 
     it('handles course approval', async () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
+        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
 
         // Find approve buttons. 
         const approveButtons = screen.getAllByRole('button', { name: /aprobar/i })
@@ -63,7 +63,7 @@ describe('ValidationPanel', () => {
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
-                '/api/admin/validations/courses/c1',
+                '/api/admin/validations/quests/c1',
                 expect.objectContaining({
                     method: 'PATCH',
                     body: JSON.stringify({ action: 'approve' })
@@ -76,7 +76,7 @@ describe('ValidationPanel', () => {
 
     it('handles course rejection with reason', async () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
+        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
 
         // Click Reject Button
         const rejectButtons = screen.getAllByRole('button', { name: /rechazar/i })
@@ -95,7 +95,7 @@ describe('ValidationPanel', () => {
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
-                '/api/admin/validations/courses/c1',
+                '/api/admin/validations/quests/c1',
                 expect.objectContaining({
                     method: 'PATCH',
                     body: JSON.stringify({

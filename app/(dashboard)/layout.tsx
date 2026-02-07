@@ -8,7 +8,7 @@ export default function PublicDashboardLayout({
     return (
         <div className="min-h-screen flex flex-col">
             <SharedHeader />
-            <main className="flex-1 scroll-smooth">
+            <main className="flex-1 scroll-smooth bg-main/80">
                 {children}
             </main>
         </div>

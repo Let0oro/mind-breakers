@@ -31,8 +31,8 @@ export default async function LeaderboardPage() {
       <header className="flex flex-col gap-4 mb-8">
         <div className="flex flex-wrap justify-between items-end gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight">Leaderboard</h2>
-            <p className="text-gray-600 dark:text-muted-foreground text-base">
+            <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Leaderboard</h2>
+            <p className="text-muted dark:text-muted text-base">
               Top {topUsers?.length || 0} learners ranked by experience
             </p>
           </div>
@@ -45,18 +45,18 @@ export default async function LeaderboardPage() {
       </header>
 
       {/* Leaderboard Table */}
-      <div className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border overflow-hidden">
+      <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#283039]">
+            <thead className="bg-surface-dark">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Rank</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Player</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Level</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-muted-foreground uppercase tracking-wider">Total XP</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted dark:text-muted uppercase tracking-wider">Rank</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted dark:text-muted uppercase tracking-wider">Player</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted dark:text-muted uppercase tracking-wider">Level</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-muted dark:text-muted uppercase tracking-wider">Total XP</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#3b4754]">
+            <tbody className="divide-y divide-border">
               {topUsers && topUsers.length > 0 ? (
                 topUsers.map((profile, index) => {
                   const rank = index + 1
@@ -67,7 +67,7 @@ export default async function LeaderboardPage() {
                       key={profile.id}
                       className={`transition-colors ${isCurrentUser
                         ? 'bg-brand/10 border-l-2 border-brand'
-                        : 'hover:bg-gray-50 dark:hover:bg-[#283039]'
+                        : 'hover:bg-surface dark:hover:bg-surface-dark'
                         }`}
                     >
                       {/* Rank */}
@@ -75,13 +75,13 @@ export default async function LeaderboardPage() {
                         <div className="flex items-center">
                           {rank <= 3 ? (
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${rank === 1 ? 'bg-yellow-500/20 text-yellow-500' :
-                              rank === 2 ? 'bg-gray-400/20 text-gray-400' :
+                              rank === 2 ? 'bg-gray-400/20 text-muted' :
                                 'bg-orange-700/20 text-orange-700'
                               }`}>
                               {rank}
                             </div>
                           ) : (
-                            <span className="text-gray-600 dark:text-muted-foreground font-medium">#{rank}</span>
+                            <span className="text-muted dark:text-muted font-medium">#{rank}</span>
                           )}
                         </div>
                       </td>
@@ -89,35 +89,35 @@ export default async function LeaderboardPage() {
                       {/* Player */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link href={`/dashboard/users/${profile.id}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center">
-                            <span className="text-brand font-bold">
-                              {profile.username?.charAt(0).toUpperCase() || '?'}
-                            </span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center">
+                              <span className="text-brand font-bold">
+                                {profile.username?.charAt(0).toUpperCase() || '?'}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="text-text-main dark:text-text-main font-bold text-sm">
+                                {profile.username || 'Anonymous'}
+                                {isCurrentUser && (
+                                  <span className="ml-2 text-xs text-brand">(You)</span>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-gray-900 dark:text-white font-bold text-sm">
-                              {profile.username || 'Anonymous'}
-                              {isCurrentUser && (
-                                <span className="ml-2 text-xs text-brand">(You)</span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                              </Link>
+                        </Link>
                       </td>
 
                       {/* Level */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <span className="material-symbols-outlined w-5 h-5 text-brand">star</span>
-                          <span className="text-gray-900 dark:text-white font-medium">Level {profile.level}</span>
+                          <span className="text-text-main dark:text-text-main font-medium">Level {profile.level}</span>
                         </div>
                       </td>
 
                       {/* Total XP */}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-gray-900 dark:text-white font-bold">
+                        <span className="text-text-main dark:text-text-main font-bold">
                           {profile.total_xp?.toLocaleString() || 0} XP
                         </span>
                       </td>
@@ -127,7 +127,7 @@ export default async function LeaderboardPage() {
               ) : (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center">
-                    <p className="text-gray-600 dark:text-muted-foreground">No data available</p>
+                    <p className="text-muted dark:text-muted">No data available</p>
                   </td>
                 </tr>
               )}
@@ -142,12 +142,12 @@ export default async function LeaderboardPage() {
           {/* 2nd Place */}
           <div className="flex flex-col items-center pt-12">
             <div className="w-16 h-16 rounded-full bg-gray-400/20 border-4 border-gray-400 flex items-center justify-center mb-3">
-              <span className="text-gray-400 text-2xl font-bold">2</span>
+              <span className="text-muted text-2xl font-bold">2</span>
             </div>
-            <p className="text-gray-900 dark:text-white font-bold text-sm text-center truncate w-full">
+            <p className="text-text-main dark:text-text-main font-bold text-sm text-center truncate w-full">
               {topUsers[1]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-muted-foreground text-xs">{topUsers[1]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-muted dark:text-muted text-xs">{topUsers[1]?.total_xp?.toLocaleString()} XP</p>
           </div>
 
           {/* 1st Place */}
@@ -158,10 +158,10 @@ export default async function LeaderboardPage() {
                 <span className="material-symbols-outlined w-8 h-8 text-yellow-500">star</span>
               </div>
             </div>
-            <p className="text-gray-900 dark:text-white font-bold text-base text-center truncate w-full">
+            <p className="text-text-main dark:text-text-main font-bold text-base text-center truncate w-full">
               {topUsers[0]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-muted-foreground text-sm">{topUsers[0]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-muted dark:text-muted text-sm">{topUsers[0]?.total_xp?.toLocaleString()} XP</p>
           </div>
 
           {/* 3rd Place */}
@@ -169,10 +169,10 @@ export default async function LeaderboardPage() {
             <div className="w-14 h-14 rounded-full bg-orange-700/20 border-4 border-orange-700 flex items-center justify-center mb-3">
               <span className="text-orange-700 text-xl font-bold">3</span>
             </div>
-            <p className="text-gray-900 dark:text-white font-bold text-sm text-center truncate w-full">
+            <p className="text-text-main dark:text-text-main font-bold text-sm text-center truncate w-full">
               {topUsers[2]?.username || 'Anonymous'}
             </p>
-            <p className="text-gray-600 dark:text-muted-foreground text-xs">{topUsers[2]?.total_xp?.toLocaleString()} XP</p>
+            <p className="text-muted dark:text-muted text-xs">{topUsers[2]?.total_xp?.toLocaleString()} XP</p>
           </div>
         </div>
       )}

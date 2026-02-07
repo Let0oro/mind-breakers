@@ -33,8 +33,8 @@ export default async function SettingsPage() {
         <>
             {/* Header */}
             <header className="mb-8">
-                <h2 className="text-gray-900 dark:text-white text-3xl font-black tracking-tight mb-2">Settings</h2>
-                <p className="text-gray-600 dark:text-muted-foreground text-base">
+                <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight mb-2">Settings</h2>
+                <p className="text-muted dark:text-muted text-base">
                     Manage your account and preferences
                 </p>
             </header>
@@ -45,8 +45,8 @@ export default async function SettingsPage() {
 
                 {/* Admin Request Section - Only show if not admin */}
                 {!profile?.is_admin && (
-                    <section className="bg-white dark:bg-[#1a232e] rounded-xl border border-gray-200 dark:border-sidebar-border p-6">
-                        <h3 className="text-gray-900 dark:text-white text-xl font-bold mb-4 flex items-center gap-2">
+                    <section className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6">
+                        <h3 className="text-text-main dark:text-text-main text-xl font-bold mb-4 flex items-center gap-2">
                             <span className="material-symbols-outlined text-brand">admin_panel_settings</span>
                             Request Admin Access
                         </h3>
@@ -57,19 +57,19 @@ export default async function SettingsPage() {
                                     <span className="material-symbols-outlined">pending</span>
                                     <span className="font-bold">Request Pending</span>
                                 </div>
-                                <p className="text-gray-900 dark:text-white text-sm mb-2">
+                                <p className="text-text-main dark:text-text-main text-sm mb-2">
                                     Your admin access request is currently being reviewed.
                                 </p>
-                                <p className="text-gray-600 dark:text-muted-foreground text-xs">
+                                <p className="text-muted dark:text-muted text-xs">
                                     <strong>Reason:</strong> {existingRequest.reason}
                                 </p>
-                                <p className="text-gray-600 dark:text-muted-foreground text-xs mt-1">
+                                <p className="text-muted dark:text-muted text-xs mt-1">
                                     <strong>Submitted:</strong> {new Date(existingRequest.created_at).toLocaleDateString()}
                                 </p>
                             </div>
                         ) : (
                             <>
-                                <p className="text-gray-600 dark:text-muted-foreground mb-4">
+                                <p className="text-muted dark:text-muted mb-4">
                                     Request administrator privileges to manage content and approve submissions.
                                 </p>
                                 <AdminRequestForm />
@@ -85,7 +85,7 @@ export default async function SettingsPage() {
                         Danger Zone
                     </h3>
 
-                    <p className="text-gray-900 dark:text-white text-sm mb-4">
+                    <p className="text-text-main dark:text-text-main text-sm mb-4">
                         Once you delete your account, there is no going back. This action is permanent.
                     </p>
 

@@ -60,7 +60,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-muted-foreground dark:hover:bg-sidebar-accent transition-colors"
+      className="cursor-pointer rounded-lg p-2 text-text-main pb-1 my-auto hover:bg-surface dark:hover:bg-sidebar-accent transition-colors"
       aria-label="Toggle theme"
     >
       {isDark ? (

@@ -170,7 +170,7 @@ export function CourseActions({
         disabled={loading}
         className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isSaved
           ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+          : 'border border-border text-text-main hover:bg-surface'
           } disabled:opacity-50`}
       >
         {isSaved ? 'Guardado' : 'Guardar'}
@@ -182,14 +182,14 @@ export function CourseActions({
             <button
               onClick={handleMarkComplete}
               disabled={loading}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-green-700 disabled:opacity-50"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-text-main dark:text-text-main hover:bg-green-700 disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Completar'}
             </button>
           ) : (
             <a
               href="#exercises"
-              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors"
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-text-main hover:bg-brand/90 transition-colors"
             >
               Vamos con el proyecto final!
             </a>

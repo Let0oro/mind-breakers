@@ -237,26 +237,26 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderOrganizations = () => (
         <div className="space-y-4">
             {pendingItems.organizations.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
-                    <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-muted-foreground">No hay organizaciones pendientes de validación</p>
+                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
+                    <p className="text-muted dark:text-muted">No hay organizaciones pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.organizations.map((org) => (
                     <div
                         key={org.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
+                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{org.name}</h3>
+                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">{org.name}</h3>
                                     <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
                                         Pendiente
                                     </span>
                                 </div>
                                 {org.description && (
-                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">{org.description}</p>
+                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">{org.description}</p>
                                 )}
                                 {org.website_url && (
                                     <a
@@ -268,7 +268,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         {org.website_url}
                                     </a>
                                 )}
-                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
+                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
                                     Creado: {new Date(org.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -282,7 +282,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         description: org.description,
                                         websiteUrl: org.website_url,
                                     })}
-                                    className="p-2 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
+                                    className="p-2 rounded-lg border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
                                     title="Editar"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
@@ -290,7 +290,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 <button
                                     onClick={() => handleApprove('organizations', org.id)}
                                     disabled={loading === org.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                 >
                                     {loading === org.id ? '...' : 'Aprobar'}
                                 </button>
@@ -320,9 +320,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderCourses = () => (
         <div className="space-y-4">
             {pendingItems.courses.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
-                    <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-muted-foreground">No hay cursos pendientes de validación</p>
+                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
+                    <p className="text-muted dark:text-muted">No hay cursos pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.courses.map((course) => {
@@ -333,15 +333,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                     return (
                         <div
                             key={course.id}
-                            className={`rounded-xl bg-white dark:bg-[#1a232e] p-6 border transition-colors ${isShadowDraft
+                            className={`rounded-xl bg-main dark:bg-surface p-6 border transition-colors ${isShadowDraft
                                 ? 'border-purple-500/30 hover:border-purple-500/50'
-                                : 'border-gray-200 dark:border-sidebar-border hover:border-brand/30'
+                                : 'border-border dark:border-border hover:border-brand/30'
                                 }`}
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                        <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">
                                             {isShadowDraft && draft?.title ? draft.title : course.title}
                                         </h3>
                                         {isShadowDraft ? (
@@ -354,22 +354,22 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">
+                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">
                                         {isShadowDraft && draft?.summary ? draft.summary : course.summary}
                                     </p>
 
                                     {isShadowDraft && draft?.edit_reason && (
-                                        <div className="mt-2 text-sm bg-gray-50 dark:bg-[#111418] p-2 rounded text-gray-700 dark:text-gray-300">
+                                        <div className="mt-2 text-sm bg-surface dark:bg-main p-2 rounded text-text-main dark:text-gray-300">
                                             <strong>Razón del cambio:</strong> {draft.edit_reason}
                                         </div>
                                     )}
 
                                     {getOrgName(course.organizations) && (
-                                        <p className="text-xs text-gray-600 dark:text-muted-foreground mt-1">
+                                        <p className="text-xs text-muted dark:text-muted mt-1">
                                             Organización: {getOrgName(course.organizations)}
                                         </p>
                                     )}
-                                    <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
+                                    <p className="text-xs text-muted dark:text-muted/60 mt-2">
                                         Actualizado: {new Date(course.created_at).toLocaleDateString('es-ES')}
                                     </p>
                                 </div>
@@ -379,7 +379,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     {isShadowDraft && (
                                         <details className="text-xs">
                                             <summary className="p-2 rounded-lg border cursor-pointer">JSON</summary>
-                                            <pre className="absolute bg-black text-white p-4 rounded z-10 max-w-sm overflow-auto text-xs">
+                                            <pre className="absolute bg-black text-text-main p-4 rounded z-10 max-w-sm overflow-auto text-xs">
                                                 {JSON.stringify(course.draft_data, null, 2)}
                                             </pre>
                                         </details>
@@ -398,7 +398,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     <button
                                         onClick={() => handleApprove('courses', course.id)}
                                         disabled={loading === course.id}
-                                        className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                        className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                         aria-label={isShadowDraft ? 'Aprobar Cambios' : 'Aprobar'}
                                     >
                                         {loading === course.id ? '...' : (isShadowDraft ? 'Aprobar Cambios' : 'Aprobar')}
@@ -415,33 +415,33 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderPaths = () => (
         <div className="space-y-4">
             {pendingItems.paths.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
-                    <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-muted-foreground">No hay learning paths pendientes de validación</p>
+                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
+                    <p className="text-muted dark:text-muted">No hay learning paths pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.paths.map((path) => (
                     <div
                         key={path.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
+                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{path.title}</h3>
+                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">{path.title}</h3>
                                     <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
                                         Pendiente
                                     </span>
                                 </div>
                                 {path.summary && (
-                                    <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 line-clamp-2">{path.summary}</p>
+                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">{path.summary}</p>
                                 )}
                                 {getOrgName(path.organizations) && (
-                                    <p className="text-xs text-gray-600 dark:text-muted-foreground">
+                                    <p className="text-xs text-muted dark:text-muted">
                                         Organización: {getOrgName(path.organizations)}
                                     </p>
                                 )}
-                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
+                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
                                     Creado: {new Date(path.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -454,7 +454,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         name: path.title,
                                         description: path.summary,
                                     })}
-                                    className="p-2 rounded-lg border border-gray-200 dark:border-sidebar-border text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
+                                    className="p-2 rounded-lg border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
                                     title="Editar"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
@@ -462,7 +462,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 <button
                                     onClick={() => handleApprove('paths', path.id)}
                                     disabled={loading === path.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                 >
                                     {loading === path.id ? '...' : 'Aprobar'}
                                 </button>
@@ -491,39 +491,39 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderEdits = () => (
         <div className="space-y-4">
             {pendingItems.edits.length === 0 ? (
-                <div className="rounded-xl bg-white dark:bg-[#1a232e] p-12 text-center border border-gray-200 dark:border-sidebar-border">
-                    <span className="material-symbols-outlined text-4xl text-[#3b4754] mb-4">check_circle</span>
-                    <p className="text-gray-600 dark:text-muted-foreground">No hay ediciones pendientes de validación</p>
+                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
+                    <p className="text-muted dark:text-muted">No hay ediciones pendientes de validación</p>
                 </div>
             ) : (
                 pendingItems.edits.map((item) => (
                     <div
                         key={item.id}
-                        className="rounded-xl bg-white dark:bg-[#1a232e] p-6 border border-gray-200 dark:border-sidebar-border hover:border-brand/30 transition-colors"
+                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">
                                         Edit: {item.resource_title || item.resource_id}
                                     </h3>
                                     <span className="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400">
                                         {item.resource_type}
                                     </span>
                                 </div>
-                                <p className="text-sm text-gray-600 dark:text-muted-foreground mb-2 font-medium">
+                                <p className="text-sm text-muted dark:text-muted mb-2 font-medium">
                                     Razón: {item.reason || 'Sin razón especificada'}
                                 </p>
 
                                 {/* Diff Preview could go here */}
                                 <details className="mt-2 text-xs">
                                     <summary className="cursor-pointer text-brand">Ver cambios JSON</summary>
-                                    <pre className="mt-2 p-2 bg-gray-100 dark:bg-black rounded overflow-x-auto">
+                                    <pre className="mt-2 p-2 bg-surface dark:bg-black rounded overflow-x-auto">
                                         {JSON.stringify(item.data, null, 2)}
                                     </pre>
                                 </details>
 
-                                <p className="text-xs text-gray-600 dark:text-muted-foreground/60 mt-2">
+                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
                                     Solicitado: {new Date(item.created_at).toLocaleDateString('es-ES')}
                                 </p>
                             </div>
@@ -532,7 +532,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 <button
                                     onClick={() => handleApprove('edits', item.id)}
                                     disabled={loading === item.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-gray-900 dark:text-white font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
                                 >
                                     {loading === item.id ? '...' : 'Aprobar Edición'}
                                 </button>
@@ -555,20 +555,20 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     return (
         <>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-sidebar-border pb-4 overflow-x-auto">
+            <div className="flex gap-2 mb-6 border-b border-border dark:border-border pb-4 overflow-x-auto">
                 {tabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
-                            ? 'bg-brand text-gray-900 dark:text-white'
-                            : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50'
+                            ? 'bg-brand text-text-main dark:text-text-main'
+                            : 'text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50'
                             }`}
                     >
                         {tab.label}
                         {tab.count > 0 && (
                             <span className={`px-1.5 py-0.5 rounded text-xs ${activeTab === tab.key
-                                ? 'bg-white/20'
+                                ? 'bg-main/20'
                                 : 'bg-yellow-500/20 text-yellow-400'
                                 }`}>
                                 {tab.count}
@@ -588,12 +588,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     {/* ... Existing Modal Content ... */}
-                    <div className="w-full max-w-lg rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border p-6 mx-4">
+                    <div className="w-full max-w-lg rounded-xl bg-main dark:bg-surface border border-border dark:border-border p-6 mx-4">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Editar Item</h2>
+                            <h2 className="text-xl font-bold text-text-main dark:text-text-main">Editar Item</h2>
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="p-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
+                                className="p-2 text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -610,28 +610,28 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
                             {editingItem.type === 'organizations' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                                    <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
                                         Website URL
                                     </label>
                                     <input
                                         type="url"
                                         value={editingItem.websiteUrl || ''}
                                         onChange={(e) => setEditingItem({ ...editingItem, websiteUrl: e.target.value })}
-                                        className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec]"
+                                        className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring"
                                         placeholder="https://..."
                                     />
                                 </div>
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                                <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
                                     {editingItem.type === 'organizations' ? 'Descripción' : 'Resumen'}
                                 </label>
                                 <textarea
                                     value={editingItem.description || ''}
                                     onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
                                     rows={3}
-                                    className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-[#137fec] resize-none"
+                                    className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring resize-none"
                                 />
                             </div>
                         </div>
@@ -639,14 +639,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
+                                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleSaveEdit}
                                 disabled={loading === editingItem.id}
-                                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-gray-900 dark:text-white hover:bg-brand/80 disabled:opacity-50 transition-colors"
+                                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 disabled:opacity-50 transition-colors"
                             >
                                 {loading === editingItem.id ? 'Guardando...' : 'Guardar y Aprobar'}
                             </button>
@@ -657,12 +657,12 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {/* Rejection Modal */}
             {rejectionModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-xl bg-white dark:bg-[#1a232e] border border-gray-200 dark:border-sidebar-border p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-full max-w-md rounded-xl bg-main dark:bg-surface border border-border dark:border-border p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Motivo del Rechazo</h2>
+                            <h2 className="text-xl font-bold text-text-main dark:text-text-main">Motivo del Rechazo</h2>
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="p-2 text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:text-white transition-colors"
+                                className="p-2 text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -670,14 +670,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                                <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
                                     Por favor explica por qué se rechaza este cambio:
                                 </label>
                                 <textarea
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                     rows={4}
-                                    className="w-full rounded-lg border border-gray-200 dark:border-sidebar-border bg-sidebar dark:bg-sidebar px-4 py-2 text-gray-900 dark:text-white placeholder:text-gray-600 dark:text-muted-foreground/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
+                                    className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
                                     placeholder="Ej: El contenido es inapropiado, faltan secciones, etc."
                                     autoFocus
                                 />
@@ -687,14 +687,14 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border px-4 py-2 text-sm font-medium text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-sidebar-border/50 transition-colors"
+                                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={confirmRejection}
                                 disabled={loading === rejectionModal.id || !rejectionReason.trim()}
-                                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-text-main hover:bg-red-700 disabled:opacity-50 transition-colors"
                             >
                                 {loading === rejectionModal.id ? 'Procesando...' : 'Confirmar Rechazo'}
                             </button>
@@ -757,8 +757,8 @@ function FuzzyMatchSuggestions({
     if (similarItems.length === 0) return null
 
     return (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-sidebar-border">
-            <p className="text-xs text-gray-600 dark:text-muted-foreground mb-2 flex items-center gap-1">
+        <div className="mt-4 pt-4 border-t border-border dark:border-border">
+            <p className="text-xs text-muted dark:text-muted mb-2 flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm text-yellow-400">warning</span>
                 Items similares existentes:
             </p>
@@ -767,9 +767,9 @@ function FuzzyMatchSuggestions({
                     <button
                         key={item.id}
                         onClick={() => onMerge(item.id)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sidebar-border/50 hover:bg-gray-100 dark:hover:bg-sidebar-border transition-colors group"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sidebar-border/50 hover:bg-surface dark:hover:bg-sidebar-border transition-colors group"
                     >
-                        <span className="text-sm text-gray-900 dark:text-white">{item.name}</span>
+                        <span className="text-sm text-text-main dark:text-text-main">{item.name}</span>
                         <span className={`text-xs px-1.5 py-0.5 rounded ${item.score > 0.8
                             ? 'bg-red-500/20 text-red-400'
                             : 'bg-yellow-500/20 text-yellow-400'

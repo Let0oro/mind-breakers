@@ -123,15 +123,15 @@ export default async function AdminValidationsPage() {
             <header className="mb-8">
                 <Link
                     href="/dashboard"
-                    className="text-sm text-gray-600 dark:text-muted-foreground hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+                    className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
                 >
                     <span className="material-symbols-outlined text-base">arrow_back</span>
                     Dashboard
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Content Validation</h1>
-                        <p className="text-gray-600 dark:text-muted-foreground mt-2">
+                        <h1 className="text-3xl font-bold text-text-main dark:text-text-main">Content Validation</h1>
+                        <p className="text-muted dark:text-muted mt-2">
                             Review and approve new content before it appears to all users
                         </p>
                     </div>

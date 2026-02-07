@@ -120,12 +120,12 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
 
     return (
         <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-gray-500">group_add</span>
+            <h3 className="text-sm font-medium text-text-main dark:text-text-main flex items-center gap-2">
+                <span className="material-symbols-outlined text-muted">group_add</span>
                 Gestionar Co-owners
             </h3>
 
-            <div className="bg-gray-50 dark:bg-[#151b24] p-4 rounded-lg border border-gray-200 dark:border-sidebar-border">
+            <div className="bg-surface dark:bg-main p-4 rounded-lg border border-border dark:border-border">
                 {message && (
                     <div className={`mb-4 p-2 rounded text-sm ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                         {message.text}
@@ -138,12 +138,12 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
                         value={newOwnerUsername}
                         onChange={(e) => setNewOwnerUsername(e.target.value)}
                         placeholder="Username del usuario..."
-                        className="flex-1 rounded-lg border border-gray-200 dark:border-sidebar-border bg-white dark:bg-[#1a232e] px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-brand focus:outline-none"
+                        className="flex-1 rounded-lg border border-border dark:border-border bg-main dark:bg-surface px-3 py-2 text-sm text-text-main dark:text-text-main focus:border-brand focus:outline-none"
                     />
                     <button
                         type="submit"
                         disabled={isLoading || !newOwnerUsername}
-                        className="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand/90 disabled:opacity-50"
+                        className="px-4 py-2 bg-brand text-text-main rounded-lg text-sm font-medium hover:bg-brand/90 disabled:opacity-50"
                     >
                         Añadir
                     </button>
@@ -152,18 +152,18 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
                 <div className="space-y-2">
                     {coOwners.length > 0 ? (
                         coOwners.map((owner) => (
-                            <div key={owner.id} className="flex items-center justify-between p-2 bg-white dark:bg-[#1a232e] rounded border border-gray-200 dark:border-sidebar-border">
+                            <div key={owner.id} className="flex items-center justify-between p-2 bg-main dark:bg-surface rounded border border-border dark:border-border">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                    <div className="w-6 h-6 rounded-full bg-main-dark dark:bg-gray-700 overflow-hidden">
                                         {owner.profile?.avatar_url ? (
                                             <img src={owner.profile.avatar_url} alt={owner.profile.username} className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500 uppercase">
+                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted uppercase">
                                                 {owner.profile?.username?.[0] || '?'}
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                    <span className="text-sm font-medium text-text-main dark:text-text-main">
                                         {owner.profile?.username}
                                     </span>
                                 </div>
@@ -177,7 +177,7 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
                             </div>
                         ))
                     ) : (
-                        <p className="text-sm text-gray-500 italic">No hay co-owners asignados.</p>
+                        <p className="text-sm text-muted italic">No hay co-owners asignados.</p>
                     )}
                 </div>
             </div>

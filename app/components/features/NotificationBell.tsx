@@ -110,11 +110,11 @@ export function NotificationBell({ userId }: { userId: string }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+        className="relative rounded-full p-2 text-text-main hover:bg-surface dark:hover:bg-gray-800"
       >
         <span className="material-symbols-outlined">notifications</span>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-gray-900 dark:text-white">
+          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-text-main dark:text-text-main">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -126,9 +126,9 @@ export function NotificationBell({ userId }: { userId: string }) {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
-            <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
+          <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-border bg-main shadow-lg dark:border-border dark:bg-gray-900">
+            <div className="flex items-center justify-between border-b border-border p-4 dark:border-border">
+              <h3 className="font-semibold text-text-main dark:text-text-main">
                 Notificaciones
               </h3>
               {unreadCount > 0 && (
@@ -146,7 +146,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`border-b border-gray-200 p-4 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 ${!notification.read ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                    className={`border-b border-border p-4 hover:bg-surface dark:border-border dark:hover:bg-gray-800 ${!notification.read ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
                       }`}
                   >
                     <div className="flex items-start gap-3">
@@ -154,13 +154,13 @@ export function NotificationBell({ userId }: { userId: string }) {
                         {getNotificationIcon(notification.type)}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-text-main dark:text-text-main">
                           {notification.title}
                         </p>
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        <p className="mt-1 text-sm text-muted dark:text-muted">
                           {notification.message}
                         </p>
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-muted">
                           {new Date(notification.created_at).toLocaleDateString('es-ES', {
                             day: 'numeric',
                             month: 'short',
@@ -193,7 +193,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-muted">
                   No tienes notificaciones
                 </div>
               )}
