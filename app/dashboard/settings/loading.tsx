@@ -2,57 +2,52 @@ export default function SettingsLoading() {
     return (
         <div className="animate-pulse">
             {/* Header */}
-            <header className="mb-8">
-                <div className="h-8 w-32 bg-main dark:bg-surface rounded-lg mb-2"></div>
-                <div className="h-4 w-64 bg-main dark:bg-surface rounded-lg"></div>
-            </header>
+            <div className="mb-8">
+                <div className="h-10 w-40 bg-surface-dark mb-1" />
+                <div className="h-4 w-64 bg-surface-dark" />
+            </div>
 
             <div className="max-w-3xl space-y-6">
-                {/* Profile Section Skeleton (as SettingsForm) */}
-                <section className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6">
-                    <div className="h-6 w-32 bg-sidebar-border rounded mb-6"></div>
-
+                {/* Profile Section */}
+                <div className="border border-border bg-main p-6">
+                    <div className="h-4 w-32 bg-surface-dark mb-6" />
                     <div className="space-y-4">
-                        {/* Avatar Field */}
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="w-20 h-20 rounded-full bg-sidebar-border"></div>
-                            <div className="h-9 w-32 bg-sidebar-border rounded-lg"></div>
+                            <div className="w-16 h-16 bg-surface-dark" />
+                            <div className="h-8 w-24 bg-surface-dark" />
                         </div>
-
-                        {/* Input Fields */}
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="space-y-2">
-                                <div className="h-4 w-24 bg-sidebar-border rounded"></div>
-                                <div className="h-11 w-full bg-sidebar-border rounded-lg"></div>
+                                <div className="h-3 w-20 bg-surface-dark" />
+                                <div className="h-12 w-full bg-surface-dark" />
                             </div>
                         ))}
-
-                        {/* Save Button */}
-                        <div className="pt-4">
-                            <div className="h-11 w-full bg-sidebar-border rounded-lg"></div>
+                        <div className="pt-4 flex justify-end">
+                            <div className="h-10 w-32 bg-surface-dark" />
                         </div>
                     </div>
-                </section>
+                </div>
 
                 {/* Admin Request Section */}
-                <section className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6">
+                <div className="border border-border bg-main p-6">
                     <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 bg-sidebar-border rounded"></div>
-                        <div className="h-6 w-48 bg-sidebar-border rounded"></div>
+                        <div className="w-5 h-5 bg-surface-dark" />
+                        <div className="h-4 w-40 bg-surface-dark" />
                     </div>
-                    <div className="h-4 w-full bg-sidebar-border rounded mb-4"></div>
-                    <div className="h-24 w-full bg-sidebar-border rounded-lg"></div>
-                </section>
+                    <div className="h-4 w-full bg-surface-dark mb-4" />
+                    <div className="h-24 w-full bg-surface-dark mb-4" />
+                    <div className="h-12 w-full bg-surface-dark" />
+                </div>
 
                 {/* Danger Zone */}
-                <section className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6 opacity-60">
+                <div className="border border-muted p-6 opacity-60">
                     <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 bg-sidebar-border rounded"></div>
-                        <div className="h-6 w-32 bg-sidebar-border rounded"></div>
+                        <div className="w-5 h-5 bg-surface-dark" />
+                        <div className="h-4 w-28 bg-surface-dark" />
                     </div>
-                    <div className="h-4 w-full bg-sidebar-border rounded mb-4"></div>
-                    <div className="h-12 w-32 bg-sidebar-border rounded-lg"></div>
-                </section>
+                    <div className="h-4 w-full bg-surface-dark mb-4" />
+                    <div className="h-10 w-48 bg-surface-dark" />
+                </div>
             </div>
         </div>
     )

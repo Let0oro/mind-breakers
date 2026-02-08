@@ -1,78 +1,51 @@
 export default function LeaderboardLoading() {
     return (
         <div className="animate-pulse">
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 mb-8">
+            {/* Header */}
+            <div className="mb-10">
                 <div className="flex flex-wrap justify-between items-end gap-6">
-                    <div className="flex flex-col gap-2">
-                        <div className="h-8 w-48 bg-main dark:bg-surface rounded-lg"></div>
-                        <div className="h-4 w-64 bg-main dark:bg-surface rounded-lg"></div>
+                    <div className="flex flex-col gap-1">
+                        <div className="h-10 w-56 bg-surface-dark" />
+                        <div className="h-4 w-40 bg-surface-dark" />
                     </div>
-                    <div className="h-9 w-32 bg-main dark:bg-surface rounded-lg"></div>
+                    <div className="h-10 w-32 bg-surface-dark" />
                 </div>
             </div>
 
-            {/* Leaderboard Table Skeleton */}
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-surface-dark">
-                            <tr>
-                                {[1, 2, 3, 4].map((i) => (
-                                    <th key={i} className="px-6 py-4">
-                                        <div className="h-3 w-16 bg-sidebar-border rounded"></div>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                                <tr key={i}>
-                                    {/* Rank */}
-                                    <td className="px-6 py-4">
-                                        <div className="w-8 h-8 bg-sidebar-border rounded-lg"></div>
-                                    </td>
-                                    {/* Player */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-sidebar-border"></div>
-                                            <div className="h-4 w-32 bg-sidebar-border rounded"></div>
-                                        </div>
-                                    </td>
-                                    {/* Level */}
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-5 h-5 bg-sidebar-border rounded"></div>
-                                            <div className="h-4 w-16 bg-sidebar-border rounded"></div>
-                                        </div>
-                                    </td>
-                                    {/* Total XP */}
-                                    <td className="px-6 py-4">
-                                        <div className="h-4 w-20 bg-sidebar-border rounded"></div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Table */}
+            <div className="border border-border bg-main">
+                <div className="bg-surface-dark px-6 py-4 flex gap-6">
+                    <div className="h-3 w-12 bg-surface" />
+                    <div className="h-3 w-24 bg-surface" />
+                    <div className="h-3 w-12 bg-surface" />
+                    <div className="h-3 w-16 bg-surface" />
                 </div>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    <div key={i} className="px-6 py-4 flex items-center gap-6 border-t border-border">
+                        <div className="h-6 w-8 bg-surface-dark" />
+                        <div className="flex items-center gap-3 flex-1">
+                            <div className="w-8 h-8 bg-surface-dark" />
+                            <div className="h-4 w-24 bg-surface-dark" />
+                        </div>
+                        <div className="h-4 w-16 bg-surface-dark" />
+                        <div className="h-4 w-20 bg-surface-dark" />
+                    </div>
+                ))}
             </div>
 
-            {/* Podium Skeleton */}
-            <div className="mt-8 grid grid-cols-3 gap-4 max-w-3xl mx-auto opacity-50">
+            {/* Podium */}
+            <div className="mt-10 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
                 <div className="flex flex-col items-center pt-12">
-                    <div className="w-16 h-16 rounded-full bg-sidebar-border mb-3"></div>
-                    <div className="h-4 w-24 bg-sidebar-border rounded mb-1"></div>
-                    <div className="h-3 w-16 bg-sidebar-border rounded"></div>
+                    <div className="w-14 h-14 bg-surface-dark mb-3" />
+                    <div className="h-3 w-16 bg-surface-dark" />
                 </div>
                 <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 rounded-full bg-sidebar-border mb-3"></div>
-                    <div className="h-4 w-24 bg-sidebar-border rounded mb-1"></div>
-                    <div className="h-3 w-16 bg-sidebar-border rounded"></div>
+                    <div className="w-16 h-16 bg-surface-dark mb-3" />
+                    <div className="h-4 w-20 bg-surface-dark" />
                 </div>
                 <div className="flex flex-col items-center pt-16">
-                    <div className="w-14 h-14 rounded-full bg-sidebar-border mb-3"></div>
-                    <div className="h-4 w-24 bg-sidebar-border rounded mb-1"></div>
-                    <div className="h-3 w-16 bg-sidebar-border rounded"></div>
+                    <div className="w-12 h-12 bg-surface-dark mb-3" />
+                    <div className="h-3 w-14 bg-surface-dark" />
                 </div>
             </div>
         </div>

@@ -1,57 +1,51 @@
 export default function PathDetailLoading() {
     return (
-        <div className="min-h-screen bg-surface animate-pulse">
+        <div className="animate-pulse">
             {/* Header */}
-            <div className="border-b bg-main">
-                <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-                    <div className="flex items-start justify-between">
-                        <div className="flex-1 space-y-4">
-                            <div className="h-4 w-32 bg-main-dark rounded"></div>
-                            <div className="h-8 w-2/3 bg-main-dark rounded"></div>
-                            <div className="h-4 w-1/2 bg-main-dark rounded"></div>
-                            <div className="h-4 w-40 bg-main-dark rounded"></div>
-                        </div>
-
-                        <div className="ml-4 flex gap-2">
-                            <div className="h-10 w-24 bg-main-dark rounded-lg"></div>
-                            <div className="h-10 w-24 bg-main-dark rounded-lg"></div>
-                        </div>
-                    </div>
-
-                    {/* Progreso */}
-                    <div className="mt-6">
-                        <div className="h-4 w-full bg-main-dark rounded-full"></div>
-                    </div>
+            <div className="mb-10">
+                <div className="h-4 w-32 bg-surface-dark mb-4" />
+                <div className="h-10 w-80 bg-surface-dark mb-2" />
+                <div className="h-4 w-full max-w-xl bg-surface-dark mb-4" />
+                <div className="flex items-center gap-6">
+                    <div className="h-3 w-20 bg-surface-dark" />
+                    <div className="h-3 w-24 bg-surface-dark" />
                 </div>
             </div>
 
-            {/* Contenido */}
-            <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-                <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="rounded-lg bg-main p-6 shadow h-64 space-y-4">
-                            <div className="h-6 w-32 bg-main-dark rounded"></div>
-                            <div className="h-4 w-full bg-main-dark rounded"></div>
-                            <div className="h-4 w-full bg-main-dark rounded"></div>
-                            <div className="h-32 w-full bg-surface rounded"></div>
+            <div className="grid gap-6 lg:grid-cols-3">
+                {/* Sidebar */}
+                <div className="space-y-6 order-2 lg:order-1">
+                    <div className="border border-border bg-main p-6">
+                        <div className="h-4 w-24 bg-surface-dark mb-4" />
+                        <div className="h-1 w-full bg-surface-dark mb-2" />
+                        <div className="flex justify-between">
+                            <div className="h-3 w-12 bg-surface-dark" />
+                            <div className="h-3 w-8 bg-surface-dark" />
                         </div>
                     </div>
+                    <div className="border border-border bg-main p-6">
+                        <div className="h-4 w-32 bg-surface-dark mb-4" />
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3 py-2">
+                                <div className="w-5 h-5 bg-surface-dark" />
+                                <div className="w-8 h-8 bg-surface-dark" />
+                                <div className="flex-1 h-3 bg-surface-dark" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                    {/* Main List */}
-                    <div className="lg:col-span-2">
-                        <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="rounded-lg border-2 border-border bg-main p-6 h-32 flex gap-4">
-                                    <div className="h-24 w-40 bg-main-dark rounded shrink-0"></div>
-                                    <div className="flex-1 space-y-3">
-                                        <div className="h-6 w-3/4 bg-main-dark rounded"></div>
-                                        <div className="h-4 w-full bg-main-dark rounded"></div>
-                                    </div>
-                                </div>
-                            ))}
+                {/* Timeline */}
+                <div className="lg:col-span-2 order-1 lg:order-2">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="flex items-start gap-6 pb-8">
+                            <div className="w-10 h-10 bg-surface-dark" />
+                            <div className="flex-1">
+                                <div className="h-4 w-48 bg-surface-dark mb-2" />
+                                <div className="h-3 w-32 bg-surface-dark" />
+                            </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

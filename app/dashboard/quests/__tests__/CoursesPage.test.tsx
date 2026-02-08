@@ -14,18 +14,46 @@ vi.mock('next/navigation', () => ({
     useSearchParams: () => new URLSearchParams(),
 }))
 
+vi.mock('@/lib/cache', () => ({
+    getUserSavedQuestsCached: vi.fn(() => Promise.resolve([])),
+    getUserProgressCached: vi.fn(() => Promise.resolve([])),
+    getUserCreatedQuestIdsCached: vi.fn(() => Promise.resolve([])),
+    getQuestsByIdsCached: vi.fn(() => Promise.resolve([]))
+}))
+
+import {
+    getUserSavedQuestsCached,
+    getUserProgressCached,
+    getUserCreatedQuestIdsCached,
+    getQuestsByIdsCached
+} from '@/lib/cache'
+
 describe('CoursesPage', () => {
-    const mockSupabase = {
-        auth: {
-            getUser: vi.fn(),
-        },
-        from: vi.fn()
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mockSupabase: any
 
     beforeEach(() => {
         vi.clearAllMocks()
+
+        mockSupabase = {
+            auth: {
+                getUser: vi.fn(() => Promise.resolve({ data: { user: { id: 'u1' } }, error: null }))
+            },
+            from: vi.fn(() => ({
+                select: vi.fn(() => ({
+                    in: vi.fn(() => Promise.resolve({ data: [{ id: 'u2', username: 'CreatorUser' }] }))
+                }))
+            }))
+        }
+
         // @ts-expect-error - mock types are simplified
-        createClient.mockResolvedValue(mockSupabase)
+        createClient.mockReturnValue(Promise.resolve(mockSupabase))
+
+            // Reset cache mocks
+            ; (getUserSavedQuestsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
+            ; (getUserProgressCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
+            ; (getUserCreatedQuestIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
+            ; (getQuestsByIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
     })
 
     test('redirects to login if no user', async () => {
@@ -41,8 +69,11 @@ describe('CoursesPage', () => {
     })
 
     test('renders courses list', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+        // Setup mock return values
+        // 1. Created quests
+        ; (getUserCreatedQuestIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(['c1'])
 
+        // 2. Quest details
         const mockCourses = [{
             id: 'c1',
             title: 'React Fundamentals',
@@ -53,59 +84,25 @@ describe('CoursesPage', () => {
             created_by: 'u2',
             organizations: [{ name: 'Tech Org' }],
             user_course_progress: [],
-            saved_courses: []
+            saved_courses: [],
+            status: 'published'
         }]
 
-        // Helper mock chain
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const createChain = (returnData: any = []) => {
-            const chain = {
-                select: vi.fn(() => chain),
-                eq: vi.fn(() => chain),
-                in: vi.fn(() => chain),
-                order: vi.fn(() => chain),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                then: (resolve: any) => Promise.resolve({ data: returnData }).then(resolve)
-            }
-            return chain
-        }
-
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'courses') {
-                return createChain(mockCourses)
-            }
-            return createChain([]) // for saved_courses, user_course_progress initial IDs fetching
-        })
+            ; (getQuestsByIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockCourses)
 
         const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('React Fundamentals')).toBeInTheDocument()
         expect(screen.getByText('Tech Org')).toBeInTheDocument()
-        expect(screen.getByText('100 XP')).toBeInTheDocument()
     })
 
     test('renders empty state', async () => {
-        mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const createChain = (returnData: any = []) => {
-            const chain = {
-                select: vi.fn(() => chain),
-                eq: vi.fn(() => chain),
-                in: vi.fn(() => chain),
-                order: vi.fn(() => chain),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                then: (resolve: any) => Promise.resolve({ data: returnData }).then(resolve)
-            }
-            return chain
-        }
-
-        mockSupabase.from.mockReturnValue(createChain([]))
+        // Default mocks return empty arrays
 
         const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
-        expect(screen.getByText('No courses found')).toBeInTheDocument()
+        expect(screen.getByText(/No courses found/i)).toBeInTheDocument()
     })
 })

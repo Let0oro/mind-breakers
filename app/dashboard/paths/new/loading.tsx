@@ -1,40 +1,39 @@
 export default function NewPathLoading() {
     return (
-        <div className="animate-pulse">
+        <div className="animate-pulse max-w-3xl">
             {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-6 h-6 bg-main dark:bg-surface rounded"></div>
-                    <div className="h-8 w-64 bg-main dark:bg-surface rounded-lg"></div>
-                </div>
-                <div className="h-4 w-80 bg-main dark:bg-surface rounded-lg"></div>
+            <div className="mb-10">
+                <div className="h-4 w-24 bg-surface-dark mb-4" />
+                <div className="h-10 w-48 bg-surface-dark mb-1" />
+                <div className="h-4 w-72 bg-surface-dark" />
             </div>
 
-            {/* Form Skeleton */}
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 max-w-3xl">
-                <div className="space-y-6">
-                    <div className="space-y-2">
-                        <div className="h-4 w-24 bg-sidebar-border rounded"></div>
-                        <div className="h-12 w-full bg-sidebar-border rounded-lg"></div>
-                    </div>
+            {/* Form */}
+            <div className="border border-border bg-main p-6 space-y-6">
+                {/* Thumbnail */}
+                <div className="space-y-2">
+                    <div className="h-3 w-20 bg-surface-dark" />
+                    <div className="h-32 w-full bg-surface-dark" />
+                </div>
 
-                    <div className="space-y-2">
-                        <div className="h-4 w-24 bg-sidebar-border rounded"></div>
-                        <div className="h-12 w-full bg-sidebar-border rounded-lg"></div>
-                        <div className="h-3 w-64 bg-sidebar-border rounded"></div>
+                {/* Fields */}
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-2">
+                        <div className="h-3 w-24 bg-surface-dark" />
+                        <div className="h-10 w-full bg-surface-dark" />
                     </div>
+                ))}
 
-                    <div className="space-y-2">
-                        <div className="h-4 w-32 bg-sidebar-border rounded"></div>
-                        <div className="h-32 w-full bg-sidebar-border rounded-lg"></div>
-                    </div>
+                {/* Description */}
+                <div className="space-y-2">
+                    <div className="h-3 w-28 bg-surface-dark" />
+                    <div className="h-32 w-full bg-surface-dark" />
+                </div>
 
-                    <div className="h-24 w-full bg-sidebar-border rounded-lg"></div>
-
-                    <div className="flex gap-3 pt-4">
-                        <div className="flex-1 h-12 bg-sidebar-border rounded-lg"></div>
-                        <div className="flex-1 h-12 bg-sidebar-border rounded-lg"></div>
-                    </div>
+                {/* Submit */}
+                <div className="pt-4 flex gap-3">
+                    <div className="h-10 flex-1 bg-surface-dark" />
+                    <div className="h-10 w-32 bg-surface-dark" />
                 </div>
             </div>
         </div>

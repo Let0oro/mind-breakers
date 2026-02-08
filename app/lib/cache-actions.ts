@@ -1,0 +1,214 @@
+'use server'
+
+/**
+ * Server actions for cache invalidation
+ * Call these after mutations to refresh cached data
+ * 
+ * Note: Next.js 16 requires a second argument for revalidateTag
+ * Using 'max' for background revalidation (SWR behavior)
+ */
+
+import { revalidateTag, revalidatePath } from 'next/cache'
+import { CACHE_TAGS } from './cache'
+
+// Default revalidation profile for SWR behavior
+const REVALIDATE_PROFILE = 'max'
+
+// ============================================================================
+// Tag-based Invalidation
+// ============================================================================
+
+/**
+ * Invalidate all quest caches
+ */
+export async function invalidateQuestsCache() {
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate a specific quest cache
+ */
+export async function invalidateQuestCache(questId: string) {
+    revalidateTag(`quest-${questId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate all path caches
+ */
+export async function invalidatePathsCache() {
+    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate a specific path cache
+ */
+export async function invalidatePathCache(pathId: string) {
+    revalidateTag(`path-${pathId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate all organization caches
+ */
+export async function invalidateOrganizationsCache() {
+    revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate user-specific caches
+ */
+export async function invalidateUserCache(userId: string) {
+    revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.USER_PROGRESS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate exercise-related caches
+ */
+export async function invalidateExercisesCache() {
+    revalidateTag(CACHE_TAGS.EXERCISES, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate submission-related caches
+ */
+export async function invalidateSubmissionsCache() {
+    revalidateTag(CACHE_TAGS.SUBMISSIONS, REVALIDATE_PROFILE)
+}
+
+/**
+ * Invalidate admin-related caches
+ */
+export async function invalidateAdminCache() {
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+}
+
+// ============================================================================
+// Path-based Invalidation (for specific routes)
+// ============================================================================
+
+/**
+ * Invalidate dashboard page
+ */
+export async function invalidateDashboard() {
+    revalidatePath('/dashboard')
+}
+
+/**
+ * Invalidate library page
+ */
+export async function invalidateLibrary() {
+    revalidatePath('/dashboard/library')
+}
+
+/**
+ * Invalidate explore page
+ */
+export async function invalidateExplore() {
+    revalidatePath('/dashboard/explore')
+}
+
+/**
+ * Invalidate admin pages
+ */
+export async function invalidateAdminPages() {
+    revalidatePath('/dashboard/admin')
+    revalidatePath('/dashboard/admin/validations')
+    revalidatePath('/dashboard/admin/submissions')
+    revalidatePath('/dashboard/admin/requests')
+}
+
+// ============================================================================
+// Combined Invalidation Helpers
+// ============================================================================
+
+/**
+ * Call after creating/updating a quest
+ */
+export async function afterQuestChange(questId?: string) {
+    if (questId) {
+        revalidateTag(`quest-${questId}`, REVALIDATE_PROFILE)
+    }
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/library')
+    revalidatePath('/dashboard/quests')
+}
+
+/**
+ * Call after creating/updating a path
+ */
+export async function afterPathChange(pathId?: string) {
+    if (pathId) {
+        revalidateTag(`path-${pathId}`, REVALIDATE_PROFILE)
+    }
+    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/library')
+    revalidatePath('/dashboard/paths')
+}
+
+/**
+ * Call after creating/updating an organization
+ */
+export async function afterOrganizationChange() {
+    revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard/organizations')
+}
+
+/**
+ * Call after saving/unsaving a quest
+ */
+export async function afterSaveQuestChange(userId: string) {
+    revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard/library')
+}
+
+/**
+ * Call after saving/unsaving a path
+ */
+export async function afterSavePathChange(userId: string) {
+    revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard/library')
+}
+
+/**
+ * Call after completing a quest or updating progress
+ */
+export async function afterProgressChange(userId: string) {
+    revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.USER_PROGRESS, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/library')
+}
+
+/**
+ * Call after submitting an exercise
+ */
+export async function afterExerciseSubmission(userId: string) {
+    revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXERCISES, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.SUBMISSIONS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard/exercises')
+    revalidatePath('/dashboard/admin/submissions')
+}
+
+/**
+ * Call after approving/rejecting content in admin
+ */
+export async function afterAdminValidation() {
+    revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
+    revalidatePath('/dashboard/admin')
+    revalidatePath('/dashboard/admin/validations')
+}

@@ -3,6 +3,13 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { ValidationPanel } from './ValidationPanel'
 import { EditRequest } from '@/lib/types'
+import {
+    getPendingQuestsListCached,
+    getQuestsWithDraftEditsCached,
+    getPendingOrgsListCached,
+    getPendingPathsListCached,
+    getPendingEditRequestsCached
+} from '@/lib/cache'
 
 export const metadata = {
     title: 'Content Validation - MindBreaker Admin',
@@ -15,7 +22,6 @@ export default async function AdminValidationsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    // Check if user is admin
     const { data: profile } = await supabase
         .from('profiles')
         .select('is_admin')
@@ -26,73 +32,18 @@ export default async function AdminValidationsPage() {
         redirect('/dashboard')
     }
 
-    // Fetch unvalidated items AND items with pending draft_data
-    const [coursesRes, draftCoursesRes, orgsRes, pathsRes, editRequestsRes] = await Promise.all([
-        // 1. New Courses (not validated)
-        supabase
-            .from('courses')
-            .select(`
-        id,
-        title,
-        summary,
-        is_validated,
-        created_at,
-        organizations (id, name),
-        draft_data
-      `)
-            .eq('is_validated', false)
-            .eq('status', 'published')
-            .order('created_at', { ascending: false }),
-
-        // 2. Existing Courses with Draft Data (Shadow Drafts)
-        supabase
-            .from('courses')
-            .select(`
-        id,
-        title,
-        summary,
-        is_validated,
-        created_at,
-        organizations (id, name),
-        draft_data
-      `)
-            .not('draft_data', 'is', null) // Fetch where draft_data is NOT null
-            .eq('is_validated', true) // Only validated courses that have NEW drafts
-            .order('created_at', { ascending: false }),
-
-        supabase
-            .from('organizations')
-            .select('id, name, description, website_url, is_validated, created_at')
-            .eq('is_validated', false)
-            .order('created_at', { ascending: false }),
-
-        supabase
-            .from('learning_paths')
-            .select(`
-        id,
-        title,
-        summary,
-        is_validated,
-        created_at,
-        organizations (id, name)
-      `)
-            .eq('is_validated', false)
-            .order('created_at', { ascending: false }),
-
-        supabase
-            .from('edit_requests')
-            .select('*')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false })
+    // Use cached queries
+    const [pendingCourses, draftCourses, pendingOrgs, pendingPaths, editRequests] = await Promise.all([
+        getPendingQuestsListCached(supabase),
+        getQuestsWithDraftEditsCached(supabase),
+        getPendingOrgsListCached(supabase),
+        getPendingPathsListCached(supabase),
+        getPendingEditRequestsCached(supabase)
     ])
 
-    // Combine courses
-    const allPendingCourses = [
-        ...(coursesRes.data || []),
-        ...(draftCoursesRes.data || [])
-    ]
+    const allPendingCourses = [...pendingCourses, ...draftCourses]
 
-    // Fetch all existing validated items for fuzzy matching
+    // Fetch existing validated items for duplicates check (still needs real-time data)
     const [existingOrgsRes, existingCoursesRes, existingPathsRes] = await Promise.all([
         supabase.from('organizations').select('id, name').eq('is_validated', true),
         supabase.from('courses').select('id, title').eq('is_validated', true),
@@ -101,9 +52,9 @@ export default async function AdminValidationsPage() {
 
     const pendingItems = {
         courses: allPendingCourses,
-        organizations: orgsRes.data || [],
-        paths: pathsRes.data || [],
-        edits: (editRequestsRes.data || []) as EditRequest[],
+        organizations: pendingOrgs,
+        paths: pendingPaths,
+        edits: editRequests as EditRequest[],
     }
 
     const existingItems = {
@@ -123,22 +74,24 @@ export default async function AdminValidationsPage() {
             <header className="mb-8">
                 <Link
                     href="/dashboard"
-                    className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+                    className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
                 >
-                    <span className="material-symbols-outlined text-base">arrow_back</span>
+                    <span className="material-symbols-outlined text-sm">arrow_back</span>
                     Dashboard
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-text-main dark:text-text-main">Content Validation</h1>
-                        <p className="text-muted dark:text-muted mt-2">
+                        <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main">
+                            Content Validation
+                        </h1>
+                        <p className="text-muted text-sm mt-1">
                             Review and approve new content before it appears to all users
                         </p>
                     </div>
                     {totalPending > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/30">
-                            <span className="material-symbols-outlined text-yellow-400">pending</span>
-                            <span className="text-yellow-400 font-medium">{totalPending} pending</span>
+                        <div className="flex items-center gap-2 px-4 py-2 border border-amber-500/30">
+                            <span className="material-symbols-outlined text-amber-500">pending</span>
+                            <span className="text-amber-500 text-xs font-bold uppercase tracking-widest">{totalPending} pending</span>
                         </div>
                     )}
                 </div>

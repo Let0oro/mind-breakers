@@ -13,7 +13,6 @@ export default async function AdminRequestsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    // Fetch all admin requests with user info
     const { data: requests } = await supabase
         .from('admin_requests')
         .select(`
@@ -28,8 +27,10 @@ export default async function AdminRequestsPage() {
     return (
         <>
             <header className="mb-8">
-                <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight mb-2">Admin Requests</h2>
-                <p className="text-muted dark:text-muted text-base">
+                <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main mb-1">
+                    Admin Requests
+                </h1>
+                <p className="text-muted text-sm">
                     Review and manage administrator access requests
                 </p>
             </header>

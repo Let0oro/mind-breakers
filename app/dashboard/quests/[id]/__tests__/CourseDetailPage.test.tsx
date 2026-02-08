@@ -10,33 +10,7 @@ vi.mock('@/utils/supabase/server', () => ({
 
 vi.mock('@supabase/ssr', () => ({
     createBrowserClient: vi.fn(() => ({
-        from: vi.fn(() => ({
-            select: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                    single: vi.fn(() => Promise.resolve({
-                        data: {
-                            id: 'test-id',
-                            title: 'Test Title',
-                            uk: 'test-uk',
-                            created_by: 'user-id',
-                            status: 'published'
-                        },
-                        error: null
-                    })),
-                    limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
-                })),
-                in: vi.fn(() => ({
-                    eq: vi.fn(() => ({
-                        limit: vi.fn(() => Promise.resolve({ data: [], error: null }))
-                    }))
-                })),
-                or: vi.fn(() => ({
-                    neq: vi.fn(() => ({
-                        limit: vi.fn(() => Promise.resolve({ data: [], error: null }))
-                    }))
-                }))
-            }))
-        })),
+        from: vi.fn(),
         auth: {
             getUser: vi.fn(() => Promise.resolve({ data: { user: { id: 'test-user' } }, error: null }))
         }
@@ -57,6 +31,34 @@ vi.mock('@/components/features/CourseActions', () => ({
     CourseActions: () => <button>Actions</button>
 }))
 
+vi.mock('@/components/features/Recommendations', () => ({
+    default: () => <div data-testid="recommendations">Recommendations</div>
+}))
+
+// Mock cache functions to avoid unstable_cache runtime requirements
+vi.mock('@/lib/cache', () => ({
+    getQuestDetailCached: vi.fn(),
+    getUserCourseProgressCached: vi.fn(),
+    getUserExerciseSubmissionsCached: vi.fn(),
+    isCourseSavedCached: vi.fn(),
+}))
+
+import { getQuestDetailCached, getUserCourseProgressCached, getUserExerciseSubmissionsCached, isCourseSavedCached } from '@/lib/cache'
+
+// Helper to create supabase chain mock
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createChain = (data: any) => {
+    const chain = {
+        select: vi.fn(() => chain),
+        eq: vi.fn(() => chain),
+        in: vi.fn(() => chain),
+        single: vi.fn(() => Promise.resolve({ data, error: data ? null : { message: 'Not found' } })),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        then: (resolve: any) => Promise.resolve({ data }).then(resolve)
+    }
+    return chain
+}
+
 describe('CourseDetailPage', () => {
     const mockSupabase = {
         auth: {
@@ -69,20 +71,13 @@ describe('CourseDetailPage', () => {
         vi.clearAllMocks()
         // @ts-expect-error - mock types are simplified
         createClient.mockResolvedValue(mockSupabase)
-    })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const createChain = (data: any) => {
-        const chain = {
-            select: vi.fn(() => chain),
-            eq: vi.fn(() => chain),
-            in: vi.fn(() => chain),
-            single: vi.fn(() => Promise.resolve({ data, error: data ? null : { message: 'Not found' } })),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            then: (resolve: any) => Promise.resolve({ data }).then(resolve) // for array returns
-        }
-        return chain
-    }
+        // Default mock for profiles query
+        mockSupabase.from.mockImplementation((table: string) => {
+            if (table === 'profiles') return createChain({ is_admin: false })
+            return createChain(null)
+        })
+    })
 
     test('renders course details correctly', async () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
@@ -98,23 +93,24 @@ describe('CourseDetailPage', () => {
             learning_paths: { id: 'p1', title: 'Path 1' },
             organizations: { name: 'Org 1' },
             course_exercises: [],
-            user_course_progress: [],
             link_url: 'https://youtube.com/watch?v=123'
         }
 
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'profiles') return createChain({}) // profile check
-            if (table === 'courses') return createChain(mockCourse)
-            if (table === 'exercise_submissions') return createChain([]) // submissions
-            if (table === 'saved_courses') return createChain(null) // saved check
-            return createChain([])
-        })
+        // Setup cache mocks
+        // @ts-expect-error - mock types are simplified
+        getQuestDetailCached.mockReturnValue(Promise.resolve({ data: mockCourse, error: null }))
+        // @ts-expect-error - mock types are simplified
+        getUserCourseProgressCached.mockReturnValue(Promise.resolve(null))
+        // @ts-expect-error - mock types are simplified
+        getUserExerciseSubmissionsCached.mockReturnValue(Promise.resolve([]))
+        // @ts-expect-error - mock types are simplified
+        isCourseSavedCached.mockReturnValue(Promise.resolve(false))
 
         const params = Promise.resolve({ id: 'c1' })
         const jsx = await CourseDetailPage({ params })
         render(jsx)
 
-        expect(screen.getByText('Detailed Course')).toBeInTheDocument()
+        expect(screen.getByText(/Detailed Course/i)).toBeInTheDocument()
         expect(screen.getByText('Description content')).toBeInTheDocument()
         expect(screen.getByTestId('youtube-player')).toBeInTheDocument()
     })
@@ -129,24 +125,25 @@ describe('CourseDetailPage', () => {
             created_by: 'u1', // Owner
             learning_paths: { id: 'p1', title: 'Path 1' },
             organizations: null,
-            course_exercises: [],
-            user_course_progress: []
+            course_exercises: []
         }
 
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'profiles') return createChain({})
-            if (table === 'courses') return createChain(mockCourse)
-            if (table === 'exercise_submissions') return createChain([])
-            if (table === 'saved_courses') return createChain(null)
-            return createChain([])
-        })
+        // Setup cache mocks
+        // @ts-expect-error - mock types are simplified
+        getQuestDetailCached.mockReturnValue(Promise.resolve({ data: mockCourse, error: null }))
+        // @ts-expect-error - mock types are simplified
+        getUserCourseProgressCached.mockReturnValue(Promise.resolve(null))
+        // @ts-expect-error - mock types are simplified
+        getUserExerciseSubmissionsCached.mockReturnValue(Promise.resolve([]))
+        // @ts-expect-error - mock types are simplified
+        isCourseSavedCached.mockReturnValue(Promise.resolve(false))
 
         const params = Promise.resolve({ id: 'c1' })
         const jsx = await CourseDetailPage({ params })
         render(jsx)
 
-        expect(screen.getByText('Pendiente de validación')).toBeInTheDocument()
-        expect(screen.getByText('Pending Course')).toBeInTheDocument() // Should still see content
+        expect(screen.getByText(/Pending validation/i)).toBeInTheDocument()
+        expect(screen.getByText(/Pending Course/i)).toBeInTheDocument()
     })
 
     test('blocks access for non-owner if not validated', async () => {
@@ -157,24 +154,25 @@ describe('CourseDetailPage', () => {
             title: 'Hidden Course',
             is_validated: false,
             created_by: 'u2', // Not owner
-            // ... other fields needed to avoid crash before check?
-            // The check happens early.
-            learning_paths: { id: 'p1' }, // minimal
-            course_exercises: [],
-            user_course_progress: []
+            learning_paths: { id: 'p1' },
+            course_exercises: []
         }
 
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'profiles') return createChain({})
-            if (table === 'courses') return createChain(mockCourse)
-            return createChain([])
-        })
+        // Setup cache mocks
+        // @ts-expect-error - mock types are simplified
+        getQuestDetailCached.mockReturnValue(Promise.resolve({ data: mockCourse, error: null }))
+        // @ts-expect-error - mock types are simplified
+        getUserCourseProgressCached.mockReturnValue(Promise.resolve(null))
+        // @ts-expect-error - mock types are simplified
+        getUserExerciseSubmissionsCached.mockReturnValue(Promise.resolve([]))
+        // @ts-expect-error - mock types are simplified
+        isCourseSavedCached.mockReturnValue(Promise.resolve(false))
 
         const params = Promise.resolve({ id: 'c1' })
         const jsx = await CourseDetailPage({ params })
         render(jsx)
 
-        expect(screen.getByText('Contenido no disponible')).toBeInTheDocument()
+        expect(screen.getByText(/Content not available/i)).toBeInTheDocument()
         expect(screen.queryByText('Hidden Course')).not.toBeInTheDocument()
     })
 })

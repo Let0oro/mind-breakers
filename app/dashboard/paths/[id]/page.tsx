@@ -10,6 +10,12 @@ import type { Course, PathResource } from '@/lib/types'
 import RecommendedCourses from './RecommendedCourses'
 import Recommendations from '@/components/features/Recommendations'
 import PathResources from '@/components/features/PathResources'
+import {
+  getPathDetailCached,
+  getPathResourcesCached,
+  isPathSavedCached,
+  getUserCoursesProgressCached
+} from '@/lib/cache'
 
 export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -18,92 +24,69 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch Path Resources Server Side
-  const { data: initialResources } = await supabase
-    .from('path_resources')
-    .select('*, profiles(username, avatar_url)')
-    .eq('path_id', id)
-    .order('created_at', { ascending: false }) as { data: PathResource[] }
-
-
-  // Obtener el path con sus cursos
-  const { data: path, error } = await supabase
-    .from('learning_paths')
-    .select(`
-      *,
-      organizations (name, website_url),
-      courses (
-        *,
-        organizations (name),
-        course_exercises (id),
-        user_course_progress!user_course_progress_course_id_fkey (
-          completed,
-          xp_earned
-        )
-      )
-    `)
-    .eq('id', id)
-    .eq('courses.user_course_progress.user_id', user.id)
-    .order('order_index', { foreignTable: 'courses', ascending: true })
-    .single()
+  // Fetch path data and resources (cached)
+  const [
+    { data: path, error },
+    initialResources
+  ] = await Promise.all([
+    getPathDetailCached(supabase, id),
+    getPathResourcesCached(supabase, id) as Promise<PathResource[]>
+  ])
 
   if (error || !path) notFound()
 
-  // Block access if not validated and not owner
   const isOwner = path.created_by === user.id
   const isValidated = path.is_validated === true
 
   if (!isValidated && !isOwner) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">pending</span>
-        <h1 className="text-2xl font-bold text-text-main dark:text-text-main mb-2">
-          Contenido no disponible
+        <span className="material-symbols-outlined text-5xl text-muted mb-4">pending</span>
+        <h1 className="text-xl font-bold uppercase tracking-wide text-text-main mb-2">
+          Content not available
         </h1>
-        <p className="text-muted dark:text-muted max-w-md">
-          Este learning path está pendiente de validación por un administrador.
-          Vuelve más tarde.
+        <p className="text-muted text-sm max-w-md">
+          This learning path is pending validation by an administrator.
         </p>
         <Link
           href="/dashboard/paths"
-          className="mt-6 inline-flex items-center gap-2 text-brand hover:underline"
+          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
         >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver a paths
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Back to paths
         </Link>
       </div>
     )
   }
 
-  // Calcular progreso
+  // Get course IDs for progress query
+  const courseIds = path.courses?.map((c: Course) => c.id) || []
+
+  // Fetch user-specific data (cached)
+  const [isSaved, userProgress] = await Promise.all([
+    isPathSavedCached(supabase, user.id, id),
+    getUserCoursesProgressCached(supabase, user.id, courseIds)
+  ])
+
+  // Create a map of course progress
+  const progressMap = new Map(userProgress.map(p => [p.course_id, p]))
+
   const totalCourses = path.courses?.length || 0
   const completedCourses = path.courses?.filter((c: Course) =>
-    c.user_course_progress?.[0]?.completed
+    progressMap.get(c.id)?.completed
   ).length || 0
 
-  // Verificar si está guardado
-  const { data: savedPath } = await supabase
-    .from('saved_paths')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('path_id', path.id)
-    .single()
-
-  const isSaved = !!savedPath
-
-  // Leaderboard Logic
+  // Leaderboard
   const pathCourseIds = path.courses?.map((c: Course) => c.id) || []
   let leaderboard: { userId: string; username: string; avatarUrl: string; totalXp: number; completedCount: number }[] = []
 
   if (pathCourseIds.length > 0) {
-    // 1. Fetch all progress for these courses
     const { data: allProgress } = await supabase
       .from('user_course_progress')
       .select('user_id, xp_earned, completed')
       .in('course_id', pathCourseIds)
 
     if (allProgress) {
-      // 2. Aggregate by user
       const statsByUser = new Map<string, { totalXp: number; completedCount: number }>()
 
       allProgress.forEach(p => {
@@ -114,14 +97,12 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
         })
       })
 
-      // 3. Sort and take top 5
       const topUserIds = Array.from(statsByUser.entries())
         .sort((a, b) => b[1].totalXp - a[1].totalXp)
         .slice(0, 5)
         .map(entry => entry[0])
 
       if (topUserIds.length > 0) {
-        // 4. Fetch profiles
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, username, avatar_url')
@@ -144,44 +125,46 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
     }
   }
 
+  const totalXp = path.courses?.reduce((sum: number, c: Course) => sum + c.xp_reward, 0) || 0
+
   return (
     <>
-      {/* Pending Validation Banner */}
+      {/* Pending Banner */}
       {!isValidated && isOwner && (
-        <div className="mb-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 p-4 flex items-center gap-3">
-          <span className="material-symbols-outlined text-amber-500">pending</span>
+        <div className="mb-6 border border-muted p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined text-muted">pending</span>
           <div>
-            <p className="font-medium text-amber-500">Pendiente de validación</p>
-            <p className="text-sm text-amber-500/70">
-              Este learning path solo es visible para ti hasta que un administrador lo apruebe.
+            <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
+            <p className="text-xs text-muted">
+              This path is only visible to you until approved by an admin.
             </p>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-10">
         <Link
-          href="/dashboard"
-          className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+          href="/dashboard/paths"
+          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
         >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver al dashboard
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Back to paths
         </Link>
 
-        <div className="flex items-start justify-between mt-2 gap-4">
+        <div className="flex items-start justify-between mt-4 gap-4">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-text-main dark:text-text-main">
-              {path.title}
+            <h1 className="text-4xl font-black italic tracking-tight text-text-main">
+              {path.title.toUpperCase()}
             </h1>
             {path.summary && (
-              <p className="mt-2 text-lg text-muted dark:text-muted">
+              <p className="mt-2 text-muted text-sm">
                 {path.summary}
               </p>
             )}
             {path.organizations && (
-              <p className="mt-2 text-sm text-muted dark:text-muted">
-                Por {path.organizations.name}
+              <p className="mt-2 text-xs text-muted uppercase tracking-wider">
+                By {path.organizations.name}
               </p>
             )}
           </div>
@@ -211,82 +194,80 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             >
               <button
                 type="submit"
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${isSaved
-                  ? 'bg-brand/20 text-brand hover:bg-brand/30'
-                  : 'border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50'
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${isSaved
+                  ? 'border border-text-main bg-inverse text-main-alt'
+                  : 'border border-border text-muted hover:border-text-main hover:text-text-main'
                   }`}
               >
-                {isSaved ? 'Guardado' : 'Guardar'}
+                {isSaved ? 'Saved' : 'Save'}
               </button>
             </form>
 
-            {/* Edit button visible to all - permissions handled in edit page */}
             <Link
               href={`/dashboard/paths/${path.id}/edit`}
-              className="rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
+              className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors"
             >
-              Editar
+              Edit
             </Link>
           </div>
         </div>
 
-        {/* Progreso */}
+        {/* Progress */}
         <div className="mt-6">
           <ProgressBar current={completedCourses} total={totalCourses} />
         </div>
       </header>
 
-      {/* Contenido */}
+      {/* Content */}
       <div className="flex flex-col md:grid gap-6 lg:grid-cols-3">
-        {/* Descripción y detalles */}
-        <div className="lg:col-span-1">
-          <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
-            <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
-              Acerca de este path
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* About */}
+          <div className="border border-border bg-main p-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+              About this path
             </h2>
             {path.description ? (
-              <p className="text-sm text-muted dark:text-muted whitespace-pre-wrap">
+              <p className="text-xs text-muted whitespace-pre-wrap">
                 {path.description}
               </p>
             ) : (
-              <p className="text-sm text-muted dark:text-muted/70 italic">
-                Sin descripción
+              <p className="text-xs text-muted italic">
+                No description
               </p>
             )}
 
-            <div className="mt-6 space-y-2 text-sm">
+            <div className="mt-6 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted dark:text-muted">Total de cursos:</span>
-                <span className="font-medium text-text-main dark:text-text-main">{totalCourses}</span>
+                <span className="text-muted">Total courses:</span>
+                <span className="font-bold text-text-main">{totalCourses}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted dark:text-muted">Completados:</span>
-                <span className="font-medium text-green-400">{completedCourses}</span>
+                <span className="text-muted">Completed:</span>
+                <span className="font-bold text-text-main">{completedCourses}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted dark:text-muted">XP total:</span>
-                <span className="font-medium text-brand">
-                  {path.courses?.reduce((sum: number, c: Course) => sum + c.xp_reward, 0)} XP
-                </span>
+                <span className="text-muted">Total XP:</span>
+                <span className="font-bold text-text-main">{totalXp} XP</span>
               </div>
             </div>
 
             {path.created_by === user.id && (
               <Link
                 href={`/dashboard/quests/new?pathId=${path.id}`}
-                className="mt-6 block w-full rounded-lg bg-brand px-4 py-2 text-center text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 transition-colors"
+                className="mt-6 block w-full px-4 py-2 text-center text-xs font-bold uppercase tracking-widest border border-text-main text-text-main hover:bg-inverse hover:text-main-alt transition-all"
               >
-                + Agregar curso
+                + Add course
               </Link>
             )}
           </div>
 
-          {/* Leaderboard Section */}
-          <div className="mt-6 rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+          {/* Leaderboard */}
+          <div className="border border-border bg-main p-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-yellow-500">trophy</span>
-              <h2 className="text-lg font-semibold text-text-main dark:text-text-main">
-                Top Estudiantes
+              <span className="material-symbols-outlined text-lg text-text-main">leaderboard</span>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-text-main">
+                Top Students
               </h2>
             </div>
 
@@ -296,16 +277,12 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                   <Link
                     key={student.userId}
                     href={`/dashboard/users/${student.userId}`}
-                    className="flex items-center gap-3 p-2 hover:bg-surface dark:hover:bg-sidebar-border/30 rounded-lg transition-colors"
+                    className="flex items-center gap-3 p-2 hover:bg-surface transition-colors"
                   >
-                    <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                      index === 1 ? 'bg-surface text-text-main' :
-                        index === 2 ? 'bg-orange-100 text-orange-700' :
-                          'text-muted'
-                      }`}>
+                    <div className="flex items-center justify-center w-5 h-5 text-[10px] font-bold border border-border text-muted">
                       {index + 1}
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-main-dark dark:bg-gray-700 overflow-hidden">
+                    <div className="w-8 h-8 bg-surface-dark overflow-hidden grayscale">
                       <FallbackImage
                         as="img"
                         src={student.avatarUrl || ''}
@@ -315,65 +292,66 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text-main dark:text-text-main truncate">
+                      <p className="text-xs font-bold text-text-main truncate uppercase tracking-wide">
                         {student.username}
                       </p>
-                      <p className="text-xs text-muted dark:text-muted">
-                        {student.completedCount} cursos completados
+                      <p className="text-[10px] text-muted">
+                        {student.completedCount} courses
                       </p>
                     </div>
-                    <div className="text-sm font-bold text-brand">
+                    <div className="text-xs font-bold text-text-main">
                       {student.totalXp} XP
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted dark:text-muted italic">
-                Sé el primero en completar cursos de este path.
+              <p className="text-xs text-muted italic">
+                Be the first to complete courses in this path.
               </p>
             )}
           </div>
 
-          {/* Path Resources */}
+          {/* Resources */}
           <PathResources pathId={path.id} initialResources={initialResources || []} />
         </div>
 
-        {/* Lista de cursos */}
+        {/* Course Timeline */}
         <div className="lg:col-span-2">
-          <div className="space-y-4">
+          <div>
             {path.courses && path.courses.length > 0 ? (
               path.courses.map((course: Course, index: number) => {
-                const isCompleted = course.user_course_progress?.[0]?.completed
+                const courseProgress = progressMap.get(course.id)
+                const isCompleted = courseProgress?.completed
+                const hasProgress = courseProgress !== undefined
 
                 return (
                   <CardCourse
                     key={course.id}
                     id={course.id}
                     title={course.title}
-                    thumbnail_url={course.thumbnail_url}
                     summary={course.summary || undefined}
                     xp_reward={course.xp_reward}
-                    variant="list"
-                    index={index}
+                    variant="timeline"
                     organizationName={course.organizations?.name}
                     exercisesCount={course.course_exercises?.length || 0}
-                    progress={isCompleted ? 100 : 0}
+                    progress={isCompleted ? 100 : hasProgress ? 10 : 0}
                     status={course.status}
+                    isLast={index === path.courses.length - 1}
                   />
                 )
               })
             ) : (
-              <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
-                <p className="text-muted dark:text-muted">
-                  Este path aún no tiene cursos.
+              <div className="border border-border p-12 text-center">
+                <p className="text-muted text-sm">
+                  This path has no courses yet.
                 </p>
                 {path.created_by === user.id && (
                   <Link
                     href={`/dashboard/quests/new?pathId=${path.id}`}
-                    className="mt-4 inline-block text-brand hover:text-brand/80"
+                    className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
                   >
-                    Agrega el primer curso →
+                    Add the first course →
                   </Link>
                 )}
               </div>
@@ -386,7 +364,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             <Recommendations mode="similar" contextId={path.id} contextType="path" />
           </div>
         </div>
-      </div >
+      </div>
     </>
   )
 }

@@ -25,16 +25,15 @@ export default async function DashboardLayout({
         .single()
 
     return (
-        <div className="flex h-screen overflow-hidden bg-main-alt dark:bg-main-alt">
-            {/* Sidebar matches standardized Background Alt */}
+        <div className="flex h-screen overflow-hidden bg-main">
             <Sidebar user={user} profile={profile} />
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto px-4 py-8 md:px-8 md:py-6 scroll-smooth">
-                {/* Breadcrumb Navigation - Add spacing for mobile toggle */}
-                <div className="flex flex-wrap justify-between md:mt-0 mt-8">
+                {/* Top Bar */}
+                <div className="flex flex-wrap md:justify-between justify-center items-center md:mt-0 mt-8 mb-6">
                     <Breadcrumb />
-                    <div className='flex gap-2 items-center justify-end'>
+                    <div className="flex ml-auto md:ml-0 gap-2 items-center">
                         <NotificationBell userId={user.id} />
                         <ThemeToggle />
                     </div>

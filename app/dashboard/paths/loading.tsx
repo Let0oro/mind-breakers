@@ -1,47 +1,39 @@
 export default function PathsListLoading() {
     return (
         <div className="animate-pulse">
-            {/* Header Section */}
-            <div className="flex flex-wrap justify-between items-end gap-6 mb-8">
-                <div className="flex flex-col gap-2">
-                    <div className="h-8 w-48 bg-main dark:bg-surface rounded-lg"></div>
-                    <div className="h-4 w-32 bg-main dark:bg-surface rounded-lg"></div>
+            {/* Header */}
+            <div className="mb-10">
+                <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
+                    <div className="flex flex-col gap-1">
+                        <div className="h-10 w-32 bg-surface-dark" />
+                        <div className="h-4 w-24 bg-surface-dark" />
+                    </div>
+                    <div className="flex gap-2">
+                        <div className="h-10 w-24 bg-surface-dark" />
+                        <div className="h-10 w-24 bg-surface-dark" />
+                    </div>
                 </div>
-                <div className="h-11 w-40 bg-main dark:bg-surface rounded-lg"></div>
             </div>
 
             {/* Paths Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6 flex flex-col gap-4">
-                        {/* Header */}
+                    <div key={i} className="border border-border bg-main p-6 flex flex-col gap-4">
                         <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 space-y-2">
-                                <div className="h-6 w-3/4 bg-sidebar-border rounded"></div>
-                                <div className="h-3 w-1/3 bg-sidebar-border rounded"></div>
+                                <div className="h-5 w-3/4 bg-surface-dark" />
+                                <div className="h-3 w-1/3 bg-surface-dark" />
                             </div>
-                            <div className="w-6 h-6 bg-sidebar-border rounded"></div>
+                            <div className="w-5 h-5 bg-surface-dark" />
                         </div>
-
-                        {/* Summary */}
                         <div className="space-y-2">
-                            <div className="h-3 w-full bg-sidebar-border rounded"></div>
-                            <div className="h-3 w-5/6 bg-sidebar-border rounded"></div>
+                            <div className="h-3 w-full bg-surface-dark" />
+                            <div className="h-3 w-5/6 bg-surface-dark" />
                         </div>
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-4">
-                            <div className="h-4 w-20 bg-sidebar-border rounded"></div>
+                        <div className="flex items-center gap-4 mt-auto">
+                            <div className="h-3 w-16 bg-surface-dark" />
                         </div>
-
-                        {/* Progress Bar Placeholder */}
-                        <div className="space-y-1 mt-auto">
-                            <div className="flex justify-between">
-                                <div className="h-3 w-12 bg-sidebar-border rounded"></div>
-                                <div className="h-3 w-8 bg-sidebar-border rounded"></div>
-                            </div>
-                            <div className="h-2 w-full bg-sidebar-border rounded-full"></div>
-                        </div>
+                        <div className="h-1 w-full bg-surface-dark" />
                     </div>
                 ))}
             </div>

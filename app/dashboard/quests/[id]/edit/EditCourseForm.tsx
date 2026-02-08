@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
 import { Course, CourseExercise } from '@/lib/types'
+import { FormLayout, FormField, FormActions, FormError, FormSection, FormDivider } from '@/components/ui/Form'
 
 interface LearningPath {
     id: string
@@ -24,11 +25,10 @@ interface Exercise {
 }
 
 export function EditCourseForm({ courseId }: { courseId: string }) {
-    const [loading, setLoading] = useState(true) // Start loading to fetch data
+    const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    // Lists for selects
     const [paths, setPaths] = useState<LearningPath[]>([])
     const [organizations, setOrganizations] = useState<Organization[]>([])
 
@@ -38,10 +38,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     // Form Fields
     const [linkUrl, setLinkUrl] = useState('')
     const [isFetchingMetadata, setIsFetchingMetadata] = useState(false)
-
     const [pathId, setPathId] = useState('')
     const [organizationId, setOrganizationId] = useState('')
-
     const [title, setTitle] = useState('')
     const [summary, setSummary] = useState('')
     const [description, setDescription] = useState('')
@@ -55,21 +53,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     const [editReason, setEditReason] = useState('')
     const [progressCount, setProgressCount] = useState(0)
 
-    // Scroll to error
     useEffect(() => {
-        if (error) {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
+        if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
     }, [error])
-
-    // XP Tooltip
-
-
 
     // Exercises
     const [exercises, setExercises] = useState<Exercise[]>([])
 
-    // Helper to add new exercise
     const addExercise = () => {
         setExercises([
             ...exercises,
@@ -77,19 +67,16 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         ])
     }
 
-    // Helper to remove exercise
     const removeExercise = (id: string) => {
         setExercises(exercises.filter(ex => ex.id !== id))
     }
 
-    // Helper to update exercise
     const updateExercise = (id: string, field: keyof Exercise, value: string) => {
         setExercises(exercises.map(ex =>
             ex.id === id ? { ...ex, [field]: value } : ex
         ))
     }
 
-    // Fetch metadata from URL
     const handleFetchMetadata = useCallback(async () => {
         if (!linkUrl.trim()) return
 
@@ -105,25 +92,18 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         }
 
         if (data) {
-            // In edit mode, we might overwrite existing data if the user explicitly asks for autofill
-            // To be safe, we only overwrite if the fields are empty OR if user just clicked the button explicitly
-            // Since this function is triggered by button click, we assume user wants to update.
             setTitle(data.title)
-
             const desc = data.description || ''
             setSummary(desc.length > 200 ? desc.substring(0, 197) + '...' : desc)
             setDescription(data.description)
             setThumbnailUrl(data.thumbnail)
-
             const calculatedXP = calculateXPFromDuration(data.durationHours)
             setXpReward(calculatedXP)
-
         }
 
         setIsFetchingMetadata(false)
     }, [linkUrl])
 
-    // Initial Data Fetch
     useEffect(() => {
         const initData = async () => {
             setLoading(true)
@@ -133,7 +113,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 return
             }
 
-            // 1. Load User's Paths & Orgs
             const [pathsRes, orgsRes] = await Promise.all([
                 supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
                 supabase.from('organizations').select('id, name').order('name'),
@@ -142,7 +121,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             if (pathsRes.data) setPaths(pathsRes.data)
             if (orgsRes.data) setOrganizations(orgsRes.data)
 
-            // 2. Load Course Data
             const { data: course, error: courseError } = await supabase
                 .from('courses')
                 .select(`
@@ -159,24 +137,12 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 return
             }
 
-            // Verify ownership
-            if (course.created_by !== user.id) {
-                // RLS checked implicitly
-            }
-
-            // Set Workflow State
             setCourseStatus(course.status as 'draft' | 'published' | 'archived')
-            // count is returned by supabase count query
             const pCount = course.user_course_progress?.[0]?.count || 0
             setProgressCount(pCount)
 
-            // Determine if we show Draft Data or Live Data
             const sourceData = (course.draft_data as unknown as Course) || course
-            /* if (course.draft_data) {
-                setHasPendingChanges(true)
-            } */
 
-            // Populate Form from sourceData (Draft or Live)
             setTitle(sourceData.title || course.title)
             setSummary(sourceData.summary || course.summary || '')
             setDescription(sourceData.description || course.description || '')
@@ -187,17 +153,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             setPathId(sourceData.path_id || course.path_id)
             setOrganizationId(sourceData.organization_id || course.organization_id || '')
 
-            // Exercises
-            // If draft_data has exercises, likely stored as JSON.
-            // But currently our plan says draft_data stores columns.
-            // Exercises are a separate table.
-            // Implementation detail: "Shadow Draft" usually applies to the main table.
-            // Exercises are tricky. If we edit exercises in a published course, they are live immediately?
-            // Or should we store exercise diffs?
-            // FOR MVP: Exercises edits are LIVE immediately (simplification), or we need a complex JSON structure.
-            // Let's stick to: Main attributes use Shadow Draft. Exercises are live (or we warn user).
-            // User request implied "editing the course", usually metadata.
-            // We will load exercises from the relation as usual.
             if (course.course_exercises) {
                 setExercises(course.course_exercises.map((ex: CourseExercise) => ({
                     id: ex.id,
@@ -213,26 +168,20 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         initData()
     }, [courseId, supabase, router])
 
-    // Validation Helpers
-    const isFormValidForDraft = () => {
-        return !!(title.trim() || linkUrl.trim())
-    }
+    const isFormValidForDraft = () => !!(title.trim() || linkUrl.trim())
 
-    const isFormValidForPublish = () => {
-        return !!(
-            title.trim() &&
-            pathId &&
-            summary.trim() &&
-            description.trim() &&
-            thumbnailUrl.trim() &&
-            xpReward > 0
-        )
-    }
+    const isFormValidForPublish = () => !!(
+        title.trim() &&
+        pathId &&
+        summary.trim() &&
+        description.trim() &&
+        thumbnailUrl.trim() &&
+        xpReward > 0
+    )
 
     const handleSaveClick = (targetStatus: 'draft' | 'published') => {
         setError(null)
 
-        // Validation
         if (targetStatus === 'published' && !isFormValidForPublish()) {
             setError("To publish, all fields must be filled and XP must be greater than 0.")
             return
@@ -242,13 +191,11 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             return
         }
 
-        // If trying to update a published course, we need a reason
         if (courseStatus === 'published') {
             setShowEditReasonModal(true)
             return
         }
 
-        // Otherwise proceed directly
         processSave(targetStatus)
     }
 
@@ -270,29 +217,22 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         let updatePayload: Record<string, unknown> = {}
 
-        // Scenario 1: Course is Published -> Save to Shadow Draft
         if (courseStatus === 'published') {
-            // We do NOT change status or is_validated of the main row, to keep it live.
-            // We save changes to draft_data.
             updatePayload = {
                 draft_data: {
                     ...commonData,
                     updated_at: new Date().toISOString()
                 },
                 edit_reason: reason,
-                // We typically verify shadow drafts, so we don't change is_validated of the row.
             }
-        }
-        // Scenario 2: Course is Draft -> Update Main Columns
-        else {
+        } else {
             updatePayload = {
                 ...commonData,
                 status: targetStatus,
-                is_validated: targetStatus === 'published' ? false : false // Pending if published
+                is_validated: false
             }
         }
 
-        // 1. Update Course
         const { error: updateError } = await supabase
             .from('courses')
             .update(updatePayload)
@@ -304,25 +244,18 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             return
         }
 
-        // 2. Handle Exercises (Keep existing logic: Exercises are LIVE)
-        // ... (Exercises Logic same as before) 
-        // Optimization: Extract exercise logic to function if needed, but inline is fine for now if we just copy headers.
-        // Re-using existing exercises logic below:
-
         await handleExercisesSave()
 
         setSaving(false)
         setShowEditReasonModal(false)
         router.refresh()
 
-        // Show success?
         if (targetStatus === 'published' && courseStatus === 'draft') {
             router.push(`/dashboard/quests/${courseId}`)
         }
     }
 
     const handleExercisesSave = async () => {
-        // Get existing DB IDs first
         const { data: existingIdsData } = await supabase
             .from('course_exercises')
             .select('id')
@@ -358,7 +291,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         setSaving(true)
         if (progressCount > 0) {
-            // Soft Delete (Archive)
             const { error } = await supabase
                 .from('courses')
                 .update({ status: 'archived', archived_at: new Date().toISOString() })
@@ -371,7 +303,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 router.push('/dashboard/quests')
             }
         } else {
-            // Hard Delete
             const { error } = await supabase
                 .from('courses')
                 .delete()
@@ -386,60 +317,43 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         }
     }
 
-
     if (loading) {
-        return <div className="p-8 text-center">Loading course data...</div>
+        return (
+            <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-text-main border-t-transparent" />
+            </div>
+        )
     }
 
     return (
         <>
-            {/* Header */}
-            <header className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
-                    >
-                        <span className="material-symbols-outlined">arrow_back</span>
-                    </button>
-                    <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Edit Course</h2>
-                </div>
-                <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 p-3 rounded-lg w-fit text-sm">
-                    <span className="material-symbols-outlined text-lg">warning</span>
-                    Saving changes will reset the course validation status to &quot;Pending&quot;.
-                </div>
-            </header>
-
-
-            {/* Form */}
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 max-w-3xl">
+            <FormLayout title="Edit Quest" subtitle="Update your course details">
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-                    {/* Error Message */}
-                    {error && (
-                        <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
-                            <p className="text-red-500 text-sm font-medium flex items-center gap-2">
-                                <span className="material-symbols-outlined text-base">error</span>
-                                {error}
+                    <FormError message={error} />
+
+                    {/* Warning Banner for Published Courses */}
+                    {courseStatus === 'published' && (
+                        <div className="border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
+                            <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
+                            <p className="text-amber-500 text-sm">
+                                Saving changes will reset the course validation status to &quot;Pending&quot;.
                             </p>
                         </div>
                     )}
 
-                    {/* Course URL */}
+                    {/* URL with Auto-fill */}
                     <div className="space-y-2">
-                        <label htmlFor="link_url" className="block text-text-main dark:text-text-main text-sm font-bold">
+                        <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
                             Course URL
                         </label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
-                                    link
-                                </span>
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-lg">link</span>
                                 <input
                                     type="url"
-                                    id="link_url"
                                     value={linkUrl}
                                     onChange={(e) => setLinkUrl(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
+                                    className="w-full h-12 pl-12 pr-4 bg-surface border border-border text-text-main placeholder:text-muted focus:outline-none focus:border-text-main transition-all"
                                     placeholder="https://youtube.com/watch?v=..."
                                 />
                             </div>
@@ -447,269 +361,220 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                 type="button"
                                 onClick={handleFetchMetadata}
                                 disabled={!linkUrl.trim() || isFetchingMetadata}
-                                className="h-12 px-4 rounded-lg bg-brand/20 text-brand font-medium hover:bg-brand/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                                className="h-12 px-4 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                             >
-                                {isFetchingMetadata ? (
-                                    <span>Fetching...</span>
-                                ) : (
+                                {isFetchingMetadata ? 'Fetching...' : (
                                     <>
-                                        <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                                        <span>Re-fetch</span>
+                                        <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                                        Re-fetch
                                     </>
                                 )}
                             </button>
                         </div>
                     </div>
 
-                    {/* Learning Path */}
-                    <div className="space-y-2">
-                        <label htmlFor="path_id" className="block text-text-main dark:text-text-main text-sm font-bold">
-                            Learning Path <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            id="path_id"
-                            required
-                            value={pathId}
-                            onChange={(e) => setPathId(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                        >
-                            <option value="">Select a learning path</option>
-                            {paths.map((path) => (
-                                <option key={path.id} value={path.id}>
-                                    {path.title}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <FormField
+                        label="Learning Path"
+                        name="path_id"
+                        type="select"
+                        value={pathId}
+                        onChange={setPathId}
+                        required
+                    >
+                        <option value="">Select a learning path</option>
+                        {paths.map((path) => (
+                            <option key={path.id} value={path.id}>{path.title}</option>
+                        ))}
+                    </FormField>
 
-                    {/* Title */}
-                    <div className="space-y-2">
-                        <label htmlFor="title" className="block text-text-main dark:text-text-main text-sm font-bold">
-                            Course Title <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="title"
-                            required
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                        />
-                    </div>
+                    <FormField
+                        label="Title"
+                        name="title"
+                        value={title}
+                        onChange={setTitle}
+                        required
+                    />
 
-                    {/* Summary */}
-                    <div className="space-y-2">
-                        <label htmlFor="summary" className="block text-text-main dark:text-text-main text-sm font-bold">
-                            Summary
-                        </label>
-                        <input
-                            type="text"
-                            id="summary"
-                            value={summary}
-                            onChange={(e) => setSummary(e.target.value)}
-                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                        />
-                    </div>
+                    <FormField
+                        label="Summary"
+                        name="summary"
+                        value={summary}
+                        onChange={setSummary}
+                    />
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <label htmlFor="description" className="block text-text-main dark:text-text-main text-sm font-bold">
-                            Description
-                        </label>
-                        <textarea
-                            id="description"
-                            rows={4}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all resize-none"
-                        />
-                    </div>
+                    <FormField
+                        label="Description"
+                        name="description"
+                        type="textarea"
+                        value={description}
+                        onChange={setDescription}
+                    />
 
-                    {/* Thumbnail URL */}
+                    {/* Thumbnail with preview */}
                     <div className="space-y-2">
-                        <label htmlFor="thumbnail_url" className="block text-text-main dark:text-text-main text-sm font-bold">
+                        <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
                             Thumbnail URL
                         </label>
                         <div className="flex gap-4">
                             <div className="relative flex-1">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
-                                    image
-                                </span>
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-lg">image</span>
                                 <input
                                     type="url"
-                                    id="thumbnail_url"
                                     value={thumbnailUrl}
                                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
+                                    className="w-full h-12 pl-12 pr-4 bg-surface border border-border text-text-main placeholder:text-muted focus:outline-none focus:border-text-main transition-all"
                                 />
                             </div>
                             {thumbnailUrl && (
-                                <div className="w-20 h-12 rounded-lg overflow-hidden border border-border dark:border-border flex-shrink-0">
-                                    <img
-                                        src={thumbnailUrl}
-                                        alt="Preview"
-                                        className="object-cover"
-                                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                                            (e.target as HTMLImageElement).style.display = 'none'
-                                        }}
-                                    />
+                                <div className="w-20 h-12 border border-border overflow-hidden shrink-0 grayscale">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={thumbnailUrl} alt="Preview" className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Row: Organization & XP Reward */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label htmlFor="organization_id" className="block text-text-main dark:text-text-main text-sm font-bold">
-                                Organization
-                            </label>
-                            <select
-                                id="organization_id"
-                                value={organizationId}
-                                onChange={(e) => setOrganizationId(e.target.value)}
-                                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                            >
-                                <option value="">None</option>
-                                {organizations.map((org) => (
-                                    <option key={org.id} value={org.id}>
-                                        {org.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <FormField
+                            label="Organization"
+                            name="organization_id"
+                            type="select"
+                            value={organizationId}
+                            onChange={setOrganizationId}
+                        >
+                            <option value="">None</option>
+                            {organizations.map((org) => (
+                                <option key={org.id} value={org.id}>{org.name}</option>
+                            ))}
+                        </FormField>
 
-                        <div className="space-y-2 relative">
-                            <label htmlFor="xp_reward" className="flex items-center gap-2 text-text-main dark:text-text-main text-sm font-bold">
-                                XP Reward
-                                <div className="relative">
-                                    <button type="button" className="text-muted dark:text-muted">
-                                        <span className="material-symbols-outlined text-base">info</span>
-                                    </button>
-                                    {/* Tooltip content same as before ... */}
-                                </div>
-                            </label>
-                            <input
-                                type="number"
-                                id="xp_reward"
-                                value={xpReward}
-                                onChange={(e) => setXpReward(parseInt(e.target.value) || 0)}
-                                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand transition-all"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Order Index */}
-                    <div className="space-y-2">
-                        <label htmlFor="order_index" className="block text-text-main dark:text-text-main text-sm font-bold">
-                            Order in Path
-                        </label>
-                        <input
+                        <FormField
+                            label="XP Reward"
+                            name="xp_reward"
                             type="number"
-                            id="order_index"
-                            value={orderIndex}
-                            onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
-                            className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
+                            value={xpReward}
+                            onChange={(v) => setXpReward(parseInt(v) || 0)}
+                            min={0}
+                            max={300}
+                            step={25}
                         />
                     </div>
 
-                    <div className="border-t border-border dark:border-border my-8"></div>
+                    <FormField
+                        label="Order in Path"
+                        name="order_index"
+                        type="number"
+                        value={orderIndex}
+                        onChange={(v) => setOrderIndex(parseInt(v) || 0)}
+                        min={0}
+                        hint="Lower numbers appear first (0 = first)"
+                    />
 
-                    {/* Exercise Section */}
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-text-main dark:text-text-main">Exercises</h3>
+                    <FormDivider />
+
+                    {/* Exercises */}
+                    <FormSection title="Exercises">
+                        <div className="flex justify-end">
                             <button
                                 type="button"
                                 onClick={addExercise}
-                                className="px-4 py-2 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 font-medium transition-colors flex items-center gap-2"
+                                className="px-4 py-2 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors flex items-center gap-2"
                             >
-                                <span className="material-symbols-outlined">add</span>
+                                <span className="material-symbols-outlined text-sm">add</span>
                                 Add Exercise
                             </button>
                         </div>
 
-                        <div className="space-y-4">
-                            {exercises.map((exercise, index) => (
-                                <div key={exercise.id} className="rounded-xl border border-border dark:border-border bg-main dark:bg-surface overflow-hidden">
-                                    <div className="p-4 bg-surface dark:bg-surface-dark flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-text-main text-xs font-bold">
-                                                {index + 1}
-                                            </span>
-                                            <input
-                                                type="text"
-                                                value={exercise.title}
-                                                onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
-                                                placeholder="Exercise Title"
-                                                className="bg-transparent border-none text-text-main dark:text-text-main font-bold focus:ring-0 p-0 w-64"
-                                            />
+                        {exercises.length === 0 ? (
+                            <div className="text-center py-8 border border-dashed border-border">
+                                <p className="text-muted text-sm">No exercises added yet.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {exercises.map((exercise, index) => (
+                                    <div key={exercise.id} className="border border-border overflow-hidden">
+                                        <div className="p-4 bg-surface flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <span className="flex items-center justify-center w-6 h-6 bg-inverse text-inverse text-xs font-bold">
+                                                    {index + 1}
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    value={exercise.title}
+                                                    onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
+                                                    placeholder="Exercise Title"
+                                                    className="bg-transparent border-none text-text-main font-bold focus:outline-none w-64"
+                                                />
+                                            </div>
+                                            <button type="button" onClick={() => removeExercise(exercise.id)} className="text-muted hover:text-red-500 transition-colors">
+                                                <span className="material-symbols-outlined">delete</span>
+                                            </button>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => removeExercise(exercise.id)}
-                                            className="text-muted hover:text-red-500 transition-colors"
-                                        >
-                                            <span className="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                    {/* Description and Requirements inputs... same as before */}
-                                    <div className="p-4 space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <textarea
                                                 value={exercise.description}
                                                 onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
                                                 rows={3}
-                                                className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                                                className="w-full px-3 py-2 bg-surface border border-border text-text-main text-sm focus:outline-none focus:border-text-main transition-all resize-none"
                                                 placeholder="Description..."
                                             />
                                             <textarea
                                                 value={exercise.requirements}
                                                 onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
                                                 rows={3}
-                                                className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
+                                                className="w-full px-3 py-2 bg-surface border border-border text-text-main text-sm focus:outline-none focus:border-text-main transition-all resize-none"
                                                 placeholder="Requirements..."
                                             />
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </FormSection>
 
-
+                    <FormActions
+                        onSave={() => handleSaveClick('draft')}
+                        onPublish={() => handleSaveClick('published')}
+                        onDelete={handleDelete}
+                        saving={saving}
+                        canSave={isFormValidForDraft()}
+                        canPublish={isFormValidForPublish()}
+                        publishLabel={courseStatus === 'published' ? 'Update' : 'Publish'}
+                        deleteLabel={progressCount > 0 ? 'Archive Course' : 'Delete Course'}
+                        showDelete={true}
+                    />
                 </form>
-            </div>
+            </FormLayout>
 
             {/* Edit Reason Modal */}
             {showEditReasonModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-main dark:bg-surface rounded-xl p-6 max-w-md w-full shadow-2xl border border-border dark:border-border">
-                        <h3 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Update Published Course</h3>
-                        <p className="text-sm text-muted dark:text-muted mb-4">
+                    <div className="bg-main border border-border p-6 max-w-md w-full">
+                        <h3 className="text-xl font-black uppercase tracking-tight text-text-main mb-4">Update Published Course</h3>
+                        <p className="text-sm text-muted mb-4">
                             Since this course is published, your changes will be saved as a draft for admin review. The live version will remain unchanged until approved.
                         </p>
-                        <label className="block text-sm font-bold text-text-main dark:text-text-main mb-2">
+                        <label className="block text-xs font-bold uppercase tracking-widest text-text-main mb-2">
                             Reason for changes <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={editReason}
                             onChange={(e) => setEditReason(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main mb-6 focus:outline-none focus:border-brand resize-none"
+                            className="w-full px-4 py-3 bg-surface border border-border text-text-main mb-6 focus:outline-none focus:border-text-main resize-none"
                             placeholder="e.g. Fixed typo in summary..."
                             rows={3}
                         />
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setShowEditReasonModal(false)}
-                                className="px-4 py-2 rounded-lg text-muted dark:text-muted hover:bg-surface dark:hover:bg-surface-dark"
+                                className="px-6 h-10 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => processSave('published', editReason)}
                                 disabled={!editReason.trim() || saving}
-                                className="px-4 py-2 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 disabled:opacity-50"
+                                className="px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
                             >
                                 {saving ? 'Submitting...' : 'Submit for Review'}
                             </button>
@@ -717,55 +582,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </div>
                 </div>
             )}
-
-            {/* Actions Footer */}
-            <div className="flex gap-3 pt-8 border-t border-border dark:border-border mt-8">
-
-                <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="ml-7 px-6 h-12 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 font-bold transition-colors flex items-center justify-center gap-2"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={saving}
-                    className="px-6 h-12 rounded-lg border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors flex items-center gap-2"
-                >
-                    <span className="material-symbols-outlined">delete</span>
-                    {progressCount > 0 ? 'Archive Course' : 'Delete Course'}
-                </button>
-                <div className="flex-1 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={() => handleSaveClick('draft')}
-                        disabled={saving || (courseStatus === 'draft' && !isFormValidForDraft())}
-                        className="px-6 h-12 rounded-lg border border-brand text-brand font-bold hover:bg-brand/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                    >
-                        {saving ? 'Saving...' : 'Save Draft'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => handleSaveClick('published')}
-                        disabled={saving || !isFormValidForPublish()}
-                        className="px-6 h-12 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                    >
-                        {courseStatus === 'published' ? (
-                            <>
-                                <span className="material-symbols-outlined">edit_document</span>
-                                Update
-                            </>
-                        ) : (
-                            <>
-                                <span className="material-symbols-outlined">rocket_launch</span>
-                                Publish
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
         </>
     )
 }

@@ -5,6 +5,15 @@ import { CardCourse } from '@/components/ui/CardCourse'
 import { CardPath } from '@/components/ui/CardPath'
 import Recommendations from '@/components/features/Recommendations'
 import { getLevelProgress } from '@/lib/gamification'
+import {
+  getUserProgressCached,
+  getUserSavedQuestsCached,
+  getUserSavedPathsCached,
+  getUserRecentActivityCached,
+  getUserSavedPathsWithCoursesCached,
+  getPublishedCoursesWithOrgsCached,
+  getSavedCoursesByIdsCached
+} from '@/lib/cache'
 
 interface DashboardCourse {
   id: string
@@ -36,6 +45,13 @@ interface DashboardSavedCourse {
   thumbnail_url?: string
 }
 
+interface DashboardSavedPath {
+  id: string
+  title: string
+  xp_reward: number
+  thumbnail_url?: string
+}
+
 
 
 export default async function DashboardPage() {
@@ -44,59 +60,32 @@ export default async function DashboardPage() {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) redirect('/login')
 
-  // Fetch user profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // Parallel fetch of all cached user data
+  const [
+    profile,
+    userProgress,
+    savedCourseIds,
+    savedPathIds,
+    recentActivity,
+    savedDashboardPaths,
+    publishedCourses
+  ] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single().then(r => r.data),
+    getUserProgressCached(supabase, user.id),
+    getUserSavedQuestsCached(supabase, user.id),
+    getUserSavedPathsCached(supabase, user.id),
+    getUserRecentActivityCached(supabase, user.id),
+    getUserSavedPathsWithCoursesCached(supabase, user.id, 5),
+    getPublishedCoursesWithOrgsCached(supabase, 3)
+  ])
 
-  const { data: recentActivity } = await supabase
-    .from('user_course_progress')
-    .select(`
-      course_id,
-      completed,
-      xp_earned,
-      courses (
-        id,
-        title
-      )
-    `)
-    .eq('user_id', user.id)
-    .order('last_accessed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const completedCourseIds = new Set(userProgress.filter(p => p.completed).map(p => p.course_id))
 
-  // Supabase join types can be tricky. Safely cast or access.
   const lastCourse = recentActivity?.courses ? (Array.isArray(recentActivity.courses) ? recentActivity.courses[0] : recentActivity.courses) : null
 
-  // Fetch Saved Paths for the dashboard summary
-  // We prioritize saved paths to show active intent
-  const { data: savedDashboardPaths } = await supabase
-    .from('saved_paths')
-    .select(`
-      path:learning_paths (
-        id,
-        title,
-        summary,
-        courses (id, title, order_index)
-      )
-    `)
-    .eq('user_id', user.id)
-    .limit(5)
-
-  // Handle Supabase relation returning array or object
   const learningPathsData = savedDashboardPaths?.map(p => Array.isArray(p.path) ? p.path[0] : p.path) || []
 
-  // Calculate progress for paths
-  // Note: accurate path progress calculation requires fetching all user progress which might be heavy. 
-  // For now we will check simplified progress or mocking it to 0 if not easily available without N+1.
-  // We can do a second query for cached progress if available or fetch user progress for all courses.
-  const { data: allUserProgress } = await supabase.from('user_course_progress').select('course_id').eq('user_id', user.id)
-  const completedCourseIds = new Set(allUserProgress?.map(p => p.course_id))
-
   const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
-    // Sort courses by order_index
     const sortedCourses = [...(path.courses || [])].sort((a: { order_index: number }, b: { order_index: number }) => (a.order_index || 0) - (b.order_index || 0))
     const totalCourses = sortedCourses.length
     const completedCourses = sortedCourses.filter((c: { id: string }) => completedCourseIds.has(c.id)).length
@@ -119,15 +108,11 @@ export default async function DashboardPage() {
 
   if (lastCourse) {
     if (!recentActivity!.completed) {
-      // Caso 1: Último curso visto no está completado -> Ir a ese curso
       resumeTarget = {
         href: `/dashboard/quests/${lastCourse.id}`,
         label: `Resume: ${lastCourse.title}`,
       }
     } else {
-      // Caso 2: Último curso completado -> Buscar el siguiente del mismo path
-      // Necesitamos saber el path_id del curso. 
-      // Hacemos una query extra ligera para obtener el path y el siguiente curso.
       const { data: courseWithPath } = await supabase
         .from('courses')
         .select('path_id, order_index')
@@ -135,7 +120,6 @@ export default async function DashboardPage() {
         .single()
 
       if (courseWithPath?.path_id) {
-        // Buscar el siguiente curso en el path
         const { data: nextCourseInPath } = await supabase
           .from('courses')
           .select('id, title')
@@ -145,17 +129,9 @@ export default async function DashboardPage() {
           .limit(1)
           .maybeSingle()
 
-        // Verificar si YA está completado (aunque sea "siguiente" en orden, podría haberlo hecho saltado? Asumimos linealidad normal)
-        // Mejor verificar user_course_progress para ese nextCourse
         if (nextCourseInPath) {
-          const { data: nextProgress } = await supabase
-            .from('user_course_progress')
-            .select('completed')
-            .eq('user_id', user.id)
-            .eq('course_id', nextCourseInPath.id)
-            .single()
-
-          if (!nextProgress?.completed) {
+          const isNextCompleted = completedCourseIds.has(nextCourseInPath.id)
+          if (!isNextCompleted) {
             resumeTarget = {
               href: `/dashboard/quests/${nextCourseInPath.id}`,
               label: `Start: ${nextCourseInPath.title}`,
@@ -166,7 +142,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // Fallback: Si no hay resumeTarget aún, buscar en 'enrolled_paths' el primero incompleto.
   if (!resumeTarget) {
     const firstIncompletePath = learningPathsList.find(path => path.completedCourses < path.totalCourses && path.nextCourseId);
     if (firstIncompletePath) {
@@ -177,297 +152,245 @@ export default async function DashboardPage() {
     }
   }
 
-
-  // Fetch enrolled courses with progress
-  const { data: coursesWithProgress } = await supabase
-    .from('courses')
-    .select(`
-      id,
-      title,
-      thumbnail_url,
-      xp_reward,
-      status,
-      is_validated,
-      organization:organizations(name),
-      user_course_progress (
-        completed,
-        xp_earned
-      )
-    `)
-    .eq('status', 'published')
-    .eq('is_validated', true)
-    .eq('user_course_progress.user_id', user.id)
-    .limit(3)
-
-
-  const enrolledCourses: DashboardCourse[] = coursesWithProgress?.map((course: {
+  // Combine progress with published courses
+  const progressMap = new Map(userProgress.map(p => [p.course_id, p]))
+  const enrolledCourses: DashboardCourse[] = publishedCourses?.map((course: {
     id: string
     title: string
     thumbnail_url?: string | null
     xp_reward: number
     status: string
-    organization: { name: string } | { name: string }[] | null
-    user_course_progress: { completed: boolean }[]
+    organizations: { name: string } | { name: string }[] | null
   }) => ({
     id: course.id,
     title: course.title,
     thumbnail_url: course.thumbnail_url || undefined,
     xp_reward: course.xp_reward || 100,
     status: course.status,
-    progress: course.user_course_progress?.[0]?.completed ? 100 : 0,
+    progress: progressMap.get(course.id)?.completed ? 100 : 0,
     duration: '8h',
-    instructor: Array.isArray(course.organization) ? course.organization[0]?.name : course.organization?.name || 'Unknown Organization',
+    instructor: Array.isArray(course.organizations) ? course.organizations[0]?.name : course.organizations?.name || 'Unknown Organization',
   })) || []
 
+  // Fetch saved courses using cached function
+  const savedCoursesData = savedCourseIds.length > 0
+    ? await getSavedCoursesByIdsCached(supabase, savedCourseIds, 5)
+    : []
 
+  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((course) => ({
+    id: course.id,
+    title: course.title,
+    thumbnail_url: course.thumbnail_url || undefined,
+    xp_reward: course.xp_reward || 100,
+  })) || []
 
+  const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
 
-  // Fetch user's drafts
-  const { data: drafts } = await supabase
-    .from('courses')
-    .select('id, title, thumbnail_url, xp_reward, summary, status, updated_at')
-    .eq('created_by', user.id)
-    .eq('status', 'draft')
-    .order('updated_at', { ascending: false })
-    .limit(3)
+const savedPathsData = savedPathIds.length > 0
+    ? await getSavedCoursesByIdsCached(supabase, savedPathIds, 5)
+    : []
 
-  // Fetch saved courses
-  // The schema showed 'saved_courses' table.
-  const { data: savedCoursesData } = await supabase
-    .from('saved_courses')
-    .select(`
-      course_id,
-      courses (
-        id,
-        title,
-        thumbnail_url,
-        xp_reward,
-        status,
-        organizations (name)
-      )
-    `)
-    .eq('user_id', user.id)
-    .limit(5)
+  const savedPaths: DashboardSavedPath[] = savedPathsData?.map((path) => ({
+    id: path.id,
+    title: path.title,
+    thumbnail_url: path.thumbnail_url || undefined,
+    xp_reward: path.xp_reward || 100,
+  })) || []
 
-  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((item) => {
-    const course = item.courses?.[0] || item.courses
-    return {
-      id: course?.id || '',
-      title: course?.title || '',
-      thumbnail_url: course?.thumbnail_url || undefined,
-      xp_reward: course?.xp_reward || 100,
-      status: course?.status || 'published',
-      instructor: course?.organizations?.[0]?.name || 'Unknown Organization',
-      duration: '8h'
-    }
-  }) || []
 
   return (
     <>
       {/* Header Section */}
-      <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Welcome back, {profile?.username?.split(' ')[0] || 'Scholar'}!</h2>
-          <p className="text-muted dark:text-muted text-base">{profile?.level || 1} level active! Keep up your learning momentum!</p>
+      <header className="flex flex-wrap justify-between items-end gap-6 mb-10">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-text-main text-4xl font-black italic tracking-tight">DASHBOARD</h1>
+          <p className="text-muted text-sm">Level {profile?.level || 1} • {profile?.username?.split(' ')[0] || 'Scholar'}</p>
         </div>
         {resumeTarget && (
           <Link
             href={resumeTarget.href}
-            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-brand text-text-main dark:text-text-main font-bold transition-all hover:bg-brand/80"
+            className="flex items-center gap-2 px-6 py-3 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
           >
-            <span className="material-symbols-outlined w-5 h-5">play_arrow</span>
             <span>{resumeTarget.label}</span>
           </Link>
         )}
       </header>
 
-      {/* Stats & Leveling Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* XP Card */}
-        <div className="lg:col-span-2 flex flex-col gap-4 p-6 rounded-xl border border-border dark:border-border bg-main dark:bg-surface">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined w-8 h-8 text-brand">star</span>
-              <div>
-                <p className="text-text-main dark:text-text-main text-sm font-medium">Level {profile?.level || 1} - {profile?.title || 'Scholar'}</p>
-                <p className="text-muted dark:text-muted text-xs">
-                  {(() => {
-                    const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
-                    return `${xpProgress.required - xpProgress.current} XP to Level ${(profile?.level || 1) + 1}`
-                  })()}
-                </p>
-              </div>
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
+        {/* XP Progress Card */}
+        <div className="lg:col-span-3 p-6 border border-border bg-main">
+          <div className="flex items-center gap-4 mb-4">
+            <span className="material-symbols-outlined text-3xl text-text-main">star</span>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted">Level {profile?.level || 1}</p>
+              <p className="text-2xl font-black text-text-main">{profile?.total_xp?.toLocaleString() || 0} XP</p>
             </div>
-            <p className="text-text-main dark:text-text-main font-bold">
-              {(() => {
-                const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
-                return `${xpProgress.current} / ${xpProgress.required} XP`
-              })()}
-            </p>
           </div>
-          <div className="h-3 w-full rounded-full bg-main-dark dark:bg-sidebar-border overflow-hidden">
+          <div className="w-full bg-surface h-2 mb-2">
             <div
-              className="h-full bg-brand rounded-full shadow-[0_0_10px_rgba(19,127,236,0.5)]"
-              style={{
-                width: `${getLevelProgress(profile?.total_xp || 0, profile?.level || 1).percentage}%`
-              }}
-            ></div>
+              className="bg-text-main h-2 transition-all duration-500"
+              style={{ width: `${xpProgress.percentage}%` }}
+            />
           </div>
-          {profile?.daily_xp && <div className="flex gap-4">
-            <div className="flex items-center gap-1.5 text-xs text-[#34d399]">
-              <span className="material-symbols-outlined w-4 h-4">trending_up</span>
-              <span>+{profile?.daily_xp} XP today</span>
-            </div>
-          </div>}
+          <p className="text-xs text-muted">
+            {xpProgress.current} / {xpProgress.required} XP to Level {(profile?.level || 1) + 1}
+          </p>
         </div>
 
-        {/* Streak Stats */}
-        <div className="flex flex-col justify-between p-6 rounded-xl border border-border dark:border-border bg-main dark:bg-surface">
-          <div className="flex justify-between items-start">
-            <p className="text-muted dark:text-muted text-sm font-medium uppercase tracking-wider">Current Streak</p>
-            <span className="material-symbols-outlined w-6 h-6 text-orange-500">local_fire_department</span>
-          </div>
-          <div>
-            <p className="text-text-main dark:text-text-main text-4xl font-black">{profile?.streak_days || 0} Days</p>
-            <p className="text-[#34d399] text-sm font-medium mt-1">Keep it up!</p>
+        {/* Stats Card */}
+        <div className="lg:col-span-1 p-6 border border-border bg-main">
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs uppercase tracking-widest text-muted">Courses</span>
+              <span className="text-lg font-black text-text-main">{userProgress.filter(p => p.completed).length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs uppercase tracking-widest text-muted">Paths</span>
+              <span className="text-lg font-black text-text-main">{learningPathsList.filter(p => p.completedCourses === p.totalCourses && p.totalCourses > 0).length}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs uppercase tracking-widest text-muted">🔥 Streak</span>
+              <span className="text-lg font-black text-text-main">{profile?.streak_days || 0}d</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Dashboard Modules */}
-      <div className="grid grid-cols-1 gap-10">
-
-        {/* Recommendations Section */}
-        <section>
-          <Recommendations mode="social" />
-        </section>
-
-        {/* My Courses Section */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-text-main dark:text-text-main">
-              <span className="material-symbols-outlined w-6 h-6 text-brand">library_books</span>
-              My Enrolled Courses
-            </h3>
-            <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/quests">View All</Link>
+      {/* Enrolled Courses Section */}
+      <section className="mb-10">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold text-text-main uppercase tracking-wide">Continue Learning</h2>
+          <Link
+            href="/dashboard/quests"
+            className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main transition-colors"
+          >
+            Browse Courses →
+          </Link>
+        </div>
+        {enrolledCourses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {enrolledCourses.map(course => (
+              <CardCourse
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                organizationName={course.instructor || 'Unknown Organization'}
+                progress={course.progress}
+                xp_reward={course.xp_reward}
+                thumbnail_url={course.thumbnail_url}
+                status={course.status}
+                variant="grid"
+              />
+            ))}
           </div>
-
-          {enrolledCourses.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {enrolledCourses.map((course) => (
-                <CardCourse
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  thumbnail_url={course.thumbnail_url}
-                  xp_reward={course.xp_reward}
-                  progress={course.progress}
-                  status={course.status}
-                  instructor={course.instructor}
-                  duration={course.duration}
-                  variant="grid"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 text-center">
-              <p className="text-muted dark:text-muted mb-4">You haven&apos;t enrolled in any courses yet.</p>
-              <Link href="/dashboard/explore?tab=courses" className="inline-block px-4 py-2 bg-brand text-text-main dark:text-text-main rounded-lg font-bold text-sm hover:bg-brand/80 transition-colors">Browse Courses</Link>
-            </div>
-          )}
-        </section>
-
-        {/* My Drafts Section */}
-        {drafts && drafts.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold flex items-center gap-2 text-text-main dark:text-text-main">
-                <span className="material-symbols-outlined w-6 h-6 text-yellow-500">edit_document</span>
-                My Drafts
-              </h3>
-              <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/drafts">View All</Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-              {drafts.slice(0, 3).map((draft) => (
-                <CardCourse
-                  key={draft.id}
-                  id={draft.id}
-                  title={draft.title}
-                  thumbnail_url={draft.thumbnail_url}
-                  xp_reward={draft.xp_reward}
-                  summary={draft.summary || undefined}
-                  status={draft.status}
-                  variant="draft"
-                  href={`/dashboard/drafts/${draft.id}/edit`}
-                />
-              ))}
-            </div>
-          </section>
+        ) : (
+          <div className="border border-dashed border-muted p-8 text-center">
+            <p className="text-muted text-sm">No courses yet. Start exploring!</p>
+            <Link
+              href="/dashboard/quests"
+              className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
+            >
+              Browse Courses →
+            </Link>
+          </div>
         )}
+      </section>
 
-        {/* My Learning Paths Section */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-text-main dark:text-text-main">
-              <span className="material-symbols-outlined w-6 h-6 text-brand">route</span>
-              Learning Paths
-            </h3>
-            <Link className="text-brand text-sm font-medium hover:underline" href="/dashboard/paths">View All</Link>
+      {/* Learning Paths Section */}
+      <section className="mb-10">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold text-text-main uppercase tracking-wide">Learning Paths</h2>
+          <Link
+            href="/dashboard/paths"
+            className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main transition-colors"
+          >
+            Explore Paths →
+          </Link>
+        </div>
+        {learningPathsList.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {learningPathsList.map(path => (
+              <CardPath
+                key={path.id}
+                id={path.id}
+                title={path.title}
+                summary={path.summary}
+                totalCourses={path.totalCourses}
+                completedCourses={path.completedCourses}
+                variant="card"
+              />
+            ))}
           </div>
-          {learningPathsList.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {learningPathsList.map((path) => (
-                <CardPath
-                  key={path.id}
-                  id={path.id}
-                  title={path.title}
-                  completedCourses={path.completedCourses}
-                  totalCourses={path.totalCourses}
-                  nextCourse={path.nextCourse}
-                  color={path.color}
-                  variant="hero"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 text-center">
-              <p className="text-muted dark:text-muted mb-4">You haven&apos;t started any learning paths yet.</p>
-              <Link href="/dashboard/explore?tab=paths" className="inline-block px-4 py-2 bg-brand text-text-main dark:text-text-main rounded-lg font-bold text-sm hover:bg-brand/80 transition-colors">Browse Paths</Link>
-            </div>
-          )}
-        </section>
+        ) : (
+          <div className="border border-dashed border-muted p-8 text-center">
+            <p className="text-muted text-sm">No learning paths saved yet.</p>
+            <Link
+              href="/dashboard/paths"
+              className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
+            >
+              Explore Paths →
+            </Link>
+          </div>
+        )}
+      </section>
 
-        {/* Saved Courses Section */}
+      {/* Saved Courses Section */}
+      {savedCourses.length > 0 && (
         <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold flex items-center gap-2 text-text-main dark:text-text-main">
-              <span className="material-symbols-outlined w-6 h-6 text-brand">bookmark</span>
-              Saved for Later
-            </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-text-main uppercase tracking-wide">Saved Courses</h2>
+            <Link
+              href="/dashboard/library"
+              className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main transition-colors"
+            >
+              View Library →
+            </Link>
           </div>
-          {savedCourses.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {savedCourses.map((course) => (
-                <CardCourse
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  thumbnail_url={course.thumbnail_url}
-                  xp_reward={course.xp_reward}
-                  variant="compact"
-                />
-              ))}
-              <div className="p-3 border border-dashed border-border dark:border-border rounded-lg flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-main/5">
-                <span className="material-symbols-outlined w-6 h-6 text-muted mb-1">add</span>
-                <Link href="/dashboard/explore" className="text-[11px] text-muted dark:text-muted">Explore More</Link>
-              </div>
-            </div>) : (
-            <p className="text-muted dark:text-muted text-sm italic">You haven&apos;t saved any courses yet.</p>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {savedCourses.map(course => (
+              <Link
+                key={course.id}
+                href={`/dashboard/quests/${course.id}`}
+                className="border border-border p-3 hover:border-text-main transition-colors group"
+              >
+                <p className="text-sm font-bold text-text-main truncate group-hover:underline">{course.title}</p>
+                <p className="text-xs text-muted mt-1">{course.xp_reward} XP</p>
+              </Link>
+            ))}
+          </div>
         </section>
-      </div>
+      )}
+
+      {/* Saved Paths Section */}
+      {savedPaths.length > 0 && (
+        <section className="mb-10">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-text-main uppercase tracking-wide">Saved Paths</h2>
+            <Link
+              href="/dashboard/library"
+              className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main transition-colors"
+            >
+              View Library →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {savedPaths.map(path => (
+              <Link
+                key={path.id}
+                href={`/dashboard/paths/${path.id}`}
+                className="border border-border p-3 hover:border-text-main transition-colors group"
+              >
+                <p className="text-sm font-bold text-text-main truncate group-hover:underline">{path.title}</p>
+                <p className="text-xs text-muted mt-1">{path.xp_reward} XP</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recommendations Section */}
+      <Recommendations mode="similar" />
     </>
   )
 }
-

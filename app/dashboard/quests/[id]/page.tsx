@@ -5,6 +5,12 @@ import { CourseActions } from '@/components/features/CourseActions'
 import Link from 'next/link'
 import type { CourseExercise } from '@/lib/types'
 import Recommendations from '@/components/features/Recommendations'
+import {
+  getQuestDetailCached,
+  getUserCourseProgressCached,
+  getUserExerciseSubmissionsCached,
+  isCourseSavedCached
+} from '@/lib/cache'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -13,88 +19,59 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Get user profile for admin check
+  // Fetch user profile for admin check
   const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
     .single()
 
-  // Obtener el curso con toda su información
-  const { data: course, error } = await supabase
-    .from('courses')
-    .select(`
-      *,
-      learning_paths (id, title),
-      organizations (name, website_url),
-      course_exercises (*),
-      user_course_progress!user_course_progress_course_id_fkey (
-        id,
-        completed,
-        completed_at,
-        xp_earned
-      )
-    `)
-    .eq('id', id)
-    .eq('user_course_progress.user_id', user.id)
-    .single()
+  // Use cached query for course data
+  const { data: course, error } = await getQuestDetailCached(supabase, id)
 
   if (error || !course) notFound()
 
-  // Block access if not validated and not owner
   const isOwner = course.created_by === user.id
   const isValidated = course.is_validated === true
 
   if (!isValidated && !isOwner) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <span className="material-symbols-outlined text-6xl text-amber-500 mb-4">pending</span>
-        <h1 className="text-2xl font-bold text-text-main dark:text-text-main mb-2">
-          Contenido no disponible
+        <span className="material-symbols-outlined text-5xl text-muted mb-4">pending</span>
+        <h1 className="text-xl font-bold uppercase tracking-wide text-text-main mb-2">
+          Content not available
         </h1>
-        <p className="text-muted dark:text-muted max-w-md">
-          Este curso está pendiente de validación por un administrador.
-          Vuelve más tarde.
+        <p className="text-muted text-sm max-w-md">
+          This course is pending validation by an administrator.
         </p>
         <Link
           href="/dashboard/quests"
-          className="mt-6 inline-flex items-center gap-2 text-brand hover:underline"
+          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
         >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver a cursos
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Back to courses
         </Link>
       </div>
     )
   }
 
-  const progress = course.user_course_progress?.[0]
+  // Get exercise IDs for submissions query
+  const exerciseIds = course.course_exercises?.map((e: CourseExercise) => e.id) || []
+
+  // Use cached queries for user-specific data
+  const [progress, submissions, isSaved] = await Promise.all([
+    getUserCourseProgressCached(supabase, user.id, id),
+    getUserExerciseSubmissionsCached(supabase, user.id, exerciseIds),
+    isCourseSavedCached(supabase, user.id, id)
+  ])
+
   const isCompleted = progress?.completed || false
-
-  // Obtener submissions del usuario para los ejercicios
-  const { data: submissions } = await supabase
-    .from('exercise_submissions')
-    .select('*, course_exercises (*)')
-    .eq('user_id', user.id)
-    .in('exercise_id', course.course_exercises?.map((e: CourseExercise) => e.id) || [])
-
-  // Verificar si está guardado
-  const { data: savedCourse } = await supabase
-    .from('saved_courses')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('course_id', course.id)
-    .single()
-
-  const isSaved = !!savedCourse
 
   const isYouTube = course.link_url &&
     (course.link_url.includes('youtube.com') || course.link_url.includes('youtu.be'))
 
-  // Calculate completion eligibility
   const exercises = course.course_exercises || []
   const totalExercises = exercises.length
-  // Count submitted exercises (status pending, approved, or rejected - assuming submission exists)
-  // User said "completed or attached". So detailed check:
   const submittedExercisesCount = exercises.filter((e: CourseExercise) =>
     submissions?.some(s => s.exercise_id === e.id)
   ).length
@@ -103,76 +80,75 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      {/* Pending Validation Banner */}
+      {/* Pending Banner */}
       {!isValidated && isOwner && (
-        <div className="mb-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 p-4 flex items-center gap-3">
-          <span className="material-symbols-outlined text-amber-500">pending</span>
+        <div className="mb-6 border border-muted p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined text-muted">pending</span>
           <div>
-            <p className="font-medium text-amber-500">Pendiente de validación</p>
-            <p className="text-sm text-amber-500/70">
-              Este curso solo es visible para ti hasta que un administrador lo apruebe.
+            <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
+            <p className="text-xs text-muted">
+              This course is only visible to you until approved by an admin.
             </p>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-10">
         <Link
           href={`/dashboard/paths/${course.learning_paths.id}`}
-          className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
         >
-          <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver a {course.learning_paths.title}
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Back to {course.learning_paths.title}
         </Link>
 
-        <div className="flex lg:items-end text-center sm:text-left lg:justify-between mt-2 lg:gap-4 flex-wrap-reverse justify-center items-center gap-8">
-
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mt-4 gap-6">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-text-main dark:text-text-main flex items-center gap-3">
-              {course.title}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-4xl font-black italic tracking-tight text-text-main">
+                {course.title.toUpperCase()}
+              </h1>
               {course.status === 'published' && (
-                <span className="inline-flex items-center rounded-md bg-green-50 dark:bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20">
-                  Publicado
+                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-text-main text-text-main">
+                  Published
                 </span>
               )}
               {course.status === 'draft' && (
-                <span className="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20">
-                  Borrador
+                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
+                  Draft
                 </span>
               )}
               {course.status === 'archived' && (
-                <span className="inline-flex items-center rounded-md bg-red-50 dark:bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/10">
-                  Archivado
+                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
+                  Archived
                 </span>
               )}
-            </h1>
+            </div>
             {course.summary && (
-              <p className="mt-2 text-lg text-muted dark:text-muted">
+              <p className="mt-2 text-muted text-sm">
                 {course.summary}
               </p>
             )}
-            <div className="mt-3 flex items-center gap-4 text-sm text-muted dark:text-muted">
+            <div className="mt-3 flex items-center gap-4 text-xs text-muted">
               {course.organizations && (
-                <span>📚 {course.organizations.name}</span>
+                <span>{course.organizations.name}</span>
               )}
-              <span className="text-brand">⚡ {course.xp_reward} XP</span>
+              <span className="font-bold text-text-main">{course.xp_reward} XP</span>
               {course.course_exercises?.length > 0 && (
-                <span>✍️ {course.course_exercises.length} ejercicio(s)</span>
+                <span>{course.course_exercises.length} exercise(s)</span>
               )}
             </div>
           </div>
 
-
-          <div className="flex items-center gap-3">
-
+          <div className="flex items-center gap-2">
             {(isOwner || profile?.is_admin) && (
               <Link
                 href={`/dashboard/quests/${course.id}/edit`}
-                className="rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors flex items-center gap-2"
+                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">edit</span>
-                Editar
+                Edit
               </Link>
             )}
 
@@ -188,61 +164,57 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             />
           </div>
         </div>
-      </header >
+      </header>
 
-      {/* Contenido */}
-      < div className="grid gap-6 lg:grid-cols-3" >
-        {/* Video/Contenido principal */}
-        < div className="lg:col-span-2 space-y-6" >
+      {/* Content */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
           {/* Video player */}
-          {
-            course.link_url && isYouTube && (
-              <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
-                <YouTubePlayer url={course.link_url} />
-              </div>
-            )
-          }
+          {course.link_url && isYouTube && (
+            <div className="border border-border bg-main p-6">
+              <YouTubePlayer url={course.link_url} />
+            </div>
+          )}
 
-          {/* Enlace externo si no es YouTube */}
-          {
-            course.link_url && !isYouTube && (
-              <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
-                <a
-                  href={course.link_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border-2 border-brand/30 bg-brand/10 p-4 hover:bg-brand/20 transition-colors"
-                >
-                  <span className="font-medium text-text-main dark:text-text-main">
-                    🔗 Ir al curso externo
-                  </span>
-                  <span className="material-symbols-outlined h-5 w-5 text-brand">open_in_new</span>
-                </a>
-              </div>
-            )
-          }
+          {/* External link */}
+          {course.link_url && !isYouTube && (
+            <div className="border border-border bg-main p-6">
+              <a
+                href={course.link_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between border border-text-main p-4 hover:bg-inverse hover:text-main-alt transition-all"
+              >
+                <span className="font-bold text-xs uppercase tracking-widest text-text-main">
+                  Go to external course
+                </span>
+                <span className="material-symbols-outlined text-lg text-text-main">open_in_new</span>
+              </a>
+            </div>
+          )}
 
-          {/* Descripción */}
-          <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
-            <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
-              Descripción
+          {/* Description */}
+          <div className="border border-border bg-main p-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+              Description
             </h2>
             {course.description ? (
-              <div className="prose prose-sm prose-invert max-w-none text-muted dark:text-muted">
-                <p className="whitespace-pre-wrap">{course.description}</p>
+              <div className="prose prose-sm max-w-none text-muted">
+                <p className="whitespace-pre-wrap text-sm">{course.description}</p>
               </div>
             ) : (
-              <p className="text-sm text-muted dark:text-muted italic">
-                Sin descripción disponible
+              <p className="text-muted text-xs italic">
+                No description available
               </p>
             )}
           </div>
 
-          {/* Ejercicios */}
+          {/* Exercises */}
           {course.course_exercises && course.course_exercises.length > 0 && (
-            <div id="exercises" className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
-              <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
-                Ejercicios prácticos
+            <div id="exercises" className="border border-border bg-main p-6">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+                Exercises
               </h2>
               <div className="space-y-4">
                 {course.course_exercises.map((exercise: CourseExercise) => {
@@ -251,27 +223,27 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   return (
                     <div
                       key={exercise.id}
-                      className={`rounded-lg border-2 p-4 ${submission?.status === 'approved'
-                        ? 'border-green-500/50 bg-green-500/10'
+                      className={`border p-4 ${submission?.status === 'approved'
+                        ? 'border-text-main bg-inverse/5'
                         : submission
-                          ? 'border-yellow-500/50 bg-yellow-500/10'
-                          : 'border-border dark:border-border bg-sidebar dark:bg-sidebar'
+                          ? 'border-muted bg-surface'
+                          : 'border-border bg-main'
                         }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-medium text-text-main dark:text-text-main">
+                          <h3 className="font-bold text-sm uppercase tracking-wide text-text-main">
                             {exercise.title}
                           </h3>
                           {exercise.description && (
-                            <p className="mt-1 text-sm text-muted dark:text-muted">
+                            <p className="mt-1 text-xs text-muted">
                               {exercise.description}
                             </p>
                           )}
                           {exercise.requirements && (
-                            <div className="mt-2 text-sm">
-                              <span className="font-medium text-muted dark:text-muted">Requisitos:</span>
-                              <p className="text-muted dark:text-muted/70 whitespace-pre-wrap">
+                            <div className="mt-2 text-xs">
+                              <span className="font-bold uppercase tracking-widest text-muted">Requirements:</span>
+                              <p className="text-muted mt-1 whitespace-pre-wrap">
                                 {exercise.requirements}
                               </p>
                             </div>
@@ -281,16 +253,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                         {submission ? (
                           <div className="ml-4">
                             {submission.status === 'approved' ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-400">
-                                ✓ Aprobado
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-text-main text-text-main">
+                                ✓ Approved
                               </span>
                             ) : submission.status === 'rejected' ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-3 py-1 text-xs font-medium text-red-400">
-                                ✗ Rechazado
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
+                                ✗ Rejected
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-500/20 px-3 py-1 text-xs font-medium text-yellow-400">
-                                ⏱ Pendiente
+                              <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
+                                ⏱ Pending
                               </span>
                             )}
                           </div>
@@ -300,9 +272,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       {!submission && (
                         <Link
                           href={`/dashboard/exercises/${exercise.id}/submit`}
-                          className="mt-4 inline-block text-sm font-medium text-brand hover:text-brand/80"
+                          className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
                         >
-                          Entregar ejercicio →
+                          Submit exercise →
                         </Link>
                       )}
                     </div>
@@ -310,67 +282,65 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 })}
               </div>
             </div>
-          )
-          }
-        </div >
+          )}
+        </div>
 
         {/* Sidebar */}
-        < div className="lg:col-span-1 space-y-6" >
-          {/* Estado del curso */}
-          < div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border" >
-            <h3 className="text-sm font-semibold text-text-main dark:text-text-main mb-4">
-              Estado del curso
+        <div className="lg:col-span-1 space-y-6">
+          {/* Course Status */}
+          <div className="border border-border bg-main p-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+              Course Status
             </h3>
 
-            {
-              isCompleted ? (
-                <div className="space-y-3">
-                  <div className="rounded-lg bg-green-500/20 p-4 text-center border border-green-500/30">
-                    <span className="mx-auto material-symbols-outlined h-12 w-12 text-green-400">check_circle</span>
-                    <p className="mt-2 font-medium text-green-400">
-                      ¡Completado!
+            {isCompleted ? (
+              <div className="space-y-3">
+                <div className="border border-text-main p-4 text-center">
+                  <span className="material-symbols-outlined text-3xl text-text-main block mb-2">check_circle</span>
+                  <p className="font-bold uppercase tracking-wide text-xs text-text-main">
+                    Completed!
+                  </p>
+                  <p className="text-xs text-muted mt-1">
+                    Earned {progress?.xp_earned} XP
+                  </p>
+                </div>
+                {progress?.completed_at && (
+                  <p className="text-[10px] text-center text-muted uppercase tracking-widest">
+                    Completed {new Date(progress.completed_at).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-muted">
+                  Complete this course to earn <span className="font-bold text-text-main">{course.xp_reward} XP</span>
+                </p>
+                {!canComplete && (
+                  <div className="border border-muted p-4">
+                    <p className="text-xs text-muted">
+                      Submit all exercises to complete this course.
                     </p>
-                    <p className="text-sm text-green-400/70">
-                      Ganaste {progress.xp_earned} XP
+                    <p className="mt-2 text-[10px] text-muted">
+                      Your submission will be reviewed by an administrator.
                     </p>
                   </div>
-                  {progress.completed_at && (
-                    <p className="text-xs text-center text-muted dark:text-muted">
-                      Completado el {new Date(progress.completed_at).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-muted dark:text-muted">
-                    Completa este curso para ganar <span className="font-semibold text-brand">{course.xp_reward} XP</span>
-                  </p>
-                  {!canComplete && <div className="rounded-lg bg-sidebar-border/10 p-4 border border-sidebar-border/20">
-                    <p className="text-sm text-muted dark:text-muted">
-                      Para completar este curso y ganar <span className="font-semibold text-brand">{course.xp_reward} XP</span>,
-                      debes aprobar el ejercicio final.
-                    </p>
-                    <p className="mt-2 text-xs text-muted dark:text-muted/70">
-                      Tu entrega será revisada por un administrador.
-                    </p>
-                  </div>}
-                </div>
-              )
-            }
-          </div >
+                )}
+              </div>
+            )}
+          </div>
 
-          {/* Información adicional */}
-          < div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border" >
-            <h3 className="text-sm font-semibold text-text-main dark:text-text-main mb-4">
-              Información
+          {/* Info */}
+          <div className="border border-border bg-main p-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+              Information
             </h3>
-            <dl className="space-y-3 text-sm">
+            <dl className="space-y-3 text-xs">
               <div>
-                <dt className="text-muted dark:text-muted">Learning Path</dt>
-                <dd className="mt-1 font-medium text-text-main dark:text-text-main">
+                <dt className="text-muted uppercase tracking-widest text-[10px]">Learning Path</dt>
+                <dd className="mt-1 font-bold text-text-main">
                   <Link
                     href={`/dashboard/paths/${course.learning_paths.id}`}
-                    className="hover:text-brand transition-colors"
+                    className="hover:underline"
                   >
                     {course.learning_paths.title}
                   </Link>
@@ -378,14 +348,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               </div>
               {course.organizations && (
                 <div>
-                  <dt className="text-muted dark:text-muted">Organización</dt>
-                  <dd className="mt-1 font-medium text-text-main dark:text-text-main">
+                  <dt className="text-muted uppercase tracking-widest text-[10px]">Organization</dt>
+                  <dd className="mt-1 font-bold text-text-main">
                     {course.organizations.website_url ? (
                       <a
                         href={course.organizations.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-brand transition-colors"
+                        className="hover:underline"
                       >
                         {course.organizations.name}
                       </a>
@@ -396,15 +366,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 </div>
               )}
               <div>
-                <dt className="text-muted dark:text-muted">Recompensa XP</dt>
-                <dd className="mt-1 font-medium text-brand">
+                <dt className="text-muted uppercase tracking-widest text-[10px]">XP Reward</dt>
+                <dd className="mt-1 font-bold text-text-main">
                   {course.xp_reward} XP
                 </dd>
               </div>
             </dl>
-          </div >
-        </div >
-      </div >
+          </div>
+        </div>
+      </div>
       <div className="mt-10">
         <Recommendations mode="similar" contextId={course.id} contextType="course" />
       </div>

@@ -3,21 +3,26 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { FormLayout, FormField, FormActions, FormError, FormDivider } from '@/components/ui/Form'
 import SimilarItemsList from '@/components/features/SimilarItemsList'
 
 export default function NewPathPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')
+  const [summary, setSummary] = useState('')
+  const [description, setDescription] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      setError('Title is required')
+      return
+    }
+
     setLoading(true)
     setError(null)
-
-    const formData = new FormData(e.currentTarget)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -28,9 +33,9 @@ export default function NewPathPage() {
     const { data, error: insertError } = await supabase
       .from('learning_paths')
       .insert({
-        title: title,
-        summary: formData.get('summary') as string,
-        description: formData.get('description') as string,
+        title,
+        summary,
+        description,
         created_by: user.id,
       })
       .select()
@@ -46,128 +51,65 @@ export default function NewPathPage() {
   }
 
   return (
-    <>
-      {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => router.back()}
-            className="text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Create Learning Path</h2>
-        </div>
-        <p className="text-muted dark:text-muted text-base">
-          Define a structured learning journey for others to follow
-        </p>
-      </header>
+    <FormLayout
+      title="New Path"
+      subtitle="Define a structured learning journey for others to follow"
+    >
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+        <FormError message={error} />
 
-      {/* Form */}
-      <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8 max-w-3xl">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Error Message */}
-          {error && (
-            <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
-              <p className="text-red-500 text-sm font-medium flex items-center gap-2">
-                <span className="material-symbols-outlined text-base">error</span>
-                {error}
+        <FormField
+          label="Title"
+          name="title"
+          value={title}
+          onChange={setTitle}
+          placeholder="e.g., Full-Stack Web Development"
+          required
+        />
+
+        <SimilarItemsList type="learning_paths" query={title} />
+
+        <FormField
+          label="Summary"
+          name="summary"
+          value={summary}
+          onChange={setSummary}
+          placeholder="Brief description (1-2 lines)"
+          hint="This will appear in search results and path listings"
+        />
+
+        <FormField
+          label="Description"
+          name="description"
+          type="textarea"
+          value={description}
+          onChange={setDescription}
+          placeholder="Describe what learners will achieve, who it's for, and what makes this path unique..."
+          rows={6}
+        />
+
+        <FormDivider />
+
+        {/* Info Box */}
+        <div className="border border-border p-4">
+          <div className="flex gap-3">
+            <span className="material-symbols-outlined text-text-main">info</span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-text-main mb-1">Next Steps</p>
+              <p className="text-sm text-muted">
+                After creating your path, you&apos;ll be able to add courses and organize the learning sequence.
               </p>
             </div>
-          )}
-
-          {/* Title */}
-          <div className="space-y-2">
-            <label htmlFor="title" className="block text-text-main dark:text-text-main text-sm font-bold">
-              Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-              placeholder="e.g., Full-Stack Web Development"
-            />
-            <SimilarItemsList
-              type="learning_paths"
-              query={title}
-            />
           </div>
+        </div>
 
-          {/* Summary */}
-          <div className="space-y-2">
-            <label htmlFor="summary" className="block text-text-main dark:text-text-main text-sm font-bold">
-              Summary
-            </label>
-            <input
-              type="text"
-              id="summary"
-              name="summary"
-              className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-              placeholder="Brief description (1-2 lines)"
-            />
-            <p className="text-muted dark:text-muted text-xs">This will appear in search results and path listings</p>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <label htmlFor="description" className="block text-text-main dark:text-text-main text-sm font-bold">
-              Full Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              rows={6}
-              className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all resize-none"
-              placeholder="Describe what learners will achieve, who it's for, and what makes this path unique..."
-            />
-          </div>
-
-          {/* Info Box */}
-          <div className="bg-brand/10 border border-brand/30 rounded-lg p-4">
-            <div className="flex gap-3">
-              <span className="material-symbols-outlined text-brand mt-0.5">info</span>
-              <div>
-                <p className="text-brand text-sm font-bold mb-1">Next Steps</p>
-                <p className="text-text-main dark:text-text-main text-sm">
-                  After creating your path, you&apos;ll be able to add courses and organize the learning sequence.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex-1 h-12 rounded-lg border border-border dark:border-border text-text-main dark:text-text-main font-medium hover:bg-surface dark:hover:bg-surface-dark transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 h-12 rounded-lg bg-brand text-text-main dark:text-text-main font-bold hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-xl">add</span>
-                  Create Path
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </>
+        <FormActions
+          onPublish={handleSubmit}
+          publishing={loading}
+          publishLabel="Create Path"
+          canPublish={!!title.trim()}
+        />
+      </form>
+    </FormLayout>
   )
 }

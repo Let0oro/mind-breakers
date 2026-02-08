@@ -3,6 +3,13 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import type { PathListItem } from '@/lib/types'
 import { CardPath } from '@/components/ui/CardPath'
+import {
+  getUserSavedPathsCached,
+  getUserProgressCached,
+  getUserCreatedPathIdsCached,
+  getPathIdsFromCourseProgressCached,
+  getPathsByIdsCached
+} from '@/lib/cache'
 
 export const metadata = {
   title: 'Learning Paths - MindBreaker',
@@ -15,97 +22,59 @@ export default async function PathsListPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch user-related paths
-  // 1. Paths created by user
-  const { data: createdPaths } = await supabase
-    .from('learning_paths')
-    .select('id')
-    .eq('created_by', user.id)
-
-  // 2. Paths with progress (via courses)
-  const { data: progressPaths } = await supabase
-    .from('user_course_progress')
-    .select(`
-            courses (
-                path_id
-            )
-        `)
-    .eq('user_id', user.id)
-
-  // Extract path IDs
-  const progressPathIds = progressPaths?.map((p: { courses: { path_id: string }[] | null }) => p.courses?.[0]?.path_id).filter(Boolean) || []
-
-  // 3. Saved paths
-  const { data: savedPaths } = await supabase
-    .from('saved_paths')
-    .select('path_id')
-    .eq('user_id', user.id)
-
-  // Combine all IDs
-  const pathIds = new Set([
-    ...(createdPaths?.map(p => p.id) || []),
-    ...progressPathIds,
-    ...(savedPaths?.map(p => p.path_id) || [])
+  // Use cached queries for all user data
+  const [savedPathIds, userProgress, createdPathIds] = await Promise.all([
+    getUserSavedPathsCached(supabase, user.id),
+    getUserProgressCached(supabase, user.id),
+    getUserCreatedPathIdsCached(supabase, user.id)
   ])
 
-  let paths: PathListItem[] = []
+  const completedCourseIds = new Set(
+    userProgress.filter(p => p.completed).map(p => p.course_id)
+  )
+  const savedSet = new Set(savedPathIds)
 
-  if (pathIds.size > 0) {
-    const { data } = await supabase
-      .from('learning_paths')
-      .select(`
-                id,
-                title,
-                summary,
-                description,
-                created_at,
-                is_validated,
-                created_by,
-                organizations (id, name),
-                courses (id),
-                saved_paths!saved_paths_path_id_fkey (user_id)
-            `)
-      .in('id', Array.from(pathIds))
-      .order('created_at', { ascending: false })
+  // Get path IDs from user's course progress (cached)
+  const progressCourseIds = userProgress.map(p => p.course_id).filter(Boolean)
+  const progressPathIds = await getPathIdsFromCourseProgressCached(supabase, user.id, progressCourseIds)
 
-    paths = data || []
-  }
+  // Combine all path IDs
+  const pathIds = [...new Set([
+    ...createdPathIds,
+    ...progressPathIds,
+    ...savedPathIds
+  ])]
 
-  // Fetch user progress for all paths (to calculate completion)
-  const { data: userProgress } = await supabase
-    .from('user_course_progress')
-    .select('course_id, completed')
-    .eq('user_id', user.id)
-    .eq('completed', true)
-
-  const completedCourseIds = new Set(userProgress?.map(p => p.course_id) || [])
-  const savedSet = new Set(savedPaths?.map(s => s.path_id) || [])
+  // Fetch paths by IDs (cached)
+  const paths = await getPathsByIdsCached(supabase, pathIds)
 
   return (
     <>
-      {/* Header Section */}
-      <header className="flex flex-wrap justify-between items-end gap-6 mb-8">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">My Learning Paths</h2>
-          <p className="text-muted dark:text-muted text-base">
-            {paths.length} paths in your journey
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link
-            href="/dashboard/explore?tab=paths"
-            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-border dark:border-border text-text-main dark:text-text-main font-medium transition-all hover:bg-surface dark:hover:bg-surface-dark"
-          >
-            <span className="material-symbols-outlined w-5 h-5">search</span>
-            <span>Explore Paths</span>
-          </Link>
-          <Link
-            href="/dashboard/paths/new"
-            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-brand text-text-main dark:text-text-main font-bold transition-all hover:bg-brand/80"
-          >
-            <span className="material-symbols-outlined w-5 h-5">add_circle</span>
-            <span>Create Path</span>
-          </Link>
+      {/* Header */}
+      <header className="mb-10">
+        <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-text-main text-4xl font-black italic tracking-tight">PATHS</h1>
+            <p className="text-muted text-sm">
+              {paths.length} paths in your journey
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              href="/dashboard/explore?tab=paths"
+              className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">search</span>
+              <span>Explore</span>
+            </Link>
+            <Link
+              href="/dashboard/paths/new"
+              className="flex items-center gap-2 px-4 py-2 border border-text-main bg-inverse text-main-alt text-xs font-bold uppercase tracking-widest hover:bg-text-main transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              <span>Create</span>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -121,7 +90,6 @@ export default async function PathsListPage() {
             const isSaved = savedSet.has(path.id)
             const isOwner = path.created_by === user.id
 
-            // Supabase returns organizations as an array, get first one
             const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
 
             return (
@@ -142,15 +110,13 @@ export default async function PathsListPage() {
             )
           })
         ) : (
-          <div className="col-span-full bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-12 text-center">
-            <span className="material-symbols-outlined text-6xl text-muted mb-4 block mx-auto">
-              route
-            </span>
-            <p className="text-muted dark:text-muted text-lg mb-2">No active learning paths</p>
-            <p className="text-muted dark:text-muted text-sm mb-4">Start your journey by finding a learning path</p>
+          <div className="col-span-full border border-border p-12 text-center">
+            <span className="material-symbols-outlined text-5xl text-muted mb-4 block">route</span>
+            <p className="text-muted text-sm mb-1">No learning paths</p>
+            <p className="text-muted text-xs mb-6">Start your journey by finding a learning path</p>
             <Link
               href="/dashboard/explore?tab=paths"
-              className="inline-block bg-brand hover:bg-brand/80 text-text-main dark:text-text-main px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+              className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
             >
               Explore Paths
             </Link>

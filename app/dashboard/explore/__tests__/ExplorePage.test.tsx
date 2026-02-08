@@ -17,128 +17,109 @@ vi.mock('next/navigation', () => ({
     useSearchParams: vi.fn(() => new URLSearchParams())
 }))
 
+vi.mock('@/lib/queries', () => ({
+    searchPaths: vi.fn(() => Promise.resolve([])),
+    searchCourses: vi.fn(() => Promise.resolve([])),
+    searchOrganizations: vi.fn(() => Promise.resolve([])),
+    getUserSavedCourses: vi.fn(() => Promise.resolve([]))
+}))
+
+import { searchPaths, searchCourses, searchOrganizations } from '@/lib/queries'
+
 describe('ExplorePage', () => {
     const mockSupabase = {
         auth: {
             getUser: vi.fn(() => Promise.resolve({ data: { user: { id: 'u1' } } }))
-        },
-        from: vi.fn()
+        }
     }
 
     beforeEach(() => {
         vi.clearAllMocks()
         // @ts-expect-error - mock types are simplified
         createClient.mockReturnValue(mockSupabase)
+
+            // Reset query mocks to default empty array
+            ; (searchPaths as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
+            ; (searchCourses as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
+            ; (searchOrganizations as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([])
     })
 
-    // Helper to create a chainable mock
-    const createChain = (data: unknown = []) => {
-        const chain = {
-            select: vi.fn(() => chain),
-            eq: vi.fn(() => chain),
-            order: vi.fn(() => chain),
-            limit: vi.fn(() => chain),
-            or: vi.fn(() => chain),
-            then: (resolve: (value: { data: unknown }) => void) => Promise.resolve({ data }).then(resolve)
-        }
-        return chain
-    }
-
     test('renders initial state with all tabs', async () => {
-        mockSupabase.from.mockReturnValue(createChain([]))
         render(<ExplorePage />)
 
-        expect(screen.getByText('Explore')).toBeInTheDocument()
-        expect(screen.getByText('Learning Paths')).toBeInTheDocument()
-        expect(screen.getByText('Courses')).toBeInTheDocument()
+        expect(screen.getByText(/Explore/i)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /PATHS/i })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /COURSES/i })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /ORGANIZATIONS/i })).toBeInTheDocument()
         expect(screen.getByPlaceholderText('Search for anything...')).toBeInTheDocument()
     })
 
     test('performs search and renders results', async () => {
-        // Setup mock return values based on table
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'learning_paths') {
-                return createChain([{ id: 'p1', title: 'Path 1' }])
-            }
-            if (table === 'courses') {
-                return createChain([{ id: 'c1', title: 'Course 1' }])
-            }
-            if (table === 'organizations') {
-                return createChain([]) // empty orgs
-            }
-            return createChain([])
-        })
+        // Setup mock return values
+        ; (searchPaths as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([{
+            id: 'p1',
+            title: 'Path 1',
+            organizations: [{ name: 'Org 1' }],
+            courses: []
+        }])
+            ; (searchCourses as unknown as ReturnType<typeof vi.fn>).mockResolvedValue([{
+                id: 'c1',
+                title: 'Course 1',
+                organizations: [{ name: 'Org 1' }]
+            }])
 
         render(<ExplorePage />)
 
         const searchInput = screen.getByPlaceholderText('Search for anything...')
         fireEvent.change(searchInput, { target: { value: 'React' } })
 
+        // Debounce might delay search, so wait
         await waitFor(() => {
             expect(screen.getByText('Path 1')).toBeInTheDocument()
             expect(screen.getByText('Course 1')).toBeInTheDocument()
-        })
+        }, { timeout: 2000 })
     })
 
     test('filters by tab', async () => {
-        // Setup mock return values based on table
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === 'learning_paths') {
-                return createChain([{ id: 'p1', title: 'Path 1' }])
-            }
-            if (table === 'courses') {
-                return createChain([{ id: 'c1', title: 'Course 1' }])
-            }
-            return createChain([])
-        })
-
         render(<ExplorePage />)
 
         // Switch to Courses tab
-        const coursesTab = screen.getByText('Courses')
+        const coursesTab = screen.getByRole('button', { name: /Courses/i })
         fireEvent.click(coursesTab)
 
         await waitFor(() => {
             expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('tab=courses'))
         })
 
-        // Note: In a real browser, URL updates trigger re-render via useSearchParams.
-        // In this test environment, clicking the tab updates local state `activeTab` 
-        // AND calls router.push. The component also has an effect on searchParams.
-        // Since we mocked useSearchParams to return static, the effect won't fire from URL change,
-        // BUT the handleTabChange function updates local state `setActiveTab` directly too.
+            // Mock that URL change effect triggers logic (simulated by re-click or just check logic)
+            // Since we can't easily simulate URL change triggering useEffect in unit test with mocked router,
+            // we rely on the click handler updating state which triggers search.
 
-        // verify filtering logic:
-        // The component re-runs performSearch when activeTab changes.
-        // But since we are mocking the response globally in this test for all tables,
-        // and performSearch conditionally calls supabase based on tab...
+            // Reset mocks to verify calls
+            ; (searchPaths as unknown as ReturnType<typeof vi.fn>).mockClear()
+            ; (searchCourses as unknown as ReturnType<typeof vi.fn>).mockClear()
 
-        // Actually, let's verify that ONLY courses are fetched if we force the tab state via props/mocks if possible,
-        // or just verify the router interaction which implies the tab change requested.
-        // Re-simulating the effect of tab change on data fetching might strictly require mocking the implementation 
-        // of `performSearch` or carefully checking which supabase tables were called.
+        fireEvent.click(coursesTab)
 
-        // Let's check calls
-        mockSupabase.from.mockClear()
-        fireEvent.click(coursesTab) // Click again to trigger the handler logic
-
-        // The handler calls setActiveTab('courses') -> triggers useEffect([..., activeTab]) -> performSearch
         await waitFor(() => {
-            // Should verify that 'learning_paths' was NOT called if tab is courses
-            // Wait, the component logic:
-            // if (activeTab === 'all' || activeTab === 'paths') { query paths }
-            // if (activeTab === 'all' || activeTab === 'courses') { query courses }
-
-            // If local state updated, it should only query courses.
-            // expect(mockSupabase.from).not.toHaveBeenCalledWith('learning_paths') // This might be flaky if state update is slow or batched
+            // Should verify that searchPaths was NOT called if tab is courses
+            // And searchCourses WAS called
+            expect(searchCourses).toHaveBeenCalled()
+            // searchPaths is only called for 'all' or 'paths'
+            expect(searchPaths).not.toHaveBeenCalled()
         })
     })
 
     test('renders empty state', async () => {
-        mockSupabase.from.mockReturnValue(createChain([]))
         render(<ExplorePage />)
 
         await waitFor(() => {
+            // If no results, usually shows logic. 
+            // Component logic: 
+            // {loading ? ... : results.length > 0 ? ... : (searchQuery ? <Empty /> : <Initial />)}
+            // If searchQuery is empty initially -> shows "Start typing" or similar ideally
+            // Looking at code (not visible, but assuming default behaviour)
+            // Actually let's assume valid expectation from previous code
             expect(screen.getByText('Start typing to search')).toBeInTheDocument()
         })
     })

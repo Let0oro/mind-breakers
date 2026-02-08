@@ -19,23 +19,6 @@ export default function SharedHeader() {
                         <Image src="/icon.png" alt="MindBreaker" width={38} height={38} />
                         <h2 className="text-foreground text-xl sm:text-2xl font-bold tracking-tight">MindBreaker</h2>
                     </Link>
-
-                    {!isAuthPage && (
-                        <nav className="hidden md:flex items-center gap-8">
-                            <Link
-                                className="text-muted hover:text-text-main text-sm font-medium transition-colors"
-                                href="/#explore"
-                            >
-                                Explore
-                            </Link>
-                            <Link
-                                className="text-muted hover:text-text-main text-sm font-medium transition-colors"
-                                href="/#quests"
-                            >
-                                Quests
-                            </Link>
-                        </nav>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4">

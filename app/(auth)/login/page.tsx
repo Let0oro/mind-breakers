@@ -106,7 +106,7 @@ export default function LoginPage() {
 
           {/* Email Field */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-bold text-text-main px-1">Email Address</label>
+            <label htmlFor="email" className="text-sm font-bold text-text-main px-1">Email Address</label>
             <input
               id="email"
               type="email"

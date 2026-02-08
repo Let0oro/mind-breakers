@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { EditCourseForm } from '@/app/dashboard/quests/[id]/edit/EditCourseForm'
+import { EditCourseForm } from '@/dashboard/quests/[id]/edit/EditCourseForm'
 
 export default async function EditDraftPage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient()

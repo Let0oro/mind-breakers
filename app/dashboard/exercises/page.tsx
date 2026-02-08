@@ -22,14 +22,12 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
     const resolvedSearchParams = await searchParams
     const filter = resolvedSearchParams?.filter || 'all'
 
-    // Fetch exercises relevant to the user:
-    // 1. From courses they are enrolled in (progress)
+    // Fetch exercises relevant to the user
     const { data: enrolledCourses } = await supabase
         .from('user_course_progress')
         .select('course_id')
         .eq('user_id', user.id)
 
-    // 2. From courses they created
     const { data: createdCourses } = await supabase
         .from('courses')
         .select('id')
@@ -40,20 +38,18 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         ...(createdCourses?.map(c => c.id) || [])
     ])
 
-    // Fetch exercises for these courses
     const exercisesQuery = supabase
         .from('course_exercises')
         .select(`
-      id,
-      title,
-      description,
-      courses (id, title)
-    `)
+            id,
+            title,
+            description,
+            courses (id, title)
+        `)
         .in('course_id', Array.from(relevantCourseIds))
 
     const { data: exercises } = await exercisesQuery
 
-    // Fetch user submissions for these exercises
     const { data: submissions } = await supabase
         .from('exercise_submissions')
         .select('exercise_id, status, created_at')
@@ -61,7 +57,6 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
 
     const submissionMap = new Map(submissions?.map(s => [s.exercise_id, s]) || [])
 
-    // Process data for display
     const exerciseList = exercises?.map(ex => {
         const submission = submissionMap.get(ex.id)
         let status: 'completed' | 'in_progress' | 'pending_review' | 'not_started' = 'not_started'
@@ -69,7 +64,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         if (submission) {
             if (submission.status === 'approved') status = 'completed'
             else if (submission.status === 'pending') status = 'pending_review'
-            else status = 'in_progress' // rejected or drafts if we had them
+            else status = 'in_progress'
         }
 
         return {
@@ -77,9 +72,6 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
             title: ex.title,
             description: ex.description,
             status,
-            // Assuming generic XP reward for exercises since it's not in the exercise table directly (based on explored schema)
-            // or we could fetch it if it exists. Re-checking types... schema showed course_exercises doesn't have xp_reward but course does.
-            // Let's use a default or update if schema has it.
             xp_reward: 50,
             course_title: Array.isArray(ex.courses) ? ex.courses[0]?.title : (ex.courses as { title: string })?.title,
             course_id: Array.isArray(ex.courses) ? ex.courses[0]?.id : (ex.courses as { id: string })?.id,
@@ -87,7 +79,6 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         }
     }) || []
 
-    // Apply filter
     const filteredExercises = exerciseList.filter(ex => {
         if (filter === 'all') return true
         if (filter === 'completed') return ex.status === 'completed'
@@ -96,7 +87,6 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         return true
     })
 
-    // Sort: Pending review first, then Not Started (todo), then Completed
     filteredExercises.sort((a, b) => {
         const score = (status: string) => {
             if (status === 'pending_review') return 0
@@ -107,35 +97,39 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         return score(a.status) - score(b.status)
     })
 
+    const tabs = [
+        { key: 'all', label: 'All' },
+        { key: 'in_progress', label: 'To Do' },
+        { key: 'pending_review', label: 'Under Review' },
+        { key: 'completed', label: 'Completed' },
+    ]
+
     return (
         <>
             <header className="mb-8">
-                <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight mb-2">My Exercises</h2>
-                <p className="text-muted dark:text-muted text-base mb-6">
+                <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main mb-1">
+                    Exercises
+                </h1>
+                <p className="text-muted text-sm">
                     Practice and apply what you&apos;ve learned
                 </p>
-
-                {/* Filter Tabs */}
-                <div className="flex gap-2 border-b border-border dark:border-border">
-                    {[
-                        { key: 'all', label: 'All Exercises' },
-                        { key: 'in_progress', label: 'To Do' },
-                        { key: 'pending_review', label: 'Under Review' },
-                        { key: 'completed', label: 'Completed' },
-                    ].map((tab) => (
-                        <a
-                            key={tab.key}
-                            href={`/dashboard/exercises?filter=${tab.key}`}
-                            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${filter === tab.key
-                                ? 'border-brand text-brand'
-                                : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:text-text-main'
-                                }`}
-                        >
-                            {tab.label}
-                        </a>
-                    ))}
-                </div>
             </header>
+
+            {/* Filter Tabs */}
+            <div className="flex gap-6 border-b border-border mb-8">
+                {tabs.map((tab) => (
+                    <a
+                        key={tab.key}
+                        href={`/dashboard/exercises?filter=${tab.key}`}
+                        className={`pb-3 text-xs font-bold uppercase tracking-widest transition-colors border-b-2 -mb-px ${filter === tab.key
+                            ? 'border-text-main text-text-main'
+                            : 'border-transparent text-muted hover:text-text-main'
+                            }`}
+                    >
+                        {tab.label}
+                    </a>
+                ))}
+            </div>
 
             <ExerciseList exercises={filteredExercises} />
         </>

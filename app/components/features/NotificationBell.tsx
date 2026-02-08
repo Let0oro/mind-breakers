@@ -110,7 +110,7 @@ export function NotificationBell({ userId }: { userId: string }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-full p-2 text-text-main hover:bg-surface dark:hover:bg-gray-800"
+        className="cursor-pointer scale-90 relative rounded-xs p-2 text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
       >
         <span className="material-symbols-outlined">notifications</span>
         {unreadCount > 0 && (

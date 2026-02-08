@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FuzzyMatchSelect } from '@/components/ui/FuzzyMatchSelect'
 
-
-
 import { EditRequest } from '@/lib/types'
 
 interface PendingCourse {
@@ -15,7 +13,7 @@ interface PendingCourse {
     is_validated: boolean
     created_at: string
     organizations?: { id: string; name: string } | { id: string; name: string }[]
-    draft_data?: Record<string, unknown> // Fixed any
+    draft_data?: Record<string, unknown>
 }
 
 interface PendingOrganization {
@@ -35,7 +33,6 @@ interface PendingPath {
     created_at: string
     organizations?: { id: string; name: string } | { id: string; name: string }[]
 }
-
 
 interface ExistingItem {
     id: string
@@ -70,18 +67,17 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const [loading, setLoading] = useState<string | null>(null)
     const router = useRouter()
 
-    // Helper to get org name from object or array
     const getOrgName = (org: { id: string; name: string } | { id: string; name: string }[] | undefined): string | undefined => {
         if (!org) return undefined
         if (Array.isArray(org)) return org[0]?.name
         return org.name
     }
 
-    const tabs: { key: TabType; label: string; count: number }[] = [
-        { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length },
-        { key: 'courses', label: 'Courses', count: pendingItems.courses.length },
-        { key: 'paths', label: 'Learning Paths', count: pendingItems.paths.length },
-        { key: 'edits', label: 'Edits', count: pendingItems.edits.length },
+    const tabs: { key: TabType; label: string; count: number; icon: string }[] = [
+        { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length, icon: 'corporate_fare' },
+        { key: 'courses', label: 'Courses', count: pendingItems.courses.length, icon: 'school' },
+        { key: 'paths', label: 'Learning Paths', count: pendingItems.paths.length, icon: 'route' },
+        { key: 'edits', label: 'Edits', count: pendingItems.edits.length, icon: 'edit_note' },
     ]
 
     const [rejectionModal, setRejectionModal] = useState<{
@@ -117,7 +113,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     }
 
     const handleDelete = async (type: TabType | 'edits', id: string) => {
-        if (!confirm('¿Estás seguro de rechazar/eliminar este item?')) {
+        if (!confirm('Are you sure you want to reject/delete this item?')) {
             return
         }
 
@@ -142,7 +138,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const confirmRejection = async () => {
         if (!rejectionModal) return
         if (!rejectionReason.trim()) {
-            alert('Por favor indica una razón para el rechazo.')
+            alert('Please provide a reason for rejection.')
             return
         }
 
@@ -153,17 +149,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                 ? `/api/admin/validations/edits/${id}`
                 : `/api/admin/validations/${type}/${id}`
 
-            // Use DELETE method but send reason in body?
-            // DELETE usually doesn't have body.
-            // Depending on API implementation.
-            // If we want to "Archive" or "Reject", maybe PATCH with action='reject'?
-            // The previous code used DELETE.
-            // I will Assume the backend supports DELETE or I should change to PATCH.
-            // The prompt says "archiving instead of deleting".
-            // So I should probably use PATCH with action='reject'.
-
             const response = await fetch(endpoint, {
-                method: 'PATCH', // Changed from DELETE to PATCH for soft rejection
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'reject',
@@ -175,8 +162,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                 setRejectionModal(null)
                 router.refresh()
             } else {
-                // Fallback to DELETE if PATCH not supported? No, stick to new logic.
-                alert('Error al rechazar.')
+                alert('Error rejecting item.')
             }
         } finally {
             setLoading(null)
@@ -185,8 +171,6 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const handleSaveEdit = async () => {
         if (!editingItem) return
-
-        // This is for editing NEW items (not edit requests)
         if (editingItem.type === 'edits') return
 
         setLoading(editingItem.id)
@@ -212,9 +196,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     }
 
     const handleMerge = async (type: TabType, sourceId: string, targetId: string) => {
-        if (type === 'edits') return; // Cannot merge edits
+        if (type === 'edits') return;
 
-        if (!confirm('¿Estás seguro de fusionar este item con el existente? El item pendiente será eliminado.')) {
+        if (!confirm('Are you sure you want to merge this item with the existing one? The pending item will be deleted.')) {
             return
         }
 
@@ -237,39 +221,39 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderOrganizations = () => (
         <div className="space-y-4">
             {pendingItems.organizations.length === 0 ? (
-                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
-                    <p className="text-muted dark:text-muted">No hay organizaciones pendientes de validación</p>
+                <div className="border border-border bg-main p-12 text-center">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending organizations</p>
                 </div>
             ) : (
                 pendingItems.organizations.map((org) => (
                     <div
                         key={org.id}
-                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
+                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">{org.name}</h3>
-                                    <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
-                                        Pendiente
+                                    <h3 className="font-bold text-text-main truncate">{org.name}</h3>
+                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
+                                        Pending
                                     </span>
                                 </div>
                                 {org.description && (
-                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">{org.description}</p>
+                                    <p className="text-sm text-muted mb-2 line-clamp-2">{org.description}</p>
                                 )}
                                 {org.website_url && (
                                     <a
                                         href={org.website_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-xs text-brand hover:underline"
+                                        className="text-xs text-text-main hover:underline"
                                     >
                                         {org.website_url}
                                     </a>
                                 )}
-                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
-                                    Creado: {new Date(org.created_at).toLocaleDateString('es-ES')}
+                                <p className="text-xs text-muted mt-2">
+                                    Created: {new Date(org.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
@@ -282,30 +266,29 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         description: org.description,
                                         websiteUrl: org.website_url,
                                     })}
-                                    className="p-2 rounded-lg border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
-                                    title="Editar"
+                                    className="p-2 border border-border text-muted hover:text-text-main hover:bg-surface transition-colors"
+                                    title="Edit"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
                                 <button
                                     onClick={() => handleApprove('organizations', org.id)}
                                     disabled={loading === org.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
-                                    {loading === org.id ? '...' : 'Aprobar'}
+                                    {loading === org.id ? '...' : 'Approve'}
                                 </button>
                                 <button
                                     onClick={() => handleDelete('organizations', org.id)}
                                     disabled={loading === org.id}
-                                    className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                                    title="Eliminar"
+                                    className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                    title="Delete"
                                 >
                                     <span className="material-symbols-outlined text-lg">delete</span>
                                 </button>
                             </div>
                         </div>
 
-                        {/* Fuzzy match suggestions */}
                         <FuzzyMatchSuggestions
                             value={org.name}
                             existingItems={existingItems.organizations}
@@ -320,66 +303,64 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderCourses = () => (
         <div className="space-y-4">
             {pendingItems.courses.length === 0 ? (
-                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
-                    <p className="text-muted dark:text-muted">No hay cursos pendientes de validación</p>
+                <div className="border border-border bg-main p-12 text-center">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending courses</p>
                 </div>
             ) : (
                 pendingItems.courses.map((course) => {
                     const isShadowDraft = !!course.draft_data
-                    // Safely cast draft_data for access
                     const draft = course.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
 
                     return (
                         <div
                             key={course.id}
-                            className={`rounded-xl bg-main dark:bg-surface p-6 border transition-colors ${isShadowDraft
+                            className={`border bg-main p-6 transition-colors ${isShadowDraft
                                 ? 'border-purple-500/30 hover:border-purple-500/50'
-                                : 'border-border dark:border-border hover:border-brand/30'
+                                : 'border-border hover:border-text-main'
                                 }`}
                         >
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">
+                                        <h3 className="font-bold text-text-main truncate">
                                             {isShadowDraft && draft?.title ? draft.title : course.title}
                                         </h3>
                                         {isShadowDraft ? (
-                                            <span className="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400 font-bold">
-                                                Edición Pendiente
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
+                                                Pending Edit
                                             </span>
                                         ) : (
-                                            <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
-                                                Nuevo Curso
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
+                                                New Course
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">
+                                    <p className="text-sm text-muted mb-2 line-clamp-2">
                                         {isShadowDraft && draft?.summary ? draft.summary : course.summary}
                                     </p>
 
                                     {isShadowDraft && draft?.edit_reason && (
-                                        <div className="mt-2 text-sm bg-surface dark:bg-main p-2 rounded text-text-main dark:text-gray-300">
-                                            <strong>Razón del cambio:</strong> {draft.edit_reason}
+                                        <div className="mt-2 text-sm bg-surface p-2 border border-border text-text-main">
+                                            <strong>Edit reason:</strong> {draft.edit_reason}
                                         </div>
                                     )}
 
                                     {getOrgName(course.organizations) && (
-                                        <p className="text-xs text-muted dark:text-muted mt-1">
-                                            Organización: {getOrgName(course.organizations)}
+                                        <p className="text-xs text-muted mt-1">
+                                            Organization: {getOrgName(course.organizations)}
                                         </p>
                                     )}
-                                    <p className="text-xs text-muted dark:text-muted/60 mt-2">
-                                        Actualizado: {new Date(course.created_at).toLocaleDateString('es-ES')}
+                                    <p className="text-xs text-muted mt-2">
+                                        Updated: {new Date(course.created_at).toLocaleDateString()}
                                     </p>
                                 </div>
 
                                 <div className="flex gap-2 shrink-0">
-                                    {/* Preview Draft Data */}
                                     {isShadowDraft && (
                                         <details className="text-xs">
-                                            <summary className="p-2 rounded-lg border cursor-pointer">JSON</summary>
-                                            <pre className="absolute bg-black text-text-main p-4 rounded z-10 max-w-sm overflow-auto text-xs">
+                                            <summary className="p-2 border border-border cursor-pointer hover:bg-surface">JSON</summary>
+                                            <pre className="absolute bg-inverse text-inverse p-4 z-10 max-w-sm overflow-auto text-xs">
                                                 {JSON.stringify(course.draft_data, null, 2)}
                                             </pre>
                                         </details>
@@ -388,9 +369,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     <button
                                         onClick={() => openRejectionModal('courses', course.id)}
                                         disabled={loading === course.id}
-                                        className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                                        title="Rechazar"
-                                        aria-label="Rechazar"
+                                        className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                        title="Reject"
                                     >
                                         <span className="material-symbols-outlined text-lg">close</span>
                                     </button>
@@ -398,10 +378,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     <button
                                         onClick={() => handleApprove('courses', course.id)}
                                         disabled={loading === course.id}
-                                        className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
-                                        aria-label={isShadowDraft ? 'Aprobar Cambios' : 'Aprobar'}
+                                        className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                     >
-                                        {loading === course.id ? '...' : (isShadowDraft ? 'Aprobar Cambios' : 'Aprobar')}
+                                        {loading === course.id ? '...' : (isShadowDraft ? 'Approve Edit' : 'Approve')}
                                     </button>
                                 </div>
                             </div>
@@ -415,34 +394,34 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderPaths = () => (
         <div className="space-y-4">
             {pendingItems.paths.length === 0 ? (
-                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
-                    <p className="text-muted dark:text-muted">No hay learning paths pendientes de validación</p>
+                <div className="border border-border bg-main p-12 text-center">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending learning paths</p>
                 </div>
             ) : (
                 pendingItems.paths.map((path) => (
                     <div
                         key={path.id}
-                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
+                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">{path.title}</h3>
-                                    <span className="px-2 py-0.5 rounded text-xs bg-yellow-500/20 text-yellow-400">
-                                        Pendiente
+                                    <h3 className="font-bold text-text-main truncate">{path.title}</h3>
+                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
+                                        Pending
                                     </span>
                                 </div>
                                 {path.summary && (
-                                    <p className="text-sm text-muted dark:text-muted mb-2 line-clamp-2">{path.summary}</p>
+                                    <p className="text-sm text-muted mb-2 line-clamp-2">{path.summary}</p>
                                 )}
                                 {getOrgName(path.organizations) && (
-                                    <p className="text-xs text-muted dark:text-muted">
-                                        Organización: {getOrgName(path.organizations)}
+                                    <p className="text-xs text-muted">
+                                        Organization: {getOrgName(path.organizations)}
                                     </p>
                                 )}
-                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
-                                    Creado: {new Date(path.created_at).toLocaleDateString('es-ES')}
+                                <p className="text-xs text-muted mt-2">
+                                    Created: {new Date(path.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
@@ -454,23 +433,23 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                         name: path.title,
                                         description: path.summary,
                                     })}
-                                    className="p-2 rounded-lg border border-border dark:border-border text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
-                                    title="Editar"
+                                    className="p-2 border border-border text-muted hover:text-text-main hover:bg-surface transition-colors"
+                                    title="Edit"
                                 >
                                     <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
                                 <button
                                     onClick={() => handleApprove('paths', path.id)}
                                     disabled={loading === path.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
-                                    {loading === path.id ? '...' : 'Aprobar'}
+                                    {loading === path.id ? '...' : 'Approve'}
                                 </button>
                                 <button
                                     onClick={() => handleDelete('paths', path.id)}
                                     disabled={loading === path.id}
-                                    className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                                    title="Eliminar"
+                                    className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                    title="Delete"
                                 >
                                     <span className="material-symbols-outlined text-lg">delete</span>
                                 </button>
@@ -491,40 +470,39 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const renderEdits = () => (
         <div className="space-y-4">
             {pendingItems.edits.length === 0 ? (
-                <div className="rounded-xl bg-main dark:bg-surface p-12 text-center border border-border dark:border-border">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-4">check_circle</span>
-                    <p className="text-muted dark:text-muted">No hay ediciones pendientes de validación</p>
+                <div className="border border-border bg-main p-12 text-center">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending edits</p>
                 </div>
             ) : (
                 pendingItems.edits.map((item) => (
                     <div
                         key={item.id}
-                        className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border hover:border-brand/30 transition-colors"
+                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="text-lg font-semibold text-text-main dark:text-text-main truncate">
+                                    <h3 className="font-bold text-text-main truncate">
                                         Edit: {item.resource_title || item.resource_id}
                                     </h3>
-                                    <span className="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-400">
+                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
                                         {item.resource_type}
                                     </span>
                                 </div>
-                                <p className="text-sm text-muted dark:text-muted mb-2 font-medium">
-                                    Razón: {item.reason || 'Sin razón especificada'}
+                                <p className="text-sm text-muted mb-2">
+                                    Reason: {item.reason || 'No reason specified'}
                                 </p>
 
-                                {/* Diff Preview could go here */}
                                 <details className="mt-2 text-xs">
-                                    <summary className="cursor-pointer text-brand">Ver cambios JSON</summary>
-                                    <pre className="mt-2 p-2 bg-surface dark:bg-black rounded overflow-x-auto">
+                                    <summary className="cursor-pointer text-text-main hover:underline">View JSON Changes</summary>
+                                    <pre className="mt-2 p-2 bg-surface border border-border overflow-x-auto">
                                         {JSON.stringify(item.data, null, 2)}
                                     </pre>
                                 </details>
 
-                                <p className="text-xs text-muted dark:text-muted/60 mt-2">
-                                    Solicitado: {new Date(item.created_at).toLocaleDateString('es-ES')}
+                                <p className="text-xs text-muted mt-2">
+                                    Requested: {new Date(item.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
@@ -532,15 +510,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 <button
                                     onClick={() => handleApprove('edits', item.id)}
                                     disabled={loading === item.id}
-                                    className="px-4 py-2 rounded-lg bg-green-600 text-text-main dark:text-text-main font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
-                                    {loading === item.id ? '...' : 'Aprobar Edición'}
+                                    {loading === item.id ? '...' : 'Approve Edit'}
                                 </button>
                                 <button
                                     onClick={() => handleDelete('edits', item.id)}
                                     disabled={loading === item.id}
-                                    className="p-2 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
-                                    title="Rechazar"
+                                    className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                    title="Reject"
                                 >
                                     <span className="material-symbols-outlined text-lg">close</span>
                                 </button>
@@ -555,21 +533,22 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     return (
         <>
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-border dark:border-border pb-4 overflow-x-auto">
+            <div className="flex gap-6 mb-6 border-b border-border pb-4 overflow-x-auto">
                 {tabs.map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
-                            ? 'bg-brand text-text-main dark:text-text-main'
-                            : 'text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50'
+                        className={`pb-3 text-xs font-bold uppercase tracking-widest transition-colors border-b-2 -mb-[17px] flex items-center gap-2 whitespace-nowrap ${activeTab === tab.key
+                            ? 'border-text-main text-text-main'
+                            : 'border-transparent text-muted hover:text-text-main'
                             }`}
                     >
+                        <span className="material-symbols-outlined text-sm">{tab.icon}</span>
                         {tab.label}
                         {tab.count > 0 && (
-                            <span className={`px-1.5 py-0.5 rounded text-xs ${activeTab === tab.key
-                                ? 'bg-main/20'
-                                : 'bg-yellow-500/20 text-yellow-400'
+                            <span className={`px-1.5 py-0.5 text-[10px] ${activeTab === tab.key
+                                ? 'bg-inverse text-inverse'
+                                : 'bg-amber-500/20 text-amber-500'
                                 }`}>
                                 {tab.count}
                             </span>
@@ -584,16 +563,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
             {activeTab === 'paths' && renderPaths()}
             {activeTab === 'edits' && renderEdits()}
 
-            {/* Edit Modal (for legacy creations, not edits of edits) */}
+            {/* Edit Modal */}
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    {/* ... Existing Modal Content ... */}
-                    <div className="w-full max-w-lg rounded-xl bg-main dark:bg-surface border border-border dark:border-border p-6 mx-4">
+                    <div className="w-full max-w-lg border border-border bg-main p-6 mx-4">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-text-main dark:text-text-main">Editar Item</h2>
+                            <h2 className="text-lg font-bold uppercase tracking-widest text-text-main">Edit Item</h2>
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="p-2 text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
+                                className="p-2 text-muted hover:text-text-main transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -601,37 +579,37 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
                         <div className="space-y-4">
                             <FuzzyMatchSelect
-                                label={editingItem.type === 'organizations' ? 'Nombre' : 'Título'}
+                                label={editingItem.type === 'organizations' ? 'Name' : 'Title'}
                                 value={editingItem.name}
                                 onChange={(name) => setEditingItem({ ...editingItem, name })}
                                 existingItems={existingItems[editingItem.type as 'organizations' | 'courses' | 'paths']}
-                                placeholder="Nombre del item..."
+                                placeholder="Item name..."
                             />
 
                             {editingItem.type === 'organizations' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-text-main mb-2">
                                         Website URL
                                     </label>
                                     <input
                                         type="url"
                                         value={editingItem.websiteUrl || ''}
                                         onChange={(e) => setEditingItem({ ...editingItem, websiteUrl: e.target.value })}
-                                        className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full border border-border bg-surface px-4 py-2 text-text-main placeholder:text-muted focus:border-text-main focus:outline-none"
                                         placeholder="https://..."
                                     />
                                 </div>
                             )}
 
                             <div>
-                                <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                                    {editingItem.type === 'organizations' ? 'Descripción' : 'Resumen'}
+                                <label className="block text-xs font-bold uppercase tracking-widest text-text-main mb-2">
+                                    {editingItem.type === 'organizations' ? 'Description' : 'Summary'}
                                 </label>
                                 <textarea
                                     value={editingItem.description || ''}
                                     onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
                                     rows={3}
-                                    className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                                    className="w-full border border-border bg-surface px-4 py-2 text-text-main placeholder:text-muted focus:border-text-main focus:outline-none resize-none"
                                 />
                             </div>
                         </div>
@@ -639,30 +617,31 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setEditingItem(null)}
-                                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
+                                className="flex-1 px-4 py-2 border border-border text-muted text-xs font-bold uppercase tracking-widest hover:text-text-main hover:bg-surface transition-colors"
                             >
-                                Cancelar
+                                Cancel
                             </button>
                             <button
                                 onClick={handleSaveEdit}
                                 disabled={loading === editingItem.id}
-                                className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 disabled:opacity-50 transition-colors"
+                                className="flex-1 bg-inverse text-inverse px-4 py-2 text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-colors"
                             >
-                                {loading === editingItem.id ? 'Guardando...' : 'Guardar y Aprobar'}
+                                {loading === editingItem.id ? 'Saving...' : 'Save & Approve'}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
             {/* Rejection Modal */}
             {rejectionModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-xl bg-main dark:bg-surface border border-border dark:border-border p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="w-full max-w-md border border-border bg-main p-6 mx-4">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-text-main dark:text-text-main">Motivo del Rechazo</h2>
+                            <h2 className="text-lg font-bold uppercase tracking-widest text-text-main">Rejection Reason</h2>
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="p-2 text-muted dark:text-muted hover:text-text-main dark:text-text-main transition-colors"
+                                className="p-2 text-muted hover:text-text-main transition-colors"
                             >
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -670,15 +649,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                                    Por favor explica por qué se rechaza este cambio:
+                                <label className="block text-xs font-bold uppercase tracking-widest text-text-main mb-2">
+                                    Please explain why this is being rejected:
                                 </label>
                                 <textarea
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                     rows={4}
-                                    className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
-                                    placeholder="Ej: El contenido es inapropiado, faltan secciones, etc."
+                                    className="w-full border border-border bg-surface px-4 py-2 text-text-main placeholder:text-muted focus:border-red-500 focus:outline-none resize-none"
+                                    placeholder="e.g., Content is inappropriate, missing sections, etc."
                                     autoFocus
                                 />
                             </div>
@@ -687,16 +666,16 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => setRejectionModal(null)}
-                                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
+                                className="flex-1 px-4 py-2 border border-border text-muted text-xs font-bold uppercase tracking-widest hover:text-text-main hover:bg-surface transition-colors"
                             >
-                                Cancelar
+                                Cancel
                             </button>
                             <button
                                 onClick={confirmRejection}
                                 disabled={loading === rejectionModal.id || !rejectionReason.trim()}
-                                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-text-main hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                className="flex-1 border border-red-500/30 text-red-500 px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                             >
-                                {loading === rejectionModal.id ? 'Procesando...' : 'Confirmar Rechazo'}
+                                {loading === rejectionModal.id ? 'Processing...' : 'Confirm Rejection'}
                             </button>
                         </div>
                     </div>
@@ -706,7 +685,6 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     )
 }
 
-// Helper component for inline fuzzy match suggestions
 function FuzzyMatchSuggestions({
     value,
     existingItems,
@@ -716,7 +694,6 @@ function FuzzyMatchSuggestions({
     existingItems: ExistingItem[]
     onMerge: (targetId: string) => void
 }) {
-    // Levenshtein distance
     function levenshteinDistance(str1: string, str2: string): number {
         const m = str1.length
         const n = str2.length
@@ -757,27 +734,27 @@ function FuzzyMatchSuggestions({
     if (similarItems.length === 0) return null
 
     return (
-        <div className="mt-4 pt-4 border-t border-border dark:border-border">
-            <p className="text-xs text-muted dark:text-muted mb-2 flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm text-yellow-400">warning</span>
-                Items similares existentes:
+        <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-xs text-muted mb-2 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm text-amber-500">warning</span>
+                Similar existing items:
             </p>
             <div className="flex flex-wrap gap-2">
                 {similarItems.map((item) => (
                     <button
                         key={item.id}
                         onClick={() => onMerge(item.id)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-sidebar-border/50 hover:bg-surface dark:hover:bg-sidebar-border transition-colors group"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 border border-border hover:bg-surface transition-colors group"
                     >
-                        <span className="text-sm text-text-main dark:text-text-main">{item.name}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${item.score > 0.8
-                            ? 'bg-red-500/20 text-red-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
+                        <span className="text-sm text-text-main">{item.name}</span>
+                        <span className={`text-[10px] px-1 py-0.5 ${item.score > 0.8
+                            ? 'bg-red-500/20 text-red-500'
+                            : 'bg-amber-500/20 text-amber-500'
                             }`}>
                             {Math.round(item.score * 100)}%
                         </span>
-                        <span className="text-xs text-brand opacity-0 group-hover:opacity-100 transition-opacity">
-                            Fusionar →
+                        <span className="text-xs text-text-main opacity-0 group-hover:opacity-100 transition-opacity">
+                            Merge →
                         </span>
                     </button>
                 ))}

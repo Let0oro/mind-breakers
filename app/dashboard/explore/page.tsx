@@ -4,6 +4,15 @@ import { useState, useEffect, Suspense, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
+import {
+    searchPaths,
+    searchCourses,
+    searchOrganizations,
+    getUserSavedCourses,
+    type CourseListItem,
+    type OrganizationListItem
+} from '@/lib/queries'
+import type { PathListItem } from '@/lib/types'
 
 type SearchResult = {
     id: string
@@ -23,7 +32,6 @@ function ExplorePageContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
 
-    // Get initial tab from URL or default to 'all'
     const initialTab = (searchParams.get('tab') as 'all' | 'paths' | 'courses' | 'organizations') || 'all'
 
     const [searchQuery, setSearchQuery] = useState('')
@@ -34,7 +42,6 @@ function ExplorePageContent() {
 
     const supabase = createClient()
 
-    // Sync state with URL params when they change
     useEffect(() => {
         const tabFromUrl = searchParams.get('tab') as typeof activeTab
         if (tabFromUrl && ['all', 'paths', 'courses', 'organizations'].includes(tabFromUrl)) {
@@ -44,7 +51,6 @@ function ExplorePageContent() {
         }
     }, [searchParams])
 
-    // Update URL when tab changes state (user click)
     const handleTabChange = (newTab: typeof activeTab) => {
         setActiveTab(newTab)
         const params = new URLSearchParams(searchParams.toString())
@@ -52,20 +58,13 @@ function ExplorePageContent() {
         router.push(`/dashboard/explore?${params.toString()}`)
     }
 
-    // Fetch saved courses once on mount
     useEffect(() => {
         const fetchSavedCourses = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
-            const { data } = await supabase
-                .from('saved_courses')
-                .select('course_id')
-                .eq('user_id', user.id)
-
-            if (data) {
-                setSavedCourseIds(new Set(data.map(item => item.course_id)))
-            }
+            const savedIds = await getUserSavedCourses(supabase, user.id)
+            setSavedCourseIds(new Set(savedIds))
         }
         fetchSavedCourses()
     }, [supabase])
@@ -75,111 +74,81 @@ function ExplorePageContent() {
         const allResults: SearchResult[] = []
 
         try {
-            // Search Learning Paths
+            const promises: Promise<void>[] = []
+
+            // Fetch paths
             if (activeTab === 'all' || activeTab === 'paths') {
-                let pathQuery = supabase
-                    .from('learning_paths')
-                    .select(`
-            id,
-            title,
-            summary,
-            description,
-            organizations (name),
-            courses (id)
-          `)
-                    .eq('is_validated', true)
-                    .order('created_at', { ascending: false })
-                    .limit(20)
-
-                if (searchQuery) {
-                    pathQuery = pathQuery.or(`title.ilike.%${searchQuery}%,summary.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
-                }
-
-                const { data: paths } = await pathQuery
-
-                paths?.forEach(path => {
-                    allResults.push({
-                        id: path.id,
-                        type: 'path',
-                        title: path.title,
-                        description: path.description,
-                        summary: path.summary,
-                        organization: path.organizations?.[0]?.name,
-                        courseCount: path.courses?.length || 0,
+                promises.push(
+                    searchPaths(supabase, {
+                        query: searchQuery || undefined,
+                        validated: true,
+                        limit: 20
+                    }).then((paths: PathListItem[]) => {
+                        paths.forEach(path => {
+                            const org = Array.isArray(path.organizations)
+                                ? path.organizations[0]
+                                : path.organizations
+                            allResults.push({
+                                id: path.id,
+                                type: 'path',
+                                title: path.title,
+                                description: path.description,
+                                summary: path.summary,
+                                organization: org?.name,
+                                courseCount: path.courses?.length || 0,
+                            })
+                        })
                     })
-                })
+                )
             }
 
-            // Search Courses
+            // Fetch courses
             if (activeTab === 'all' || activeTab === 'courses') {
-                let courseQuery = supabase
-                    .from('courses')
-                    .select(`
-            id,
-            title,
-            summary,
-            thumbnail_url,
-            xp_reward,
-            organizations (name)
-          `)
-                    .eq('status', 'published')
-                    .eq('is_validated', true)
-                    .order('created_at', { ascending: false })
-                    .limit(20)
-
-
-                if (searchQuery) {
-                    courseQuery = courseQuery.or(`title.ilike.%${searchQuery}%,summary.ilike.%${searchQuery}%`)
-                }
-
-                const { data: courses } = await courseQuery
-
-                courses?.forEach(course => {
-                    allResults.push({
-                        id: course.id,
-                        type: 'course',
-                        title: course.title,
-                        summary: course.summary,
-                        thumbnail_url: course.thumbnail_url,
-                        xp_reward: course.xp_reward,
-                        organization: course.organizations?.[0]?.name,
-                        saved: savedCourseIds.has(course.id)
+                promises.push(
+                    searchCourses(supabase, {
+                        query: searchQuery || undefined,
+                        validated: true,
+                        status: 'published',
+                        limit: 20
+                    }).then((courses: CourseListItem[]) => {
+                        courses.forEach(course => {
+                            allResults.push({
+                                id: course.id,
+                                type: 'course',
+                                title: course.title,
+                                summary: course.summary,
+                                thumbnail_url: course.thumbnail_url,
+                                xp_reward: course.xp_reward,
+                                organization: course.organizations?.[0]?.name,
+                                saved: savedCourseIds.has(course.id)
+                            })
+                        })
                     })
-                })
+                )
             }
 
-            // Search Organizations
+            // Fetch organizations
             if (activeTab === 'all' || activeTab === 'organizations') {
-                let orgQuery = supabase
-                    .from('organizations')
-                    .select(`
-            id,
-            name,
-            description,
-            learning_paths (id),
-            courses (id)
-          `)
-                    .order('name')
-                    .limit(10)
-
-                if (searchQuery) {
-                    orgQuery = orgQuery.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
-                }
-
-                const { data: orgs } = await orgQuery
-
-                orgs?.forEach(org => {
-                    allResults.push({
-                        id: org.id,
-                        type: 'organization',
-                        title: org.name,
-                        description: org.description,
-                        pathCount: org.learning_paths?.length || 0,
-                        courseCount: org.courses?.length || 0,
+                promises.push(
+                    searchOrganizations(supabase, {
+                        query: searchQuery || undefined,
+                        limit: 10
+                    }).then((orgs: OrganizationListItem[]) => {
+                        orgs.forEach(org => {
+                            allResults.push({
+                                id: org.id,
+                                type: 'organization',
+                                title: org.name,
+                                description: org.description,
+                                pathCount: org.learning_paths?.length || 0,
+                                courseCount: org.courses?.length || 0,
+                            })
+                        })
                     })
-                })
+                )
             }
 
+            await Promise.all(promises)
             setResults(allResults)
         } catch (error) {
             console.error('Search error:', error)
@@ -192,20 +161,18 @@ function ExplorePageContent() {
         performSearch()
     }, [performSearch])
 
-
-
     return (
         <>
-            {/* Header Section */}
-            <header className="mb-8">
-                <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight mb-2">Explore</h2>
-                <p className="text-muted dark:text-muted text-base mb-6">
+            {/* Header */}
+            <header className="mb-10">
+                <h1 className="text-text-main text-4xl font-black italic tracking-tight mb-1">EXPLORE</h1>
+                <p className="text-muted text-sm mb-6">
                     Discover learning paths, courses, and organizations
                 </p>
 
-                {/* Search Bar */}
+                {/* Search */}
                 <div className="relative max-w-2xl">
-                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted">
                         search
                     </span>
                     <input
@@ -213,25 +180,25 @@ function ExplorePageContent() {
                         placeholder="Search for anything..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-14 pl-12 pr-4 rounded-lg bg-main dark:bg-surface border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
+                        className="w-full h-12 pl-12 pr-4 border border-border bg-main text-text-main placeholder:text-muted focus:outline-none focus:border-text-main transition-all"
                     />
                 </div>
             </header>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-border dark:border-border">
+            <div className="flex gap-6 mb-8 border-b border-border">
                 {[
-                    { key: 'all', label: 'All' },
-                    { key: 'paths', label: 'Learning Paths' },
-                    { key: 'courses', label: 'Courses' },
-                    { key: 'organizations', label: 'Organizations' },
+                    { key: 'all', label: 'ALL' },
+                    { key: 'paths', label: 'PATHS' },
+                    { key: 'courses', label: 'COURSES' },
+                    { key: 'organizations', label: 'ORGANIZATIONS' },
                 ].map((tab) => (
                     <button
                         key={tab.key}
                         onClick={() => handleTabChange(tab.key as typeof activeTab)}
-                        className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${activeTab === tab.key
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:text-text-main'
+                        className={`pb-3 text-xs font-bold uppercase tracking-widest border-b-2 transition-colors ${activeTab === tab.key
+                            ? 'border-text-main text-text-main'
+                            : 'border-transparent text-muted hover:text-text-main'
                             }`}
                     >
                         {tab.label}
@@ -242,7 +209,7 @@ function ExplorePageContent() {
             {/* Results */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-border dark:border-border border-t-ring"></div>
+                    <div className="animate-spin h-8 w-8 border-2 border-border border-t-text-main" />
                 </div>
             ) : results.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -251,14 +218,14 @@ function ExplorePageContent() {
                     ))}
                 </div>
             ) : (
-                <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-12 text-center">
-                    <span className="material-symbols-outlined text-6xl text-muted mb-4 block">
+                <div className="border border-border p-12 text-center">
+                    <span className="material-symbols-outlined text-5xl text-muted mb-4 block">
                         search_off
                     </span>
-                    <p className="text-muted dark:text-muted text-lg mb-2">
+                    <p className="text-muted text-sm mb-1">
                         {searchQuery ? 'No results found' : 'Start typing to search'}
                     </p>
-                    <p className="text-muted dark:text-muted text-sm">
+                    <p className="text-muted text-xs">
                         {searchQuery ? 'Try different keywords' : 'Search across paths, courses, and organizations'}
                     </p>
                 </div>
@@ -270,109 +237,83 @@ function ExplorePageContent() {
 function ResultCard({ result }: { result: SearchResult }) {
     const getLink = () => {
         switch (result.type) {
-            case 'path':
-                return `/dashboard/paths/${result.id}`
-            case 'course':
-                return `/dashboard/quests/${result.id}`
-            case 'organization':
-                return `/dashboard/organizations/${result.id}`
-            default:
-                return '#'
+            case 'path': return `/dashboard/paths/${result.id}`
+            case 'course': return `/dashboard/quests/${result.id}`
+            case 'organization': return `/dashboard/organizations/${result.id}`
+            default: return '#'
         }
     }
 
     const getIcon = () => {
         switch (result.type) {
-            case 'path':
-                return 'route'
-            case 'course':
-                return 'school'
-            case 'organization':
-                return 'business'
-            default:
-                return 'help'
+            case 'path': return 'route'
+            case 'course': return 'school'
+            case 'organization': return 'business'
+            default: return 'help'
         }
     }
 
     const getTypeLabel = () => {
         switch (result.type) {
-            case 'path':
-                return 'Learning Path'
-            case 'course':
-                return 'Course'
-            case 'organization':
-                return 'Organization'
-            default:
-                return ''
+            case 'path': return 'Path'
+            case 'course': return 'Course'
+            case 'organization': return 'Organization'
+            default: return ''
         }
     }
 
     return (
         <Link
             href={getLink()}
-            className="group bg-main dark:bg-surface rounded-xl border border-border dark:border-border hover:border-brand/50 transition-all overflow-hidden relative"
+            className="group border border-border hover:border-text-main bg-main transition-all overflow-hidden"
         >
-            {/* Type Badge & Icon */}
-            <div className="p-5 border-b border-border dark:border-border">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-muted dark:text-muted uppercase tracking-wider">
+            {/* Header */}
+            <div className="p-4 border-b border-border">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-widest">
                         {getTypeLabel()}
                     </span>
                     <div className="flex items-center gap-2">
                         {result.saved && (
-                            <span className="material-symbols-outlined text-yellow-500" title="Saved">
-                                bookmark
-                            </span>
+                            <span className="material-symbols-outlined text-sm text-text-main">bookmark</span>
                         )}
-                        <span className="material-symbols-outlined text-brand">
+                        <span className="material-symbols-outlined text-lg text-text-main">
                             {getIcon()}
                         </span>
                     </div>
                 </div>
-                <h3 className="text-text-main dark:text-text-main font-bold text-lg group-hover:text-brand transition-colors line-clamp-2">
+                <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline line-clamp-2">
                     {result.title}
                 </h3>
             </div>
 
             {/* Content */}
-            <div className="p-5">
+            <div className="p-4">
                 {result.summary && (
-                    <p className="text-muted dark:text-muted text-sm line-clamp-2 mb-3">
+                    <p className="text-muted text-xs line-clamp-2 mb-3">
                         {result.summary}
                     </p>
                 )}
 
                 {result.description && !result.summary && (
-                    <p className="text-muted dark:text-muted text-sm line-clamp-2 mb-3">
+                    <p className="text-muted text-xs line-clamp-2 mb-3">
                         {result.description}
                     </p>
                 )}
 
                 {/* Metadata */}
-                <div className="flex flex-wrap gap-3 text-xs">
+                <div className="flex flex-wrap gap-3 text-xs text-muted">
                     {result.organization && (
-                        <div className="flex items-center gap-1 text-muted dark:text-muted">
-                            <span className="material-symbols-outlined text-sm">business</span>
-                            <span>{result.organization}</span>
-                        </div>
+                        <span>{result.organization}</span>
                     )}
                     {result.xp_reward && (
-                        <div className="flex items-center gap-1 text-brand">
-                            <span className="material-symbols-outlined text-sm">star</span>
-                            <span className="font-bold">{result.xp_reward} XP</span>
-                        </div>
+                        <span>{result.xp_reward} XP</span>
                     )}
                     {result.courseCount !== undefined && result.courseCount > 0 && (
-                        <div className="flex items-center gap-1 text-muted dark:text-muted">
-                            <span className="material-symbols-outlined text-sm">school</span>
-                            <span>{result.courseCount} courses</span>
-                        </div>
+                        <span>{result.courseCount} courses</span>
                     )}
                     {result.pathCount !== undefined && result.pathCount > 0 && (
-                        <div className="flex items-center gap-1 text-muted dark:text-muted">
-                            <span className="material-symbols-outlined text-sm">route</span>
-                            <span>{result.pathCount} paths</span>
-                        </div>
+                        <span>{result.pathCount} paths</span>
                     )}
                 </div>
             </div>
@@ -382,7 +323,7 @@ function ResultCard({ result }: { result: SearchResult }) {
 
 export default function ExplorePage() {
     return (
-        <Suspense fallback={<div className="text-text-main dark:text-text-main">Loading...</div>}>
+        <Suspense fallback={<div className="text-text-main">Loading...</div>}>
             <ExplorePageContent />
         </Suspense>
     )

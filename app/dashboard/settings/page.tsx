@@ -14,14 +14,12 @@ export default async function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    // Fetch user profile
     const { data: profile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
-    // Check for existing admin request
     const { data: existingRequest } = await supabase
         .from('admin_requests')
         .select('*')
@@ -31,10 +29,11 @@ export default async function SettingsPage() {
 
     return (
         <>
-            {/* Header */}
             <header className="mb-8">
-                <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight mb-2">Settings</h2>
-                <p className="text-muted dark:text-muted text-base">
+                <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main mb-1">
+                    Settings
+                </h1>
+                <p className="text-muted text-sm">
                     Manage your account and preferences
                 </p>
             </header>
@@ -43,33 +42,33 @@ export default async function SettingsPage() {
                 {/* Profile Section */}
                 <SettingsForm user={user} profile={profile} />
 
-                {/* Admin Request Section - Only show if not admin */}
+                {/* Admin Request Section */}
                 {!profile?.is_admin && (
-                    <section className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6">
-                        <h3 className="text-text-main dark:text-text-main text-xl font-bold mb-4 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-brand">admin_panel_settings</span>
+                    <section className="border border-border bg-main p-6">
+                        <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
                             Request Admin Access
                         </h3>
 
                         {existingRequest ? (
-                            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                                <div className="flex items-center gap-2 text-yellow-500 mb-2">
-                                    <span className="material-symbols-outlined">pending</span>
-                                    <span className="font-bold">Request Pending</span>
+                            <div className="p-4 border border-muted">
+                                <div className="flex items-center gap-2 text-muted mb-2">
+                                    <span className="material-symbols-outlined text-sm">pending</span>
+                                    <span className="text-xs font-bold uppercase tracking-widest">Request Pending</span>
                                 </div>
-                                <p className="text-text-main dark:text-text-main text-sm mb-2">
+                                <p className="text-text-main text-sm mb-2">
                                     Your admin access request is currently being reviewed.
                                 </p>
-                                <p className="text-muted dark:text-muted text-xs">
+                                <p className="text-muted text-xs">
                                     <strong>Reason:</strong> {existingRequest.reason}
                                 </p>
-                                <p className="text-muted dark:text-muted text-xs mt-1">
+                                <p className="text-muted text-xs mt-1">
                                     <strong>Submitted:</strong> {new Date(existingRequest.created_at).toLocaleDateString()}
                                 </p>
                             </div>
                         ) : (
                             <>
-                                <p className="text-muted dark:text-muted mb-4">
+                                <p className="text-muted text-sm mb-4">
                                     Request administrator privileges to manage content and approve submissions.
                                 </p>
                                 <AdminRequestForm />
@@ -79,19 +78,19 @@ export default async function SettingsPage() {
                 )}
 
                 {/* Danger Zone */}
-                <section className="bg-red-500/10 rounded-xl border border-red-500/30 p-6">
-                    <h3 className="text-red-500 text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined">warning</span>
+                <section className="border border-muted p-6">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-lg">warning</span>
                         Danger Zone
                     </h3>
 
-                    <p className="text-text-main dark:text-text-main text-sm mb-4">
+                    <p className="text-muted text-sm mb-4">
                         Once you delete your account, there is no going back. This action is permanent.
                     </p>
 
                     <button
                         disabled
-                        className="h-12 px-6 rounded-lg bg-red-500/20 border border-red-500/50 text-red-500 font-bold opacity-50 cursor-not-allowed"
+                        className="px-4 py-2 border border-muted text-muted text-xs font-bold uppercase tracking-widest opacity-50 cursor-not-allowed"
                     >
                         Delete Account (Coming Soon)
                     </button>

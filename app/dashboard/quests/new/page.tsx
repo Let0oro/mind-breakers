@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { FormLayout, FormField, FormActions, FormError, FormSection, FormDivider } from '@/components/ui/Form'
 import SimilarItemsList from '@/components/features/SimilarItemsList'
-
 import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
 import { Course } from '@/lib/types'
 
@@ -18,15 +18,22 @@ interface Organization {
   name: string
 }
 
+interface Exercise {
+  id: string
+  title: string
+  description: string
+  requirements: string
+}
+
 export default function NewCoursePage() {
-  const [loading, setLoading] = useState({ "draft": false, "published": false })
+  const [loading, setLoading] = useState({ draft: false, published: false })
   const [error, setError] = useState<string | null>(null)
   const [paths, setPaths] = useState<LearningPath[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const router = useRouter()
   const supabase = createClient()
 
-  // Metadata auto-fill states
+  // Form fields
   const [linkUrl, setLinkUrl] = useState('')
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false)
   const [metadataFetched, setMetadataFetched] = useState(false)
@@ -35,48 +42,28 @@ export default function NewCoursePage() {
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [xpReward, setXpReward] = useState(100)
-  const [showXpTooltip, setShowXpTooltip] = useState(false)
   const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
   const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
-
   const [orderIndex, setOrderIndex] = useState(0)
   const [pathId, setPathId] = useState('')
   const [organizationId, setOrganizationId] = useState('')
   const [originUk, setOriginUk] = useState<string | null>(null)
-
-  // Exercise fields
-  interface Exercise {
-    id: string
-    title: string
-    description: string
-    requirements: string
-  }
   const [exercises, setExercises] = useState<Exercise[]>([])
 
-  // Helper to add new exercise
   const addExercise = () => {
-    setExercises([
-      ...exercises,
-      { id: crypto.randomUUID(), title: '', description: '', requirements: '' }
-    ])
+    setExercises([...exercises, { id: crypto.randomUUID(), title: '', description: '', requirements: '' }])
   }
 
-  // Helper to remove exercise
   const removeExercise = (id: string) => {
     setExercises(exercises.filter(ex => ex.id !== id))
   }
 
-  // Helper to update exercise
   const updateExercise = (id: string, field: keyof Exercise, value: string) => {
-    setExercises(exercises.map(ex =>
-      ex.id === id ? { ...ex, [field]: value } : ex
-    ))
+    setExercises(exercises.map(ex => ex.id === id ? { ...ex, [field]: value } : ex))
   }
 
-  // Fetch metadata from URL
   const handleFetchMetadata = useCallback(async () => {
     if (!linkUrl.trim()) return
-
     setIsFetchingMetadata(true)
     setError(null)
 
@@ -89,26 +76,21 @@ export default function NewCoursePage() {
     }
 
     if (data) {
-      if (!title || metadataFetched === false) setTitle(data.title)
-      if (!summary || metadataFetched === false) {
+      if (!title || !metadataFetched) setTitle(data.title)
+      if (!summary || !metadataFetched) {
         const desc = data.description || ''
         setSummary(desc.length > 200 ? desc.substring(0, 197) + '...' : desc)
       }
-      if (!description || metadataFetched === false) setDescription(data.description)
-      if (!thumbnailUrl || metadataFetched === false) setThumbnailUrl(data.thumbnail)
+      if (!description || !metadataFetched) setDescription(data.description)
+      if (!thumbnailUrl || !metadataFetched) setThumbnailUrl(data.thumbnail)
 
       const calculatedXP = calculateXPFromDuration(data.durationHours)
       setXpReward(calculatedXP)
 
       if (calculatedXP === 0) {
         setXpNeedsAttention(true)
-        setShowXpTooltip(true)
         if (xpTooltipTimeout.current) clearTimeout(xpTooltipTimeout.current)
-        xpTooltipTimeout.current = setTimeout(() => {
-          setShowXpTooltip(false)
-        }, 4000)
-      } else {
-        setXpNeedsAttention(false)
+        xpTooltipTimeout.current = setTimeout(() => setXpNeedsAttention(false), 4000)
       }
 
       setMetadataFetched(true)
@@ -133,16 +115,12 @@ export default function NewCoursePage() {
     fetchData()
   }, [supabase])
 
-  // Scroll to error
   useEffect(() => {
-    if (error) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [error])
 
-  // Adapt Functionality
   const handleAdapt = async (course: Course) => {
-    if (confirm('Do you want to adapt this course? This will replace your current form data.')) {
+    if (confirm('Adapt this course? This will replace your current form data.')) {
       setTitle(course.title)
       setSummary(course.summary || '')
       setDescription(course.description || '')
@@ -151,7 +129,6 @@ export default function NewCoursePage() {
       setXpReward(course.xp_reward || 100)
       setOriginUk(course.uk)
 
-      // Fetch exercises
       const { data: courseExercises } = await supabase
         .from('course_exercises')
         .select('*')
@@ -169,34 +146,19 @@ export default function NewCoursePage() {
     }
   }
 
-  // Validation Helpers
-  const isFormValidForDraft = () => {
-    return !!(title.trim() || linkUrl.trim())
-  }
-
-  const isFormValidForPublish = () => {
-    return !!(
-      title.trim() &&
-      summary.trim() &&
-      description.trim() &&
-      thumbnailUrl.trim() &&
-      xpReward > 0 &&
-      pathId
-    )
-  }
+  const isFormValidForDraft = () => !!(title.trim() || linkUrl.trim())
+  const isFormValidForPublish = () => !!(title.trim() && summary.trim() && description.trim() && thumbnailUrl.trim() && xpReward > 0 && pathId)
 
   const handleSaveClick = (targetStatus: 'draft' | 'published') => {
     setError(null)
-
     if (targetStatus === 'published' && !isFormValidForPublish()) {
-      setError("To publish, all fields must be filled, a path selected, and XP must be greater than 0.")
+      setError("To publish, all fields must be filled, a path selected, and XP > 0.")
       return
     }
     if (targetStatus === 'draft' && !isFormValidForDraft()) {
       setError("Drafts require at least a Title or a Link.")
       return
     }
-
     processSave(targetStatus)
   }
 
@@ -206,7 +168,7 @@ export default function NewCoursePage() {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      setError('You must be logged in to create a course')
+      setError('You must be logged in')
       setLoading(p => ({ ...p, [targetStatus]: false }))
       return
     }
@@ -217,13 +179,12 @@ export default function NewCoursePage() {
       return
     }
 
-    // 1. Create Course
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coursePayload: any = {
       path_id: pathId,
-      title: title,
-      summary: summary,
-      description: description,
+      title,
+      summary,
+      description,
       link_url: linkUrl || null,
       thumbnail_url: thumbnailUrl || null,
       organization_id: organizationId || null,
@@ -234,10 +195,7 @@ export default function NewCoursePage() {
       is_validated: false
     }
 
-    // If adapting, use originUk, otherwise DB generates new one
-    if (originUk) {
-      coursePayload.uk = originUk
-    }
+    if (originUk) coursePayload.uk = originUk
 
     const { data: courseData, error: insertError } = await supabase
       .from('courses')
@@ -251,357 +209,199 @@ export default function NewCoursePage() {
       return
     }
 
-    // 2. Create Exercises
     if (exercises.length > 0) {
-      const validExercises = exercises.filter(ex => ex.title.trim() !== '')
+      const validExercises = exercises.filter(ex => ex.title.trim())
       if (validExercises.length > 0) {
         const exercisesToInsert = validExercises.map(ex => ({
           course_id: courseData.id,
           title: ex.title.trim(),
           description: ex.description.trim() || null,
           requirements: ex.requirements.trim() || null,
-          uk: originUk ? originUk : undefined // If adapting, link exercises via UK too (optional logic, maybe exercises should have unique UKs? Plan said 'uk' on exercises too. Let's assume for now we reuse UK or generate new. The DB default is random. If we want same exercises to share UK, we need their original UK. But I didn't fetch their original UK in handleAdapt. Let's skip explicitly setting UK for exercises for now unless crucial.)
         }))
 
-        const { error: exerciseError } = await supabase
-          .from('course_exercises')
-          .insert(exercisesToInsert)
-
-        if (exerciseError) console.error('Error creating exercises:', exerciseError)
+        await supabase.from('course_exercises').insert(exercisesToInsert)
       }
     }
 
     router.push(`/dashboard/quests/${courseData.id}`)
   }
 
-  const handleSubmit = (e: React.FormEvent) => e.preventDefault()
-
   return (
-    <>
-      {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => router.back()}
-            className="text-muted dark:text-muted hover:text-text-main transition-colors"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-          <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">Create Course</h2>
-        </div>
-        <p className="text-muted dark:text-muted text-base">
-          Add a new course to an existing learning path
-        </p>
-      </header>
+    <div className="flex gap-8 flex-col lg:flex-row items-start">
+      <div className="flex-1 w-full">
+        <FormLayout title="New Quest" subtitle="Add a new course to an existing learning path">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+            <FormError message={error} />
 
-      <div className="flex gap-8 flex-col lg:flex-row items-start">
-        {/* Form */}
-        <div className="flex-1 w-full bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error Message */}
-            {error && (
-              <div className="rounded-lg bg-red-500/20 border border-red-500/30 p-4">
-                <p className="text-red-500 text-sm font-medium flex items-center gap-2">
-                  <span className="material-symbols-outlined text-base">error</span>
-                  {error}
-                </p>
-              </div>
-            )}
-
-            {/* Course URL */}
+            {/* URL with Auto-fill */}
             <div className="space-y-2">
-              <label htmlFor="link_url" className="block text-text-main dark:text-text-main text-sm font-bold">
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
                 Course URL
-                {metadataFetched && (
-                  <span className="ml-2 text-xs font-normal text-green-500">✓ Metadata loaded</span>
-                )}
+                {metadataFetched && <span className="text-[10px] font-normal normal-case text-green-500">✓ Metadata loaded</span>}
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
-                    link
-                  </span>
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-lg">link</span>
                   <input
                     type="url"
-                    id="link_url"
                     value={linkUrl}
                     onChange={(e) => setLinkUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                    placeholder="https://youtube.com/watch?v=... or any URL"
+                    className="w-full h-12 pl-12 pr-4 bg-surface border border-border text-text-main placeholder:text-muted focus:outline-none focus:border-text-main transition-all"
+                    placeholder="https://youtube.com/watch?v=..."
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleFetchMetadata}
                   disabled={!linkUrl.trim() || isFetchingMetadata}
-                  className="h-12 px-4 rounded-lg bg-brand/20 text-brand font-medium hover:bg-brand/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="h-12 px-4 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
-                  {isFetchingMetadata ? (
+                  {isFetchingMetadata ? 'Fetching...' : (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-brand border-t-transparent"></div>
-                      <span>Fetching...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                      <span>Auto-fill</span>
+                      <span className="material-symbols-outlined text-sm">auto_awesome</span>
+                      Auto-fill
                     </>
                   )}
                 </button>
               </div>
-              <p className="text-muted dark:text-muted text-xs">
-                Paste a YouTube or web URL and click Auto-fill to fetch title, description and thumbnail.
-                <span className="block mt-1 text-amber-600 dark:text-amber-400">
-                  💡 Use public URLs (without login). If auto-fill doesn&apos;t work, you can enter the data manually.
-                </span>
-              </p>
-
-              <SimilarItemsList
-                type="courses"
-                query={linkUrl}
-                onAdapt={handleAdapt}
-              />
+              <SimilarItemsList type="courses" query={linkUrl} onAdapt={handleAdapt} />
             </div>
 
-            {/* Learning Path */}
-            <div className="space-y-2">
-              <label htmlFor="path_id" className="block text-text-main dark:text-text-main text-sm font-bold">
-                Learning Path <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="path_id"
-                value={pathId}
-                onChange={(e) => setPathId(e.target.value)}
-                required
-                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-              >
-                <option value="">Select a learning path</option>
-                {paths.map((path) => (
-                  <option key={path.id} value={path.id}>
-                    {path.title}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <FormField
+              label="Learning Path"
+              name="path_id"
+              type="select"
+              value={pathId}
+              onChange={setPathId}
+              required
+            >
+              <option value="">Select a learning path</option>
+              {paths.map((path) => (
+                <option key={path.id} value={path.id}>{path.title}</option>
+              ))}
+            </FormField>
 
-            {/* Title */}
-            <div className="space-y-2">
-              <label htmlFor="title" className="block text-text-main dark:text-text-main text-sm font-bold">
-                Course Title <span className="text-red-500">*</span>
-                {metadataFetched && title && (
-                  <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
-                )}
-              </label>
-              <input
-                type="text"
-                id="title"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                placeholder="e.g., Introduction to React Hooks"
-              />
-              <SimilarItemsList
-                type="courses"
-                query={title}
-                onAdapt={handleAdapt}
-              />
-            </div>
+            <FormField
+              label="Title"
+              name="title"
+              value={title}
+              onChange={setTitle}
+              placeholder="e.g., Introduction to React Hooks"
+              required
+              autoFilled={metadataFetched && !!title}
+            />
 
-            {/* Summary */}
-            <div className="space-y-2">
-              <label htmlFor="summary" className="block text-text-main dark:text-text-main text-sm font-bold">
-                Summary
-                {metadataFetched && summary && (
-                  <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
-                )}
-              </label>
-              <input
-                type="text"
-                id="summary"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                placeholder="Brief one-liner about the course"
-              />
-            </div>
+            <SimilarItemsList type="courses" query={title} onAdapt={handleAdapt} />
 
-            {/* Description */}
-            <div className="space-y-2">
-              <label htmlFor="description" className="block text-text-main dark:text-text-main text-sm font-bold">
-                Description
-                {metadataFetched && description && (
-                  <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
-                )}
-              </label>
-              <textarea
-                id="description"
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all resize-none"
-                placeholder="What will students learn?"
-              />
-            </div>
+            <FormField
+              label="Summary"
+              name="summary"
+              value={summary}
+              onChange={setSummary}
+              placeholder="Brief one-liner about the course"
+              autoFilled={metadataFetched && !!summary}
+            />
 
-            {/* Thumbnail URL */}
+            <FormField
+              label="Description"
+              name="description"
+              type="textarea"
+              value={description}
+              onChange={setDescription}
+              placeholder="What will students learn?"
+              autoFilled={metadataFetched && !!description}
+            />
+
+            {/* Thumbnail with preview */}
             <div className="space-y-2">
-              <label htmlFor="thumbnail_url" className="block text-text-main dark:text-text-main text-sm font-bold">
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
                 Thumbnail URL
-                {metadataFetched && thumbnailUrl && (
-                  <span className="ml-2 text-xs font-normal text-green-500">Auto-filled</span>
-                )}
+                {metadataFetched && thumbnailUrl && <span className="text-[10px] font-normal normal-case text-green-500">✓ Auto-filled</span>}
               </label>
               <div className="flex gap-4">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted">
-                    image
-                  </span>
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted text-lg">image</span>
                   <input
                     type="url"
-                    id="thumbnail_url"
                     value={thumbnailUrl}
                     onChange={(e) => setThumbnailUrl(e.target.value)}
-                    className="w-full h-12 pl-12 pr-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main placeholder:text-muted dark:placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
+                    className="w-full h-12 pl-12 pr-4 bg-surface border border-border text-text-main placeholder:text-muted focus:outline-none focus:border-text-main transition-all"
                     placeholder="https://example.com/image.jpg"
                   />
                 </div>
                 {thumbnailUrl && (
-                  <div className="w-20 h-12 rounded-lg overflow-hidden border border-border dark:border-border shrink-0">
+                  <div className="w-20 h-12 border border-border overflow-hidden shrink-0 grayscale">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={thumbnailUrl}
-                      alt="Thumbnail preview"
-                      className="object-cover"
-                      onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                        (e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
+                    <img src={thumbnailUrl} alt="Preview" className="object-cover w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Row: Organization & XP Reward */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="organization_id" className="block text-text-main dark:text-text-main text-sm font-bold">
-                  Organization
-                </label>
-                <select
-                  id="organization_id"
-                  value={organizationId}
-                  onChange={(e) => setOrganizationId(e.target.value)}
-                  className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                >
-                  <option value="">None</option>
-                  {organizations.map((org) => (
-                    <option key={org.id} value={org.id}>
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <FormField
+                label="Organization"
+                name="organization_id"
+                type="select"
+                value={organizationId}
+                onChange={setOrganizationId}
+              >
+                <option value="">None</option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>{org.name}</option>
+                ))}
+              </FormField>
 
-              <div className="space-y-2 relative">
-                <label htmlFor="xp_reward" className="flex items-center gap-2 text-text-main dark:text-text-main text-sm font-bold">
-                  XP Reward
-                  {metadataFetched && xpReward > 0 && (
-                    <span className="text-xs font-normal text-green-500">Auto-calculated</span>
-                  )}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onMouseEnter={() => setShowXpTooltip(true)}
-                      onMouseLeave={() => !xpNeedsAttention && setShowXpTooltip(false)}
-                      onClick={() => setShowXpTooltip(!showXpTooltip)}
-                      className="text-muted dark:text-muted hover:text-brand transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-base">info</span>
-                    </button>
-                    {showXpTooltip && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900 dark:bg-surface-dark text-text-main text-xs rounded-lg shadow-xl z-50 animate-fade-in">
-                        <p className="font-bold mb-2">📊 XP by Duration:</p>
-                        <ul className="space-y-1">
-                          <li>&lt; 2h → 25 XP</li>
-                          <li>2-4h → 50 XP</li>
-                          <li>4-8h → 100 XP</li>
-                          <li>8-20h → 150 XP</li>
-                          <li>20-40h → 200 XP</li>
-                          <li>40h+ → 300 XP (max)</li>
-                        </ul>
-                        {xpNeedsAttention && (
-                          <p className="mt-2 text-amber-400 font-medium">⚠️ Duration not found. Please set XP manually.</p>
-                        )}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-inverse dark:border-t-border"></div>
-                      </div>
-                    )}
-                  </div>
-                </label>
-                <input
-                  type="number"
-                  id="xp_reward"
-                  value={xpReward}
-                  onChange={(e) => {
-                    setXpReward(parseInt(e.target.value) || 0)
-                    setXpNeedsAttention(false)
-                  }}
-                  min={0}
-                  max={300}
-                  step={25}
-                  className={`w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border text-text-main dark:text-text-main placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all ${xpNeedsAttention
-                    ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
-                    : 'border-border dark:border-border'
-                    }`}
-                />
-              </div>
-            </div>
-
-
-            {/* Order Index */}
-            <div className="space-y-2">
-              <label htmlFor="order_index" className="block text-text-main dark:text-text-main text-sm font-bold">
-                Order in Path
-              </label>
-              <input
+              <FormField
+                label="XP Reward"
+                name="xp_reward"
                 type="number"
-                id="order_index"
-                value={orderIndex}
-                onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
+                value={xpReward}
+                onChange={(v) => { setXpReward(parseInt(v) || 0); setXpNeedsAttention(false) }}
                 min={0}
-                className="w-full h-12 px-4 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main placeholder:text-muted dark:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-ring/20 transition-all"
-                placeholder="0"
+                max={300}
+                step={25}
+                needsAttention={xpNeedsAttention}
+                autoFilled={metadataFetched && xpReward > 0}
               />
-              <p className="text-muted dark:text-muted text-xs">Lower numbers appear first (0 = first)</p>
             </div>
 
-            <div className="border-t border-border dark:border-border my-8"></div>
+            <FormField
+              label="Order in Path"
+              name="order_index"
+              type="number"
+              value={orderIndex}
+              onChange={(v) => setOrderIndex(parseInt(v) || 0)}
+              min={0}
+              hint="Lower numbers appear first (0 = first)"
+            />
 
-            {/* Exercise Section using Dynamic List */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-text-main dark:text-text-main">Exercises</h3>
+            <FormDivider />
+
+            {/* Exercises */}
+            <FormSection title="Exercises">
+              <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={addExercise}
-                  className="px-4 py-2 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 font-medium transition-colors flex items-center gap-2"
+                  className="px-4 py-2 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors flex items-center gap-2"
                 >
-                  <span className="material-symbols-outlined">add</span>
+                  <span className="material-symbols-outlined text-sm">add</span>
                   Add Exercise
                 </button>
               </div>
 
               {exercises.length === 0 ? (
-                <div className="text-center py-8 rounded-xl border border-dashed border-border dark:border-border bg-surface/50 dark:bg-surface/50">
-                  <p className="text-muted dark:text-muted">No exercises added yet.</p>
+                <div className="text-center py-8 border border-dashed border-border">
+                  <p className="text-muted text-sm">No exercises added yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {exercises.map((exercise, index) => (
-                    <div key={exercise.id} className="rounded-xl border border-border dark:border-border bg-main dark:bg-surface overflow-hidden">
-                      <div className="p-4 bg-surface dark:bg-surface-dark flex items-center justify-between">
+                    <div key={exercise.id} className="border border-border overflow-hidden">
+                      <div className="p-4 bg-surface flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-brand text-text-main text-xs font-bold">
+                          <span className="flex items-center justify-center w-6 h-6 bg-inverse text-inverse text-xs font-bold">
                             {index + 1}
                           </span>
                           <input
@@ -609,108 +409,63 @@ export default function NewCoursePage() {
                             value={exercise.title}
                             onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
                             placeholder="Exercise Title"
-                            className="bg-transparent border-none text-text-main dark:text-text-main font-bold focus:ring-0 p-0 w-64"
+                            className="bg-transparent border-none text-text-main font-bold focus:outline-none w-64"
                           />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeExercise(exercise.id)}
-                          className="text-muted hover:text-red-500 transition-colors"
-                        >
+                        <button type="button" onClick={() => removeExercise(exercise.id)} className="text-muted hover:text-red-500 transition-colors">
                           <span className="material-symbols-outlined">delete</span>
                         </button>
                       </div>
-
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="block text-xs font-bold text-muted uppercase">Description</label>
-                            <textarea
-                              value={exercise.description}
-                              onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
-                              rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
-                              placeholder="Brief description..."
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="block text-xs font-bold text-muted uppercase">Requirements</label>
-                            <textarea
-                              value={exercise.requirements}
-                              onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
-                              rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-surface dark:bg-main border border-border dark:border-border text-text-main dark:text-text-main text-sm focus:outline-none focus:border-brand transition-all resize-none"
-                              placeholder="- Validations&#10;- Tests"
-                            />
-                          </div>
-                        </div>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <textarea
+                          value={exercise.description}
+                          onChange={(e) => updateExercise(exercise.id, 'description', e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2 bg-surface border border-border text-text-main text-sm focus:outline-none focus:border-text-main transition-all resize-none"
+                          placeholder="Description..."
+                        />
+                        <textarea
+                          value={exercise.requirements}
+                          onChange={(e) => updateExercise(exercise.id, 'requirements', e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2 bg-surface border border-border text-text-main text-sm focus:outline-none focus:border-text-main transition-all resize-none"
+                          placeholder="Requirements..."
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </FormSection>
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-8 border-t border-border dark:border-border">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="px-6 h-12 rounded-lg border border-border dark:border-border text-text-main dark:text-text-main font-medium hover:bg-surface dark:hover:bg-surface-dark transition-colors"
-              >
-                Cancel
-              </button>
-              <div className="flex-1 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleSaveClick('draft')}
-                  disabled={loading['draft']}
-                  className={`px-6 h-12 rounded-lg border border-brand text-brand font-bold hover:bg-brand/10 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {loading ? 'Saving...' : 'Save Draft'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSaveClick('published')}
-                  disabled={loading['published']}
-                  className={`px-6 h-12 rounded-lg bg-brand text-text-main font-bold hover:bg-brand/90 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-xl">rocket_launch</span>
-                      Publish Course
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+            <FormActions
+              onSave={() => handleSaveClick('draft')}
+              onPublish={() => handleSaveClick('published')}
+              saving={loading.draft}
+              publishing={loading.published}
+              canSave={isFormValidForDraft()}
+              canPublish={isFormValidForPublish()}
+              publishLabel="Publish Quest"
+            />
           </form>
-        </div>
+        </FormLayout>
+      </div>
 
-        {/* Sidebar for additional info (could be used for tips or recommended actions) */}
-        {/* Hidden on mobile, visible on lg */}
-        <div className="hidden lg:block w-80 space-y-6">
-          {/* We can put tips here or even the similar items if we wanted a permanent place, 
-               but for now SimilarItemsList is inline for better context */}
-          <div className="bg-brand/5 border border-brand/20 rounded-xl p-6">
-            <h4 className="font-bold text-brand mb-2 flex items-center gap-2">
-              <span className="material-symbols-outlined">lightbulb</span>
-              Pro Tips
-            </h4>
-            <ul className="text-sm text-muted dark:text-muted space-y-3">
-              <li>• Use clear, descriptive titles.</li>
-              <li>• Add a high-quality thumbnail.</li>
-              <li>• Check for existing courses before creating a new one to avoid duplicates.</li>
-              <li>• You can adapt existing courses to your path!</li>
-            </ul>
-          </div>
+      {/* Sidebar Tips */}
+      <div className="hidden lg:block w-72 shrink-0">
+        <div className="border border-border p-6 sticky top-6">
+          <h4 className="font-bold text-xs uppercase tracking-widest text-text-main mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-sm">lightbulb</span>
+            Pro Tips
+          </h4>
+          <ul className="text-xs text-muted space-y-3">
+            <li>• Use clear, descriptive titles.</li>
+            <li>• Add a high-quality thumbnail.</li>
+            <li>• Check for existing courses before creating a new one.</li>
+            <li>• You can adapt existing courses to your path!</li>
+          </ul>
         </div>
       </div>
-    </>
+    </div>
   )
 }

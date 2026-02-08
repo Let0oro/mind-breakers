@@ -2,11 +2,30 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { CardCourse } from '@/components/ui/CardCourse'
-
+import {
+    getUserSavedQuestsCached,
+    getUserProgressCached,
+    getUserCreatedQuestIdsCached,
+    getQuestsByIdsCached
+} from '@/lib/cache'
 
 export const metadata = {
     title: 'Courses - MindBreaker',
     description: 'Browse and enroll in courses',
+}
+
+interface QuestItem {
+    id: string
+    title: string
+    summary?: string
+    thumbnail_url?: string
+    xp_reward: number
+    is_validated?: boolean
+    created_by: string
+    status: 'draft' | 'published' | 'archived'
+    organizations: { name: string }[] | null
+    user_course_progress: { completed: boolean, xp_earned: number }[]
+    saved_courses: { user_id: string }[]
 }
 
 export default async function CoursesPage({
@@ -21,76 +40,25 @@ export default async function CoursesPage({
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) redirect('/login')
 
-    // Fetch user-related courses
-    // 1. Courses created by user
-    const { data: createdCourses } = await supabase
-        .from('courses')
-        .select('id')
-        .eq('created_by', user.id)
-
-    // 2. Courses with progress
-    const { data: progressCourses } = await supabase
-        .from('user_course_progress')
-        .select('course_id')
-        .eq('user_id', user.id)
-
-    // 3. Saved courses
-    const { data: savedCourses } = await supabase
-        .from('saved_courses')
-        .select('course_id')
-        .eq('user_id', user.id)
-
-    // Combine all IDs
-    const courseIds = new Set([
-        ...(createdCourses?.map(c => c.id) || []),
-        ...(progressCourses?.map(c => c.course_id) || []),
-        ...(savedCourses?.map(c => c.course_id) || [])
+    // Use all cached queries for user data
+    const [savedCourseIds, userProgress, createdCourseIds] = await Promise.all([
+        getUserSavedQuestsCached(supabase, user.id),
+        getUserProgressCached(supabase, user.id),
+        getUserCreatedQuestIdsCached(supabase, user.id)
     ])
 
-    interface CourseListItem {
-        id: string
-        title: string
-        summary?: string
-        thumbnail_url?: string
-        xp_reward: number
-        is_validated?: boolean
-        created_by: string
-        status: 'draft' | 'published' | 'archived'
-        organizations: { name: string }[] | null
-        user_course_progress: { completed: boolean, xp_earned: number }[]
-        saved_courses: { user_id: string }[]
-    }
+    const progressCourseIds = userProgress.map(c => c.course_id)
 
-    let courses: CourseListItem[] = []
+    // Combine all course IDs
+    const courseIds = [...new Set([
+        ...createdCourseIds,
+        ...progressCourseIds,
+        ...savedCourseIds
+    ])]
 
-    if (courseIds.size > 0) {
-        const { data } = await supabase
-            .from('courses')
-            .select(`
-                id,
-                title,
-                summary,
-                thumbnail_url,
-                xp_reward,
-                is_validated,
-                created_by,
-                status,
-                organizations (name),
-                user_course_progress (
-                    completed,
-                    xp_earned
-                ),
-                saved_courses (
-                    user_id
-                )
-            `)
-            .in('id', Array.from(courseIds))
-            .order('created_at', { ascending: false })
+    // Fetch courses by IDs (cached)
+    let courses = (await getQuestsByIdsCached(supabase, courseIds)) as QuestItem[]
 
-        courses = (data as unknown as CourseListItem[]) || []
-    }
-
-    // Filter courses based on status if filter is requested
     const allCoursesCount = courses.length
     if (filter !== 'all') {
         courses = courses.filter(course => {
@@ -102,7 +70,6 @@ export default async function CoursesPage({
         })
     }
 
-    // Fetch creators for the displayed courses
     const creatorIds = Array.from(new Set(courses.map(c => c.created_by).filter(Boolean)))
     let creatorMap = new Map<string, string>()
 
@@ -117,91 +84,60 @@ export default async function CoursesPage({
         }
     }
 
-    // Fetch user progress for map (simplified as we already have some in join but good for exact map)
-    const { data: userProgress } = await supabase
-        .from('user_course_progress')
-        .select('course_id, completed')
-        .eq('user_id', user.id)
+    const progressMap = new Map(userProgress.map(p => [p.course_id, p.completed]))
+    const savedSet = new Set(savedCourseIds)
 
-    const progressMap = new Map(userProgress?.map(p => [p.course_id, p.completed]) || [])
-    const savedSet = new Set(savedCourses?.map(s => s.course_id) || [])
+    const tabs = [
+        { key: 'all', label: 'ALL', href: '/dashboard/quests' },
+        { key: 'published', label: 'PUBLISHED', href: '/dashboard/quests?filter=published' },
+        { key: 'pending', label: 'PENDING', href: '/dashboard/quests?filter=pending' },
+        { key: 'draft', label: 'DRAFTS', href: '/dashboard/quests?filter=draft' },
+        { key: 'archived', label: 'ARCHIVED', href: '/dashboard/quests?filter=archived' },
+    ]
 
     return (
         <>
-            {/* Header Section */}
-            <header className="flex flex-col gap-6 mb-8">
-                <div className="flex flex-wrap justify-between items-end gap-6">
-                    <div className="flex flex-col gap-2">
-                        <h2 className="text-text-main dark:text-text-main text-3xl font-black tracking-tight">My Courses</h2>
-                        <p className="text-muted dark:text-muted text-base">
+            {/* Header */}
+            <header className="mb-10">
+                <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
+                    <div className="flex flex-col gap-1">
+                        <h1 className="text-text-main text-4xl font-black italic tracking-tight">COURSES</h1>
+                        <p className="text-muted text-sm">
                             {courses.length} / {allCoursesCount} courses displayed
                         </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                         <Link
                             href="/dashboard/explore"
-                            className="flex items-center gap-2 h-11 px-6 rounded-lg border border-border dark:border-border text-text-main dark:text-text-main font-medium transition-all hover:bg-surface dark:hover:bg-surface-dark"
+                            className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-all"
                         >
-                            <span className="material-symbols-outlined w-5 h-5">search</span>
-                            <span>Explore More</span>
+                            <span className="material-symbols-outlined text-lg">search</span>
+                            <span>Explore</span>
                         </Link>
                         <Link
                             href="/dashboard/quests/new"
-                            className="flex items-center gap-2 h-11 px-6 rounded-lg bg-brand text-text-main dark:text-text-main font-bold transition-all hover:bg-brand/80"
+                            className="flex items-center gap-2 px-4 py-2 border border-text-main bg-inverse text-main-alt text-xs font-bold uppercase tracking-widest hover:bg-text-main transition-all"
                         >
-                            <span className="material-symbols-outlined w-5 h-5">add_circle</span>
-                            <span>Create Course</span>
+                            <span className="material-symbols-outlined text-lg">add</span>
+                            <span>Create</span>
                         </Link>
                     </div>
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="flex items-center gap-2 border-b border-border dark:border-border pb-1 overflow-x-auto">
-                    <Link
-                        href="/dashboard/quests"
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'all'
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:hover:text-text-main'
-                            }`}
-                    >
-                        All
-                    </Link>
-                    <Link
-                        href="/dashboard/quests?filter=published"
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'published'
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:hover:text-text-main'
-                            }`}
-                    >
-                        Published
-                    </Link>
-                    <Link
-                        href="/dashboard/quests?filter=pending"
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'pending'
-                            ? 'border-amber-500 text-amber-500'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:hover:text-text-main'
-                            }`}
-                    >
-                        Pending
-                    </Link>
-                    <Link
-                        href="/dashboard/quests?filter=draft"
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'draft'
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:hover:text-text-main'
-                            }`}
-                    >
-                        Drafts
-                    </Link>
-                    <Link
-                        href="/dashboard/quests?filter=archived"
-                        className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${filter === 'archived'
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-muted dark:text-muted hover:text-text-main dark:hover:text-text-main'
-                            }`}
-                    >
-                        Archived
-                    </Link>
+                {/* Tabs */}
+                <div className="flex gap-6 border-b border-border">
+                    {tabs.map((tab) => (
+                        <Link
+                            key={tab.key}
+                            href={tab.href}
+                            className={`pb-3 text-xs font-bold uppercase tracking-widest border-b-2 transition-colors ${filter === tab.key
+                                ? 'border-text-main text-text-main'
+                                : 'border-transparent text-muted hover:text-text-main'
+                                }`}
+                        >
+                            {tab.label}
+                        </Link>
+                    ))}
                 </div>
             </header>
 
@@ -213,7 +149,6 @@ export default async function CoursesPage({
                         const isEnrolled = progressMap.has(course.id)
                         const isSaved = savedSet.has(course.id)
 
-                        // Status Logic
                         const isPublished = course.status === 'published'
                         const isPending = isPublished && !course.is_validated
 
@@ -226,7 +161,7 @@ export default async function CoursesPage({
                                 xp_reward={course.xp_reward}
                                 summary={course.summary}
                                 status={isPending ? 'pending' : course.status}
-                                progress={isEnrolled ? (isCompleted ? 100 : 10) : 0} // Approximate progress based on boolean
+                                progress={isEnrolled ? (isCompleted ? 100 : 10) : 0}
                                 isSaved={isSaved}
                                 instructor={course.organizations && course.organizations.length > 0 ? course.organizations[0].name : (creatorMap.get(course.created_by) ? `by ${creatorMap.get(course.created_by)}` : undefined)}
                                 variant="grid"
@@ -234,15 +169,15 @@ export default async function CoursesPage({
                         )
                     })
                 ) : (
-                    <div className="col-span-full bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-12 text-center">
-                        <span className="material-symbols-outlined w-16 h-16 text-muted mx-auto mb-4">school</span>
-                        <p className="text-muted dark:text-muted text-lg mb-2">No courses found</p>
-                        <p className="text-muted dark:text-muted text-sm mb-4">
-                            {filter !== 'all' ? `No ${filter} courses found.` : "You haven't enrolled in, saved, or created any courses yet."}
+                    <div className="col-span-full border border-border p-12 text-center">
+                        <span className="material-symbols-outlined text-5xl text-muted mb-4 block">school</span>
+                        <p className="text-muted text-sm mb-1">No courses found</p>
+                        <p className="text-muted text-xs mb-6">
+                            {filter !== 'all' ? `No ${filter} courses.` : "Start by exploring or creating a course."}
                         </p>
                         <Link
                             href="/dashboard/explore"
-                            className="inline-block bg-brand hover:bg-brand/80 text-text-main dark:text-text-main px-6 py-2 rounded-lg font-bold text-sm transition-colors"
+                            className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
                         >
                             Explore Courses
                         </Link>

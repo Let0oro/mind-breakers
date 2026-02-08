@@ -48,22 +48,22 @@ describe('ValidationPanel', () => {
 
     it('renders pending courses', () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
+        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
         expect(screen.getByText('Pending Course 1')).toBeInTheDocument()
         expect(screen.getByText(/Org 1/)).toBeInTheDocument()
     })
 
     it('handles course approval', async () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
+        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
 
         // Find approve buttons. 
-        const approveButtons = screen.getAllByRole('button', { name: /aprobar/i })
+        const approveButtons = screen.getAllByRole('button', { name: /approve/i })
         fireEvent.click(approveButtons[0])
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
-                '/api/admin/validations/quests/c1',
+                '/api/admin/validations/courses/c1',
                 expect.objectContaining({
                     method: 'PATCH',
                     body: JSON.stringify({ action: 'approve' })
@@ -76,26 +76,26 @@ describe('ValidationPanel', () => {
 
     it('handles course rejection with reason', async () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
-        fireEvent.click(screen.getByRole('button', { name: /quests/i }))
+        fireEvent.click(screen.getByRole('button', { name: /courses/i }))
 
-        // Click Reject Button
-        const rejectButtons = screen.getAllByRole('button', { name: /rechazar/i })
+        // Click Reject Button (using title attribute directly)
+        const rejectButtons = screen.getAllByTitle(/Reject/i)
         fireEvent.click(rejectButtons[0])
 
         // Expect Modal to open
-        expect(screen.getByText('Motivo del Rechazo')).toBeInTheDocument()
+        expect(screen.getByText(/Rejection Reason/i)).toBeInTheDocument()
 
         // Type reason
-        const reasonInput = screen.getByPlaceholderText('Ej: El contenido es inapropiado, faltan secciones, etc.')
+        const reasonInput = screen.getByPlaceholderText(/e.g., Content is inappropriate/i)
         fireEvent.change(reasonInput, { target: { value: 'Violation of terms' } })
 
         // Click Confirm Reject
-        const confirmButton = screen.getByRole('button', { name: 'Confirmar Rechazo' })
+        const confirmButton = screen.getByRole('button', { name: /Confirm Rejection/i })
         fireEvent.click(confirmButton)
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith(
-                '/api/admin/validations/quests/c1',
+                '/api/admin/validations/courses/c1',
                 expect.objectContaining({
                     method: 'PATCH',
                     body: JSON.stringify({
