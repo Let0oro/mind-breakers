@@ -63,11 +63,7 @@ export function ThemeToggle() {
       className="cursor-pointer rounded-xs p-2 my-auto align-middle text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
       aria-label="Toggle theme"
     >
-      {isDark ? (
-        <span className="scale-90 material-symbols-outlined">light_mode</span>
-      ) : (
-        <span className="scale-90 material-symbols-outlined">dark_mode</span>
-      )}
+    <span className="scale-90 material-symbols-outlined">candle</span>
     </button>
   )
 }

@@ -93,31 +93,31 @@ export async function invalidateAdminCache() {
  * Invalidate dashboard page
  */
 export async function invalidateDashboard() {
-    revalidatePath('/dashboard')
+    revalidatePath('/guild-hall')
 }
 
 /**
  * Invalidate library page
  */
 export async function invalidateLibrary() {
-    revalidatePath('/dashboard/library')
+    revalidatePath('/guild-hall/library')
 }
 
 /**
  * Invalidate explore page
  */
 export async function invalidateExplore() {
-    revalidatePath('/dashboard/explore')
+    revalidatePath('/guild-hall/world-map')
 }
 
 /**
  * Invalidate admin pages
  */
 export async function invalidateAdminPages() {
-    revalidatePath('/dashboard/admin')
-    revalidatePath('/dashboard/admin/validations')
-    revalidatePath('/dashboard/admin/submissions')
-    revalidatePath('/dashboard/admin/requests')
+    revalidatePath('/guild-hall/admin')
+    revalidatePath('/guild-hall/admin/validations')
+    revalidatePath('/guild-hall/admin/submissions')
+    revalidatePath('/guild-hall/admin/requests')
 }
 
 // ============================================================================
@@ -133,9 +133,9 @@ export async function afterQuestChange(questId?: string) {
     }
     revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/library')
-    revalidatePath('/dashboard/quests')
+    revalidatePath('/guild-hall')
+    revalidatePath('/guild-hall/library')
+    revalidatePath('/guild-hall/quests')
 }
 
 /**
@@ -147,9 +147,9 @@ export async function afterPathChange(pathId?: string) {
     }
     revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/library')
-    revalidatePath('/dashboard/paths')
+    revalidatePath('/guild-hall')
+    revalidatePath('/guild-hall/library')
+    revalidatePath('/guild-hall/paths')
 }
 
 /**
@@ -158,7 +158,7 @@ export async function afterPathChange(pathId?: string) {
 export async function afterOrganizationChange() {
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard/organizations')
+    revalidatePath('/guild-hall/organizations')
 }
 
 /**
@@ -167,7 +167,7 @@ export async function afterOrganizationChange() {
 export async function afterSaveQuestChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard/library')
+    revalidatePath('/guild-hall/library')
 }
 
 /**
@@ -176,7 +176,7 @@ export async function afterSaveQuestChange(userId: string) {
 export async function afterSavePathChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard/library')
+    revalidatePath('/guild-hall/library')
 }
 
 /**
@@ -185,8 +185,8 @@ export async function afterSavePathChange(userId: string) {
 export async function afterProgressChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_PROGRESS, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/library')
+    revalidatePath('/guild-hall')
+    revalidatePath('/guild-hall/library')
 }
 
 /**
@@ -197,8 +197,8 @@ export async function afterExerciseSubmission(userId: string) {
     revalidateTag(CACHE_TAGS.EXERCISES, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.SUBMISSIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard/exercises')
-    revalidatePath('/dashboard/admin/submissions')
+    revalidatePath('/guild-hall/missions')
+    revalidatePath('/guild-hall/admin/submissions')
 }
 
 /**
@@ -209,6 +209,6 @@ export async function afterAdminValidation() {
     revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
-    revalidatePath('/dashboard/admin')
-    revalidatePath('/dashboard/admin/validations')
+    revalidatePath('/guild-hall/admin')
+    revalidatePath('/guild-hall/admin/validations')
 }

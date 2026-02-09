@@ -95,7 +95,7 @@ export default function Recommendations({ mode, contextId, contextType, title }:
                         xp_reward={item.xp_reward}
                         instructor={item.profiles?.username}
                         variant="recommendation"
-                        href={`/dashboard/${contextType === 'path' || (!contextType && !item.path_id) ? 'paths' : 'quests'}/${item.id}`}
+                        href={`/guild-hall/${contextType === 'path' || (!contextType && !item.path_id) ? 'expeditions' : 'quests'}/${item.id}`}
                     />
                 ))}
             </div>

@@ -101,7 +101,7 @@ export function FormField({
     className = ''
 }: FormFieldProps) {
     const baseInputClasses = `
-        w-full px-4 bg-surface border text-text-main 
+        w-full px-4 bg-main border text-text-main 
         placeholder:text-muted focus:outline-none focus:border-text-main
         transition-all disabled:opacity-50 disabled:cursor-not-allowed
         ${needsAttention ? 'border-amber-500 ring-1 ring-amber-500/30' : 'border-border'}
@@ -219,7 +219,7 @@ export function FormActions({
             <button
                 type="button"
                 onClick={onCancel || (() => router.back())}
-                className="px-6 h-10 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors"
+                className="px-6 h-10 border border-border text-text-main text-xs font-bold uppercase tracking-widest cursor-pointer hover:bg-surface transition-colors"
             >
                 Cancel
             </button>
@@ -229,9 +229,8 @@ export function FormActions({
                     type="button"
                     onClick={onDelete}
                     disabled={saving || publishing}
-                    className="px-6 h-10 border border-red-500/30 text-red-500 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    className="cursor-pointer px-6 h-10 border border-red-500/30 text-red-500 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 transition-colors disabled:opacity-50"
                 >
-                    <span className="material-symbols-outlined text-sm mr-1">delete</span>
                     {deleteLabel}
                 </button>
             )}
@@ -242,7 +241,7 @@ export function FormActions({
                         type="button"
                         onClick={onSave}
                         disabled={saving || !canSave}
-                        className="px-6 h-10 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="cursor-pointer px-6 h-10 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-input transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {saving ? 'Saving...' : saveLabel}
                     </button>
@@ -253,7 +252,7 @@ export function FormActions({
                         type="button"
                         onClick={onPublish}
                         disabled={publishing || !canPublish}
-                        className="px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="cursor-pointer px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:bg-border transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                         {publishing ? (
                             <>
@@ -262,7 +261,6 @@ export function FormActions({
                             </>
                         ) : (
                             <>
-                                <span className="material-symbols-outlined text-sm">rocket_launch</span>
                                 {publishLabel}
                             </>
                         )}

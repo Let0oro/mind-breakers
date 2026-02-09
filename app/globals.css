@@ -26,6 +26,11 @@
     animation-fill-mode: both;
 }
 
+::view-transition-group(img-*) {
+    opacity: 0;
+    /* mix-blend-mode: difference; */
+}
+
 @keyframes scale {
     0% {
         mask-size: 0;
@@ -41,54 +46,62 @@
     }
 }
 
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-gold);
+    border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--color-background);
+}
+
 /* =================================================================
-   Theme Variables - Simplified Monochrome
+   Theme Variables - Fantasy RPG
    ================================================================= */
 @theme inline {
-    --color-background: var(--gray-100);
-    --color-foreground: var(--gray-900);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+    /* Core Colors */
+    --color-background: var(--color-parchment);
+    --color-foreground: var(--color-midnight);
 
-    /* Simple Gray Scale */
-    --color-main: var(--gray-100);
-    --color-main-dark: var(--gray-200);
-    --color-main-alt: var(--gray-50);
-    --color-surface: var(--gray-150);
-    --color-surface-dark: var(--gray-250);
-    --color-inverse: var(--gray-900);
-    --color-muted: var(--gray-500);
+    /* RPG Palette References */
+    --color-parchment: #E8E4D8;
+    --color-midnight: #1A1F2C;
+    --color-gold: #C5A059;
+    --color-forest: #3E5F3F;
+    --color-terracotta: #8B3A3A;
+    --color-slate: #4A607A;
 
-    /* Text Colors */
-    --color-text-main: var(--gray-900);
-    --color-text-muted: var(--gray-500);
+    /* Semantic Mappings */
+    --color-primary: var(--color-midnight);
+    --color-primary-foreground: var(--color-parchment);
+    --color-secondary: var(--color-gold);
+    --color-secondary-foreground: var(--color-midnight);
+    --color-accent: var(--color-gold);
+    /* Used for premium elements */
+    --color-accent-foreground: var(--color-midnight);
+    --color-muted: var(--color-slate);
+    --color-muted-foreground: var(--color-parchment);
+    --color-destructive: var(--color-terracotta);
+    --color-destructive-foreground: var(--color-parchment);
 
-    /* Border */
-    --color-border: var(--gray-300);
-    --color-border-main: var(--gray-300);
-    --color-input: var(--gray-300);
-    --color-ring: var(--gray-400);
+    /* Surfaces */
+    --color-surface: rgba(255, 255, 255, 0.5);
+    /* Glass-like effect on parchment */
+    --color-surface-dark: rgba(26, 31, 44, 0.8);
+    /* Dark glass for midnight */
 
-    /* Standard Tailwind Mappings */
-    --color-primary: var(--gray-900);
-    --color-primary-foreground: var(--gray-100);
-    --color-secondary: var(--gray-200);
-    --color-secondary-foreground: var(--gray-900);
-    --color-muted-foreground: var(--gray-500);
-    --color-accent: var(--gray-200);
-    --color-accent-foreground: var(--gray-900);
-    --color-destructive: var(--gray-900);
-    --color-destructive-foreground: var(--gray-100);
+    /* Borders */
+    --color-border: rgba(197, 160, 89, 0.3);
+    /* Fine gold border */
+    --color-input: rgba(74, 96, 122, 0.2);
+    /* Slate input border */
+    --color-ring: var(--color-gold);
 
-    /* Sidebar */
-    --color-sidebar: var(--gray-150);
-    --color-sidebar-foreground: var(--gray-900);
-    --color-sidebar-primary: var(--gray-900);
-    --color-sidebar-primary-foreground: var(--gray-100);
-    --color-sidebar-accent: var(--gray-100);
-    --color-sidebar-accent-foreground: var(--gray-900);
-    --color-sidebar-border: var(--gray-300);
-    --color-sidebar-ring: var(--gray-400);
+    /* Fonts */
+    --font-header: 'Cinzel', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-sans: var(--font-body);
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
     /* Radius */
     --radius: 0.5rem;
@@ -96,34 +109,33 @@
     --radius-md: 0.375rem;
     --radius-lg: 0.5rem;
     --radius-xl: 0.75rem;
-    --radius-2xl: 1rem;
-    --radius-3xl: 1.25rem;
-    --radius-4xl: 1.5rem;
 }
 
 /* =================================================================
-   Custom Utilities
-   ================================================================= */
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-/* =================================================================
-   Light Theme
+   Root Variables
    ================================================================= */
 :root {
-    --gray-50: oklch(0.99 0 0);
-    --gray-100: oklch(0.97 0 0);
-    --gray-150: oklch(0.94 0 0);
-    --gray-200: oklch(0.90 0 0);
-    --gray-250: oklch(0.85 0 0);
-    --gray-300: oklch(0.80 0 0);
-    --gray-400: oklch(0.65 0 0);
-    --gray-500: oklch(0.50 0 0);
-    --gray-600: oklch(0.40 0 0);
-    --gray-700: oklch(0.30 0 0);
-    --gray-800: oklch(0.20 0 0);
-    --gray-900: oklch(0.12 0 0);
+    /* Fondos con textura coherente */
+    --color-parchment: #E8E4D8;
+    /* Fondo Light unificado */
+    --color-midnight: #1A1F2C;
+    /* Fondo Dark unificado */
+
+    /* Acentos de marca estandarizados */
+    --accent-gold: #C5A059;
+    /* Rangos, títulos y elementos premium */
+    --accent-forest: #3E5F3F;
+    /* Acciones primarias y éxito */
+    --accent-terracotta: #8B3A3A;
+    /* Alertas y misiones activas */
+    --accent-slate: #4A607A;
+    /* Líneas de mapa y texto de apoyo */
+
+    /* Interfaz y Bordes */
+    --glass-panel: rgba(255, 255, 255, 0.03);
+    /* Paneles oscuros coherentes */
+    --border-fine: 1px solid rgba(197, 160, 89, 0.3);
+    /* Borde dorado sutil */
 
     /* View Transitions */
     --expo-in: linear(0 0%, 0.0085 31.26%, 0.0167 40.94%,
@@ -140,22 +152,59 @@
             0.8962 32.68%, 0.9283 38.01%,
             0.9529 44.08%, 0.9711 51.14%,
             0.9833 59.06%, 0.9915 68.74%, 1 100%);
+
+    scrollbar-color: var(--color-gold) var(--color-background);
 }
 
-/* =================================================================
-   Dark Theme
-   ================================================================= */
 .dark {
-    --gray-50: oklch(0.12 0 0);
-    --gray-100: oklch(0.15 0 0);
-    --gray-150: oklch(0.18 0 0);
-    --gray-200: oklch(0.22 0 0);
-    --gray-250: oklch(0.28 0 0);
-    --gray-300: oklch(0.35 0 0);
-    --gray-400: oklch(0.45 0 0);
-    --gray-500: oklch(0.55 0 0);
-    --gray-600: oklch(0.65 0 0);
-    --gray-700: oklch(0.75 0 0);
-    --gray-800: oklch(0.88 0 0);
-    --gray-900: oklch(0.97 0 0);
+    --color-background: var(--color-midnight);
+    --color-foreground: var(--color-parchment);
+    --color-primary: var(--color-gold);
+    --color-primary-foreground: var(--color-midnight);
+    --color-muted: 215 20% 65%;
+    /* Light Slate */
+}
+
+/* Base Global Styles */
+body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-header);
+    color: var(--color-accent-gold);
+    /* Default headers to gold in dark mode or strong color */
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+    color: var(--color-gold);
+}
+
+.ornate-border {
+    border: 1px solid var(--color-border);
+    position: relative;
+}
+
+.ornate-border::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border: 1px solid var(--color-border);
+    opacity: 0.4;
+    pointer-events: none;
 }

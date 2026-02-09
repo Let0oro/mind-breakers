@@ -14,13 +14,13 @@ interface Exercise {
 export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
     if (!exercises.length) {
         return (
-            <div className="bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-12 text-center">
+            <div className="bg-main  border border-border dark:border-border p-12 text-center">
                 <span className="material-symbols-outlined text-6xl text-muted mb-4 block">
                     assignment
                 </span>
-                <p className="text-muted dark:text-muted text-lg mb-2">No exercises found</p>
+                <p className="text-muted dark:text-muted text-lg mb-2">No missions found</p>
                 <p className="text-muted dark:text-muted text-sm">
-                    Enroll in courses to find new exercises
+                    Enroll in quests to find new missions
                 </p>
             </div>
         )
@@ -31,11 +31,11 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
             {exercises.map((exercise) => (
                 <div
                     key={exercise.id}
-                    className="group bg-main dark:bg-surface rounded-xl border border-border dark:border-border p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-brand/50 transition-all"
+                    className="group bg-main  border border-border dark:border-border p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-brand/50 transition-all"
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${exercise.status === 'completed' ? 'bg-green-500/20 text-green-500' :
+                            <span className={`px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider ${exercise.status === 'completed' ? 'bg-green-500/20 text-green-500' :
                                 exercise.status === 'in_progress' ? 'bg-blue-500/20 text-blue-500' :
                                     exercise.status === 'pending_review' ? 'bg-yellow-500/20 text-yellow-500' :
                                         'bg-surface0/20 text-muted'
@@ -69,7 +69,7 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
                         )}
 
                         <Link
-                            href={`/dashboard/exercises/${exercise.id}/submit`}
+                            href={`/guild-hall/missions/${exercise.id}/submit`}
                             className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors whitespace-nowrap ${exercise.status === 'completed' || exercise.status === 'pending_review'
                                 ? 'bg-surface-dark text-text-main dark:text-text-main hover:bg-sidebar-border'
                                 : 'bg-brand text-text-main dark:text-text-main hover:bg-brand/80'
@@ -77,7 +77,7 @@ export function ExerciseList({ exercises }: { exercises: Exercise[] }) {
                         >
                             {exercise.status === 'completed' ? 'View Submission' :
                                 exercise.status === 'pending_review' ? 'View Status' :
-                                    'Start Exercise'}
+                                    'Start Mission'}
                         </Link>
                     </div>
                 </div>

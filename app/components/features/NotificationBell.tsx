@@ -95,13 +95,13 @@ export function NotificationBell({ userId }: { userId: string }) {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'exercise_approved':
-        return '✅'
+        return 'crown'
       case 'exercise_rejected':
-        return '❌'
+        return 'skull'
       case 'level_up':
-        return '🎉'
+        return 'sports_bar'
       default:
-        return '🔔'
+        return 'raven'
     }
   }
 
@@ -112,9 +112,9 @@ export function NotificationBell({ userId }: { userId: string }) {
         onClick={() => setIsOpen(!isOpen)}
         className="cursor-pointer scale-90 relative rounded-xs p-2 text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
       >
-        <span className="material-symbols-outlined">notifications</span>
+        <span className="material-symbols-outlined">raven</span>
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-text-main dark:text-text-main">
+          <span className="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-xs bg-red-500 text-xs font-bold text-text-main dark:text-text-main">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -126,7 +126,7 @@ export function NotificationBell({ userId }: { userId: string }) {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-border bg-main shadow-lg dark:border-border dark:bg-gray-900">
+          <div className="absolute right-0 z-20 mt-2 w-80 rounded-xs border border-border bg-background shadow-lg dark:border-border dark:bg-gray-900">
             <div className="flex items-center justify-between border-b border-border p-4 dark:border-border">
               <h3 className="font-semibold text-text-main dark:text-text-main">
                 Notificaciones
@@ -150,7 +150,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                       }`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className="text-2xl">
+                      <span className="text-2xl material-symbols-outlined">
                         {getNotificationIcon(notification.type)}
                       </span>
                       <div className="flex-1 min-w-0">

@@ -74,7 +74,7 @@ describe('SharedHeader', () => {
         fireEvent.click(toggleButton)
 
         // Should appear now
-        expect(screen.getByText('Explore')).toBeInTheDocument()
+        expect(screen.getByText('World Map')).toBeInTheDocument()
         expect(screen.getByText('Quests')).toBeInTheDocument()
 
         // Click to close

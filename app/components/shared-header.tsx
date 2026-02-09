@@ -79,14 +79,14 @@ export default function SharedHeader() {
                     <nav className="flex flex-col p-4 gap-2 items-stretch text-center">
                         <Link
                             className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
-                            href="/#explore"
+                            href="/guild-hall/world-map"
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            Explore
+                            World Map
                         </Link>
                         <Link
                             className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
-                            href="/#quests"
+                            href="/guild-hall/quests"
                             onClick={() => setMobileMenuOpen(false)}
                         >
                             Quests

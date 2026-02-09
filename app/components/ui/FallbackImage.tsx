@@ -37,6 +37,7 @@ export function FallbackImage({
     }
 
     const throwImage = !hasError && imgSrc && src;
+    const transitionName = `img-${src.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30)}`
 
     return (<>
         <Activity mode={!throwImage ? 'visible' : 'hidden'} >
@@ -51,6 +52,7 @@ export function FallbackImage({
                 alt={alt}
                 className={className}
                 onError={handleError}
+                style={{ viewTransitionName: transitionName } as React.CSSProperties}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {...props as any} // Cast because ImageProps has Next.js specific props
             /> : (imgSrc ? <Image
@@ -58,6 +60,7 @@ export function FallbackImage({
                 alt={alt}
                 className={className}
                 onError={handleError}
+                style={{ viewTransitionName: transitionName } as React.CSSProperties}
                 {...props}
             /> : null)}
         </Activity>

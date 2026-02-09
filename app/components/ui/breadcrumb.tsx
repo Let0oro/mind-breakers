@@ -94,19 +94,19 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
                         )}
 
                         {isLast ? (
-                            <span className="text-text-main dark:text-text-main">
+                            <span className="text-gold dark:text-text-main">
                                 {item.label}
                             </span>
                         ) : (
                             <>
                                 <Link
-                                    href={item.href?.includes("organizations") ? "/dashboard/organizations/new" : item.href || '#'}
+                                    href={item.href?.includes("organizations") ? "/guild-hall/organizations/new" : item.href || '#'}
                                     className="text-muted hover:text-text-main transition-colors"
                                 >
                                     {item.label}
                                 </Link>
                                 <span className="text-sm text-muted">
-                                    {"/"}
+                                    {"•"}
                                 </span>
                             </>
                         )}

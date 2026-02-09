@@ -57,7 +57,7 @@ export async function POST(
         title: 'Admin Request Update',
         message: 'Your request for admin access has been reviewed. Please contact support for more information.',
         type: 'admin_request_rejected',
-        link: '/dashboard/settings',
+        link: '/guild-hall/settings',
         read: false,
     })
 

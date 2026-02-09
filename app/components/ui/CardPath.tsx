@@ -35,7 +35,7 @@ export function CardPath({
     isSaved,
     isValidated = true,
     variant = 'card',
-    href = `/dashboard/paths/${id}`,
+    href = `/guild-hall/expeditions/${id}`,
     organizationName,
     createdAt,
     className = '',
@@ -69,7 +69,7 @@ export function CardPath({
                         {title}
                     </h4>
                     <p className="text-muted text-xs mt-1 uppercase tracking-wider">
-                        {completedCourses} of {totalCourses} courses completed
+                        {completedCourses} of {totalCourses} quests completed
                     </p>
 
                     {/* Progress Dots */}
@@ -115,7 +115,7 @@ export function CardPath({
                     </div>
                     <div className="absolute top-2 right-2">
                         <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
-                            Path
+                            Campaign
                         </span>
                     </div>
                 </div>
@@ -177,7 +177,7 @@ export function CardPath({
 
             {/* Stats */}
             <div className="flex items-center gap-4 text-xs text-muted mt-auto">
-                <span>{totalCourses} courses</span>
+                <span>{totalCourses} quests</span>
                 {progressPercent > 0 && (
                     <span>{completedCourses} completed</span>
                 )}
@@ -190,7 +190,7 @@ export function CardPath({
                         <span className="text-muted uppercase tracking-wider">Progress</span>
                         <span className="text-text-main font-bold">{Math.round(progressPercent)}%</span>
                     </div>
-                    <div className="h-1 bg-surface-dark">
+                    <div className="h-1 bg-surface-dark dark:bg-surface">
                         <div
                             className="h-full bg-inverse transition-all"
                             style={{ width: `${progressPercent}%` }}

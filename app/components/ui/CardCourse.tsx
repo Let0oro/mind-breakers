@@ -14,7 +14,7 @@ interface CardCourseProps {
     progress?: number
     status?: string
     href?: string
-    variant?: 'grid' | 'compact' | 'profile' | 'draft' | 'list' | 'timeline' | 'recommendation'
+    variant?: 'grid' | 'compact' | 'profile' | 'draft' | 'list' | 'timeline' | 'recommendation' | 'board'
     isSaved?: boolean
     className?: string
     index?: number
@@ -33,7 +33,7 @@ export function CardCourse({
     duration,
     progress,
     status = 'published',
-    href = `/dashboard/quests/${id}`,
+    href = `/guild-hall/quests/${id}`,
     variant = 'grid',
     isSaved,
     className = '',
@@ -42,6 +42,67 @@ export function CardCourse({
     organizationName,
     isLast = false
 }: CardCourseProps) {
+
+    // VARIANT: BOARD (Quest Board - Pinned Note)
+    if (variant === 'board') {
+        const isCompleted = progress === 100
+        const isActive = progress !== undefined && progress > 0 && progress < 100
+        const isLocked = status !== 'published'
+
+        // Random rotation based on index/id for natural look
+        const rotation = index !== undefined ? (index % 2 === 0 ? 'rotate-1' : '-rotate-1') : 'rotate-0'
+
+        return (
+            <Link
+                href={href}
+                className={`group relative md:min-w-48 min-w-32 h-min flex flex-col p-6 bg-background/10 border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] ${rotation} hover:rotate-0 hover:z-[1] isolate ${className}`}
+            >
+                {/* Pin Visual */}
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-main -rotate-45 z-[2] border border-gold/50 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-gold"></div>
+                </div>
+
+                {/* Decorative Scotch Tape (alternative to pin, or addition) */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-black/5 blur-sm rounded-full -z-10"></div>
+
+                {/* Status Stamps */}
+                {isCompleted && (
+                    <div className="absolute -right-2 -bottom-2 border-2 border-forest text-forest px-2 py-1 rotate-[-15deg] opacity-80 font-black uppercase text-xs tracking-widest bg-background/80 backdrop-blur-sm z-10">
+                        Completed
+                    </div>
+                )}
+
+                {isActive && (
+                    <div className="absolute -right-2 -top-2 border-2 border-gold text-gold px-2 py-1 rotate-[10deg] opacity-90 font-black uppercase text-xs tracking-widest bg-background/80 backdrop-blur-sm z-10">
+                        Active
+                    </div>
+                )}
+
+                {/* Content */}
+                <div className="flex flex-col items-center text-center">
+                    <h3 className="line-clamp-5 font-header text-lg text-foreground italic leading-tight group-hover:text-gold transition-colors ">
+                        {title}
+                    </h3>
+
+
+                    <div className='flex items-center gap-2 mt-4 pt-4 border-t border-border/30'>
+                        <span className='text-sm text-muted'>{organizationName}</span>
+                    </div>
+
+                </div>
+
+                {/* Footer specs */}
+                <div className="mt-4 pt-4 border-t border-border/30 flex justify-between items-center w-full text-[10px] uppercase tracking-widest text-muted font-bold">
+                    <span>{xp_reward} XP</span>
+                    {exercisesCount !== undefined && (
+                        <span>{exercisesCount} Missions</span>
+                    )}
+                </div>
+            </Link>
+        )
+    }
+
+
 
     // VARIANT: TIMELINE (Path Detail Page - Figma design)
     if (variant === 'timeline') {
@@ -59,10 +120,10 @@ export function CardCourse({
                 <Link href={href} className="group flex items-start gap-6">
                     {/* Square icon */}
                     <div className={`relative z-10 w-10 h-10 flex items-center justify-center shrink-0 border transition-all ${isCompleted
-                            ? 'border-text-main bg-inverse'
-                            : isActive
-                                ? 'border-text-main bg-main'
-                                : 'border-border bg-main group-hover:border-text-main'
+                        ? 'border-text-main bg-inverse'
+                        : isActive
+                            ? 'border-text-main bg-main'
+                            : 'border-border bg-main group-hover:border-text-main'
                         }`}>
                         {isCompleted ? (
                             <span className="material-symbols-outlined text-main-alt text-sm">check</span>
@@ -87,7 +148,7 @@ export function CardCourse({
                                     {organizationName && <span>{organizationName}</span>}
                                     <span>{xp_reward} XP</span>
                                     {exercisesCount !== undefined && exercisesCount > 0 && (
-                                        <span>{exercisesCount} exercises</span>
+                                        <span>{exercisesCount} Missions</span>
                                     )}
                                 </div>
                             </div>
@@ -197,7 +258,7 @@ export function CardCourse({
                                     <div className="mt-2 flex items-center gap-4 text-xs text-muted">
                                         <span>{xp_reward} XP</span>
                                         {exercisesCount !== undefined && exercisesCount > 0 && (
-                                            <span>{exercisesCount} exercises</span>
+                                            <span>{exercisesCount} Missions</span>
                                         )}
                                         {duration && <span>{duration}</span>}
                                     </div>
@@ -265,7 +326,7 @@ export function CardCourse({
                     />
                     <div className="absolute top-2 right-2">
                         <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
-                            Course
+                            Quest
                         </span>
                     </div>
                 </div>

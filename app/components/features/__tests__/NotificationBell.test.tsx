@@ -65,7 +65,7 @@ describe('NotificationBell', () => {
             render(<NotificationBell userId="u1" />)
         })
 
-        expect(screen.getByText('notifications')).toBeInTheDocument()
+        expect(screen.getByText('raven')).toBeInTheDocument()
         // Should not show badge
         expect(screen.queryByText(/0/)).not.toBeInTheDocument()
     })

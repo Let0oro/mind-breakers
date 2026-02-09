@@ -93,7 +93,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
     }
 
     return (
-        <div className="mt-8 rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
+        <div className="mt-8 bg-main p-6 border border-border">
             <div className="flex flex-wrap gap-3 items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-brand">library_books</span>
@@ -121,7 +121,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
 
             {/* Add Form */}
             {isAdding && (
-                <form onSubmit={handleSubmit} className="mb-8 p-4 bg-surface dark:bg-main rounded-lg border border-border dark:border-border">
+                <form onSubmit={handleSubmit} className="mb-8 p-4 bg-surface dark:bg-main border border-border dark:border-border">
                     <div className="space-y-4">
                         <div>
                             <label className="block text-xs font-bold text-text-main dark:text-gray-300 mb-1">Title</label>
@@ -130,7 +130,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 rounded-md border border-border dark:border-border bg-main dark:bg-surface text-sm"
+                                className="w-full px-3 py-2 border border-border dark:border-border bg-main dark:bg-surface text-sm"
                                 placeholder="e.g. Official Documentation"
                             />
                         </div>
@@ -141,7 +141,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                 <select
                                     value={linkType}
                                     onChange={(e) => setLinkType(e.target.value as 'link' | 'text')}
-                                    className="px-3 py-2 rounded-md border border-border dark:border-border bg-main dark:bg-surface text-sm"
+                                    className="px-3 py-2 border border-border dark:border-border bg-main dark:bg-surface text-sm"
                                 >
                                     <option value="link">Link (URL)</option>
                                     <option value="text">Text / Concept</option>
@@ -156,7 +156,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     required
-                                    className="w-full px-3 py-2 rounded-md border border-border dark:border-border bg-main dark:bg-surface text-sm"
+                                    className="w-full px-3 py-2 border border-border dark:border-border bg-main dark:bg-surface text-sm"
                                     placeholder={linkType === 'link' ? 'https://...' : 'Explain the concept...'}
                                 />
                             </div>
@@ -166,7 +166,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className="px-4 py-2 bg-brand text-text-main rounded-md text-sm font-bold hover:bg-brand/90 disabled:opacity-50"
+                                className="px-4 py-2 bg-brand text-text-main text-sm font-bold hover:bg-brand/90 disabled:opacity-50"
                             >
                                 {submitting ? 'Adding...' : 'Add Resource'}
                             </button>
@@ -181,7 +181,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                     {resources.map((resource) => (
                         <div
                             key={resource.id}
-                            className="flex items-start justify-between p-3 rounded-lg border border-border dark:border-border hover:bg-surface dark:hover:bg-sidebar-border/20 transition-colors group"
+                            className="flex items-start justify-between p-3 border border-border dark:border-border hover:bg-surface dark:hover:bg-sidebar-border/20 transition-colors group"
                         >
                             <div className="flex items-start gap-3">
                                 <div className="mt-1">
@@ -207,7 +207,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                                     </p>
                                     <div className="text-xs text-muted mt-1 flex items-center gap-1">
                                         {resource.profiles?.avatar_url && (
-                                            <img src={resource.profiles.avatar_url} className="w-4 h-4 rounded-full" alt="" />
+                                            <img src={resource.profiles.avatar_url} className="w-4 h-4 rounded-xs" alt="" />
                                         )}
                                         <span>Added by {resource.profiles?.username || 'Unknown'}</span>
                                     </div>
