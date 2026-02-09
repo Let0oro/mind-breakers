@@ -68,7 +68,7 @@ export async function POST(request: Request) {
             title: 'New Admin Request',
             message: `${profile?.username || 'A user'} has requested admin access`,
             type: 'new_admin_request' as const,
-            link: '/dashboard/admin/requests',
+            link: '/guild-hall/admin/requests',
             read: false,
         }))
 

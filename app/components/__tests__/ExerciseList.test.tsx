@@ -5,7 +5,7 @@ import { ExerciseList } from '../features/ExerciseList'
 describe('ExerciseList', () => {
     test('renders empty state', () => {
         render(<ExerciseList exercises={[]} />)
-        expect(screen.getByText('No exercises found')).toBeInTheDocument()
+        expect(screen.getByText('No missions found')).toBeInTheDocument()
     })
 
     test('renders exercises with correct status', () => {
@@ -30,7 +30,7 @@ describe('ExerciseList', () => {
         ]
         render(<ExerciseList exercises={exercises} />)
 
-        const link = screen.getByRole('link', { name: /start exercise/i })
-        expect(link).toHaveAttribute('href', '/dashboard/exercises/1/submit')
+        const link = screen.getByRole('link', { name: /Start Mission/i })
+        expect(link).toHaveAttribute('href', '/guild-hall/missions/1/submit')
     })
 })

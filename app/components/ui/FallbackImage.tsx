@@ -37,11 +37,12 @@ export function FallbackImage({
     }
 
     const throwImage = !hasError && imgSrc && src;
+    const transitionName = `img-${src.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30)}`
 
     return (<>
         <Activity mode={!throwImage ? 'visible' : 'hidden'} >
             <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-                <span className={`material-symbols-outlined text-4xl text-white/80`}>{iconFallback}</span>
+                <span className={`material-symbols-outlined text-4xl text-text-main/80`}>{iconFallback}</span>
             </div>
         </Activity>
 
@@ -51,6 +52,7 @@ export function FallbackImage({
                 alt={alt}
                 className={className}
                 onError={handleError}
+                style={{ viewTransitionName: transitionName } as React.CSSProperties}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {...props as any} // Cast because ImageProps has Next.js specific props
             /> : (imgSrc ? <Image
@@ -58,6 +60,7 @@ export function FallbackImage({
                 alt={alt}
                 className={className}
                 onError={handleError}
+                style={{ viewTransitionName: transitionName } as React.CSSProperties}
                 {...props}
             /> : null)}
         </Activity>

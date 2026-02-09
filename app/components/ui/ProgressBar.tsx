@@ -10,19 +10,19 @@ export function ProgressBar({ current, total, showLabel = true }: ProgressBarPro
   return (
     <div className="space-y-2">
       {showLabel && (
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted">
           <span>Progreso</span>
           <span className="font-medium">{current}/{total} cursos</span>
         </div>
       )}
-      <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-main-dark">
         <div
           className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-500"
           style={{ width: `${percentage}%` }}
         />
       </div>
       {showLabel && (
-        <div className="text-right text-xs text-gray-500">{percentage}%</div>
+        <div className="text-right text-xs text-muted">{percentage}%</div>
       )}
     </div>
   )

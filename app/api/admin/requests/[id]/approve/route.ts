@@ -67,7 +67,7 @@ export async function POST(
         title: 'Admin Request Approved! 🎉',
         message: 'Your request for admin access has been approved. You now have administrator privileges.',
         type: 'admin_request_approved',
-        link: '/dashboard/admin/requests',
+        link: '/guild-hall/admin/requests',
         read: false,
     })
 
