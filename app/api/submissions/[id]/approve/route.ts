@@ -23,5 +23,5 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.redirect(new URL('/dashboard/admin/submissions', request.url))
+  return NextResponse.redirect(new URL('/guild-hall/admin/submissions', request.url))
 }

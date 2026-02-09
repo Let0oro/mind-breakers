@@ -1,301 +1,210 @@
 @import "tailwindcss";
 
-
-
 @custom-variant dark (&:is(.dark *));
 
 /* =================================================================
    View Transitions API - Smooth theme transitions
    ================================================================= */
-/* 
+::view-transition-group(root) {
+    animation-timing-function: var(--expo-in);
+}
+
 ::view-transition-new(root) {
-  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="white"/></svg>')
-    center / 0 no-repeat;
-  animation: scale 1s;
-  animation-fill-mode: both;
+    --url: url('https://media.tenor.com/cyORI7kwShQAAAAi/shigure-ui-dance.gif');
+
+    @supports(-webkit-mask: var(--url)) or (mask: var(--url)) {
+        mask: var(--url) center / 0 no-repeat;
+    }
+
+    animation: scale 3s;
+    animation-fill-mode: both;
 }
 
 ::view-transition-old(root),
 .dark::view-transition-old(root) {
-  animation: none;
-  animation-fill-mode: both;
-  z-index: -1;
+    animation: scale 3s;
+    animation-fill-mode: both;
 }
-.dark::view-transition-new(root) {
-  animation: scale 1s;
-  animation-fill-mode: both;
+
+::view-transition-group(img-*) {
+    opacity: 0;
+    /* mix-blend-mode: difference; */
 }
 
 @keyframes scale {
-  to {
-    mask-size: 200vmax;
-  }
+    0% {
+        mask-size: 0;
+    }
+
+    10%,
+    90% {
+        mask-size: 25vmax;
+    }
+
+    100% {
+        mask-size: 2000vmax;
+    }
 }
 
-::view-transition-group(root) {
-  animation-duration: 0.7s;
-} */
-
-
-/* CUSTOM VIEW TRANSITION LINEAR */
-/* ::view-transition-group(root) {
-  animation-duration: 0.7s;
-  animation-timing-function: var(--expo-out);
-}
-      
-::view-transition-new(root) {
-  animation-name: reveal-light;
-  animation-fill-mode: both;
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-gold);
+    border-radius: var(--radius);
 }
 
-::view-transition-old(root),
-.dark::view-transition-old(root) {
-  animation: none;
-  animation-fill-mode: both;
-  z-index: -1;
+::-webkit-scrollbar-track {
+    background-color: var(--color-background);
 }
-.dark::view-transition-new(root) {
-  animation-name: reveal-dark;
-  animation-fill-mode: both;
-}
-
-@keyframes reveal-dark {
-  from {
-    clip-path: polygon(50% -71%, -50% 71%, -50% 71%, 50% -71%);
-  }
-  to {
-    clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
-  }
-}
-
-@keyframes reveal-light {
-  from {
-    clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
-  }
-  to {
-    clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
-  }
-} */
-
-
-/* CUSTOM VIEW TRANSITION GIFT */
-::view-transition-group(root) {
-  animation-timing-function: var(--expo-in);
-}
-
-::view-transition-new(root) {
-
-  /* SKELETON */
-  /* --url: url('https://tenor.com/es/view/skeleton-dance-moves-dancing-skeleton-dance-steps-gif-17167276'); */
-  /* ANIME */
-  --url: url('https://media.tenor.com/cyORI7kwShQAAAAi/shigure-ui-dance.gif');
-  /* JOKE */
-  /* --url: url('https://media.tenor.com/Jz0aSpk9VIQAAAAi/i-love-you-love.gif'); */
-
-  @supports(-webkit-mask: var(--url)) or (mask: var(--url)) {
-    mask: var(--url) center / 0 no-repeat;
-  }
-
-  animation: scale 3s;
-  /* 1.5s */
-  animation-fill-mode: both;
-}
-
-::view-transition-old(root),
-.dark::view-transition-old(root) {
-  animation: scale 3s;
-  /* 1.5s */
-  animation-fill-mode: both;
-}
-
-@keyframes scale {
-  0% {
-    mask-size: 0;
-  }
-
-  10%,
-  90% {
-    mask-size: 25vmax;
-  }
-
-  100% {
-    mask-size: 2000vmax;
-  }
-}
-
-
-
-
 
 /* =================================================================
-   Theme Variables - Primary Color Tokens
+   Theme Variables - Fantasy RPG
    ================================================================= */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    /* Core Colors */
+    --color-background: var(--color-parchment);
+    --color-foreground: var(--color-midnight);
 
-  /* Sidebar Colors */
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  
-  /* Brand Colors */
-  --color-brand: var(--brand);
-  --color-brand-foreground: var(--brand-foreground);
+    /* RPG Palette References */
+    --color-parchment: #E8E4D8;
+    --color-midnight: #1A1F2C;
+    --color-gold: #C5A059;
+    --color-forest: #3E5F3F;
+    --color-terracotta: #8B3A3A;
+    --color-slate: #4A607A;
 
-  /* Chart Colors */
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+    /* Semantic Mappings */
+    --color-primary: var(--color-midnight);
+    --color-primary-foreground: var(--color-parchment);
+    --color-secondary: var(--color-gold);
+    --color-secondary-foreground: var(--color-midnight);
+    --color-accent: var(--color-gold);
+    /* Used for premium elements */
+    --color-accent-foreground: var(--color-midnight);
+    --color-muted: var(--color-slate);
+    --color-muted-foreground: var(--color-parchment);
+    --color-destructive: var(--color-terracotta);
+    --color-destructive-foreground: var(--color-parchment);
 
-  /* UI Element Colors */
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+    /* Surfaces */
+    --color-surface: rgba(255, 255, 255, 0.5);
+    /* Glass-like effect on parchment */
+    --color-surface-dark: rgba(26, 31, 44, 0.8);
+    /* Dark glass for midnight */
 
-  /* Border Radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+    /* Borders */
+    --color-border: rgba(197, 160, 89, 0.3);
+    /* Fine gold border */
+    --color-input: rgba(74, 96, 122, 0.2);
+    /* Slate input border */
+    --color-ring: var(--color-gold);
+
+    /* Fonts */
+    --font-header: 'Cinzel', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-sans: var(--font-body);
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* Radius */
+    --radius: 0.5rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
 }
 
 /* =================================================================
-   Custom Utilities
-   ================================================================= */
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-.neon-glow {
-  box-shadow: 0 0 15px rgba(37, 37, 244, 0.4);
-}
-
-.hero-gradient {
-  background: radial-gradient(circle at 50% 50%,
-      rgba(37, 37, 244, 0.15) 0%,
-      rgba(10, 10, 10, 1) 70%);
-}
-
-/* =================================================================
-   Light Theme Variables
+   Root Variables
    ================================================================= */
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  
-  /* Brand */
-  --brand: #137fec;
-  --brand-foreground: #ffffff;
+    /* Fondos con textura coherente */
+    --color-parchment: #E8E4D8;
+    /* Fondo Light unificado */
+    --color-midnight: #1A1F2C;
+    /* Fondo Dark unificado */
 
-  /* Sidebar - Light (Matches #f6f7f8) */
-  --sidebar: #f6f7f8;
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #137fec;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+    /* Acentos de marca estandarizados */
+    --accent-gold: #C5A059;
+    /* Rangos, títulos y elementos premium */
+    --accent-forest: #3E5F3F;
+    /* Acciones primarias y éxito */
+    --accent-terracotta: #8B3A3A;
+    /* Alertas y misiones activas */
+    --accent-slate: #4A607A;
+    /* Líneas de mapa y texto de apoyo */
 
-  --expo-in: linear(0 0%, 0.0085 31.26%, 0.0167 40.94%,
-      0.0289 48.86%, 0.0471 55.92%,
-      0.0717 61.99%, 0.1038 67.32%,
-      0.1443 72.07%, 0.1989 76.7%,
-      0.2659 80.89%, 0.3465 84.71%,
-      0.4419 88.22%, 0.554 91.48%,
-      0.6835 94.51%, 0.8316 97.34%, 1 100%);
-  --expo-out: linear(0 0%, 0.1684 2.66%, 0.3165 5.49%,
-      0.446 8.52%, 0.5581 11.78%,
-      0.6535 15.29%, 0.7341 19.11%,
-      0.8011 23.3%, 0.8557 27.93%,
-      0.8962 32.68%, 0.9283 38.01%,
-      0.9529 44.08%, 0.9711 51.14%,
-      0.9833 59.06%, 0.9915 68.74%, 1 100%);
+    /* Interfaz y Bordes */
+    --glass-panel: rgba(255, 255, 255, 0.03);
+    /* Paneles oscuros coherentes */
+    --border-fine: 1px solid rgba(197, 160, 89, 0.3);
+    /* Borde dorado sutil */
+
+    /* View Transitions */
+    --expo-in: linear(0 0%, 0.0085 31.26%, 0.0167 40.94%,
+            0.0289 48.86%, 0.0471 55.92%,
+            0.0717 61.99%, 0.1038 67.32%,
+            0.1443 72.07%, 0.1989 76.7%,
+            0.2659 80.89%, 0.3465 84.71%,
+            0.4419 88.22%, 0.554 91.48%,
+            0.6835 94.51%, 0.8316 97.34%, 1 100%);
+    --expo-out: linear(0 0%, 0.1684 2.66%, 0.3165 5.49%,
+            0.446 8.52%, 0.5581 11.78%,
+            0.6535 15.29%, 0.7341 19.11%,
+            0.8011 23.3%, 0.8557 27.93%,
+            0.8962 32.68%, 0.9283 38.01%,
+            0.9529 44.08%, 0.9711 51.14%,
+            0.9833 59.06%, 0.9915 68.74%, 1 100%);
+
+    scrollbar-color: var(--color-gold) var(--color-background);
 }
 
-/* =================================================================
-   Dark Theme Variables
-   ================================================================= */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: #b0bfcc; /* Updated to match hardcoded value */
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  
-  /* Sidebar - Dark (Matches #101922) */
-  --sidebar: #101922;
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #137fec;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: #283039; /* Hover Hardcoded */
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: #3b4754; /* Border Hardcoded */
-  --sidebar-ring: oklch(0.556 0 0);
+    --color-background: var(--color-midnight);
+    --color-foreground: var(--color-parchment);
+    --color-primary: var(--color-gold);
+    --color-primary-foreground: var(--color-midnight);
+    --color-muted: 215 20% 65%;
+    /* Light Slate */
+}
+
+/* Base Global Styles */
+body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-header);
+    color: var(--color-accent-gold);
+    /* Default headers to gold in dark mode or strong color */
+}
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+    color: var(--color-gold);
+}
+
+.ornate-border {
+    border: 1px solid var(--color-border);
+    position: relative;
+}
+
+.ornate-border::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border: 1px solid var(--color-border);
+    opacity: 0.4;
+    pointer-events: none;
 }

@@ -12,10 +12,10 @@ interface BreadcrumbProps {
 // Mapeo de segmentos de URL a etiquetas legibles
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard: 'Dashboard',
-    courses: 'Courses',
-    paths: 'Learning Paths',
+    quests: 'Quests',
+    paths: 'Paths',
     exercises: 'Exercises',
-    organizations: 'Organizations',
+    organizations: 'Orgs',
     leaderboard: 'Leaderboard',
     admin: 'Admin',
     submissions: 'Submissions',
@@ -48,13 +48,13 @@ export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbPro
                 // Para IDs, intentar usar un nombre más descriptivo basado en el contexto
                 const previousSegment = segments[index - 1]
                 if (previousSegment === 'courses') {
-                    label = 'Course Details'
+                    label = 'Details'
                 } else if (previousSegment === 'paths') {
-                    label = 'Path Details'
+                    label = 'Details'
                 } else if (previousSegment === 'exercises') {
-                    label = 'Exercise Details'
+                    label = 'Details'
                 } else if (previousSegment === 'organizations') {
-                    label = 'Organization Details'
+                    label = 'Details'
                 } else {
                     label = 'Details'
                 }
@@ -88,25 +88,25 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
                 return (
                     <div key={index} className="flex items-center gap-2">
                         {item.icon && (
-                            <span className="material-symbols-outlined text-sm text-muted-foreground">
+                            <span className="material-symbols-outlined text-sm text-muted">
                                 {item.icon}
                             </span>
                         )}
 
                         {isLast ? (
-                            <span className="text-foreground dark:text-white">
+                            <span className="text-gold dark:text-text-main">
                                 {item.label}
                             </span>
                         ) : (
                             <>
                                 <Link
-                                    href={item.href?.includes("organizations") ? "/dashboard/organizations/new" : item.href || '#'}
-                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                    href={item.href?.includes("organizations") ? "/guild-hall/organizations/new" : item.href || '#'}
+                                    className="text-muted hover:text-text-main transition-colors"
                                 >
                                     {item.label}
                                 </Link>
-                                <span className="material-symbols-outlined text-sm text-muted-foreground">
-                                    chevron_right
+                                <span className="text-sm text-muted">
+                                    {"•"}
                                 </span>
                             </>
                         )}

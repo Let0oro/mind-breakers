@@ -60,14 +60,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-muted-foreground dark:hover:bg-sidebar-accent transition-colors"
+      className="cursor-pointer rounded-xs p-2 my-auto align-middle text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
       aria-label="Toggle theme"
     >
-      {isDark ? (
-        <span className="material-symbols-outlined">light_mode</span>
-      ) : (
-        <span className="material-symbols-outlined">dark_mode</span>
-      )}
+    <span className="scale-90 material-symbols-outlined">candle</span>
     </button>
   )
 }

@@ -6,10 +6,10 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex-col bg-main text-text-main">
       <SharedHeader />
 
-      <main className="flex-1 flex items-center justify-center font-display">
+      <main className="flex items-center font-display">
         <div className="w-full">
           {children}
         </div>

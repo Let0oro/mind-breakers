@@ -14,7 +14,7 @@ export function YouTubePlayer({ url, onComplete }: YouTubePlayerProps) {
       /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
       /youtube\.com\/embed\/([^&\n?#]+)/,
     ]
-    
+
     for (const pattern of patterns) {
       const match = url.match(pattern)
       if (match) return match[1]
@@ -26,7 +26,7 @@ export function YouTubePlayer({ url, onComplete }: YouTubePlayerProps) {
 
   if (!videoId) {
     return (
-      <div className="flex aspect-video items-center justify-center bg-gray-100 text-gray-500">
+      <div className="flex aspect-video items-center justify-center bg-surface text-muted">
         URL de YouTube inválida
       </div>
     )
@@ -34,15 +34,15 @@ export function YouTubePlayer({ url, onComplete }: YouTubePlayerProps) {
 
   return (
     <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
-      <YouTubeEmbed 
-        videoid={videoId} 
+      <YouTubeEmbed
+        videoid={videoId}
         height={400}
         params="controls=1&modestbranding=1"
       />
       {onComplete && (
         <button
           onClick={onComplete}
-          className="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 text-gray-900 dark:text-white hover:bg-green-700"
+          className="mt-4 w-full rounded-lg bg-green-600 px-4 py-2 text-text-main dark:text-text-main hover:bg-green-700"
         >
           Marcar como completado
         </button>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Space_Grotesk } from 'next/font/google'
+import { Inter, Cinzel } from 'next/font/google'
 import '@/globals.css'
 import 'material-symbols/outlined.css';
 
@@ -8,10 +8,10 @@ const inter = Inter({
   display: 'swap',
   variable: '--font-inter'
 })
-const space_grotesk = Space_Grotesk({
+const cinzel = Cinzel({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter'
+  variable: '--font-cinzel'
 })
 
 
@@ -62,7 +62,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} ${space_grotesk.className} bg-sidebar dark:bg-sidebar font-display text-slate-900 dark:text-white transition-colors duration-300`} suppressHydrationWarning>
+      <body className={`${inter.className} ${cinzel.variable} bg-background dark:bg-background text-foreground dark:text-foreground antialiased transition-colors duration-300`} suppressHydrationWarning>
         {children}
       </body>
     </html>
