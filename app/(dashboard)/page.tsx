@@ -8,7 +8,9 @@ export default function DashboardPage() {
     <div className="min-h-auto bg-main/80 text-text-main">
       <main id='explore' className="relative scroll-mt-40">
         <section className="pt-20 pb-12 px-6 lg:px-20">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center"> {/* Lighthose LCPE -> Largest Contentful Paint element 21,020 ms - TTFB
+2%
+460 ms */}
             <div className="space-y-8">
               <h1 className="text-6xl md:text-7xl font-black leading-[1.1] tracking-tighter text-transparent bg-clip-text bg-linear-to-r from-primary to-accent">
                 Level Up Your <br />Coding Skills
