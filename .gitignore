@@ -45,4 +45,5 @@ next-env.d.ts
 *.log
 *.agent
 *.txt
+.lighthouseci/
 supabase/functions/**/*.ts
