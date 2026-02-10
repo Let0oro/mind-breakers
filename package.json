@@ -38,7 +38,7 @@
     "swr": "^2.4.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
+    "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^16.1.6",
