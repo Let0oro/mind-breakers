@@ -1,21 +1,21 @@
-## 🚀 Type of PR
-- [ ] Feature
-- [ ] Bug Fix
-- [ ] Refactor
-- [ ] Chore (Dependencies/Config)
+## 🚀 Tipo de PR
+- [ ] Nueva Funcionalidad
+- [ ] Corrección de Bugs
+- [ ] Refactorización
+- [ ] Tareas de Mantenimiento (Dependencias/Config)
 
-## 📝 Description
-- **Summary**: Brief explanation of the changes.
-- **Database Changes**: [ ] Yes / [ ] No (Does this PR include Prisma migrations?)
-- **Environment Variables**: [ ] Yes / [ ] No (Are there new keys to add in Heroku/Config Vars?)
+## 📝 Descripción
+- **Resumen**: Breve explicación de los cambios.
+- **Cambios en Base de Datos**: [ ] Sí / [ ] No (¿Incluye migraciones de Supabase?)
+- **Variables de Entorno**: [ ] Sí / [ ] No (¿Hay nuevas claves para agregar en Vercel/Variables de Entorno?)
 
-## 🛠️ How to test?
-1. Run `yarn install` or `npm install`.
-2. Run `npx prisma generate` to update the client.
-3. Start the server with `yarn dev`.
-4. Test the following endpoint(s):
-   - `GET /api/auth/verify`
-   - ...
+## 🛠️ ¿Cómo probar?
+1. Ejecutar `npm install`.
+2. Ejecutar `npm run lint` para verificar estilo de código.
+3. Ejecutar `npm run test` para correr las pruebas unitarias.
+4. Iniciar el servidor con `npm run dev`.
+5. Verificar manualmente en `http://localhost:3000`.
+   - Pasos específicos de prueba...
 
-## 🔗 Related Issue
-- Closes #ID
+## 🔗 Issue Relacionado
+- Close #ID
