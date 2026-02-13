@@ -83,6 +83,16 @@ describe('ExplorePage', () => {
     test('filters by tab', async () => {
         render(<ExplorePage />)
 
+        // Wait for initial load to complete
+        await waitFor(() => {
+            expect(searchPaths).toHaveBeenCalled()
+        });
+
+        // Reset mocks to verify calls after tab change
+        (searchPaths as unknown as ReturnType<typeof vi.fn>).mockClear();
+        (searchCourses as unknown as ReturnType<typeof vi.fn>).mockClear();
+        (searchOrganizations as unknown as ReturnType<typeof vi.fn>).mockClear();
+
         // Switch to Courses tab
         const coursesTab = screen.getByRole('button', { name: /QUESTS/i })
         fireEvent.click(coursesTab)
@@ -91,19 +101,8 @@ describe('ExplorePage', () => {
             expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('tab=courses'))
         })
 
-            // Mock that URL change effect triggers logic (simulated by re-click or just check logic)
-            // Since we can't easily simulate URL change triggering useEffect in unit test with mocked router,
-            // we rely on the click handler updating state which triggers search.
-
-            // Reset mocks to verify calls
-            ; (searchPaths as unknown as ReturnType<typeof vi.fn>).mockClear()
-            ; (searchCourses as unknown as ReturnType<typeof vi.fn>).mockClear()
-
-        fireEvent.click(coursesTab)
-
         await waitFor(() => {
-            // Should verify that searchPaths was NOT called if tab is courses
-            // And searchCourses WAS called
+            // searchCourses should be called for 'courses' tab
             expect(searchCourses).toHaveBeenCalled()
             // searchPaths is only called for 'all' or 'paths'
             expect(searchPaths).not.toHaveBeenCalled()

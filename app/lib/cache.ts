@@ -1127,3 +1127,24 @@ export const getSubmissionsListCached = (supabase: SupabaseClient) =>
     )()
 
 
+
+/**
+ * Get user profile (cached per user)
+ */
+export const getUserProfileCached = (supabase: SupabaseClient, userId: string) =>
+    unstable_cache(
+        async () => {
+            const { data } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single()
+
+            return data
+        },
+        [`user-profile-${userId}`],
+        {
+            revalidate: CACHE_DURATION.SHORT,
+            tags: [`user-${userId}`],
+        }
+    )()
