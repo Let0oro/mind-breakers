@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { YouTubePlayer } from '@/components/ui/YouTubePlayer'
@@ -376,7 +377,18 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
       <div className="mt-10">
-        <Recommendations mode="similar" contextId={course.id} contextType="course" />
+        <Suspense fallback={
+          <div className="animate-pulse border border-border bg-main p-6">
+            <div className="h-4 w-40 bg-surface rounded mb-4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-32 bg-surface rounded" />
+              ))}
+            </div>
+          </div>
+        }>
+          <Recommendations mode="similar" contextId={course.id} contextType="course" />
+        </Suspense>
       </div>
     </>
   )
