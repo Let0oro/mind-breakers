@@ -229,14 +229,14 @@ export default function NewCoursePage() {
   return (
     <div className="flex gap-8 flex-col lg:flex-row items-start">
       <div className="flex-1 w-full">
-        <FormLayout title="New Quest" subtitle="Add a new course to an existing learning path">
+        <FormLayout title="New Quest" subtitle="Add a new quest to an existing expedition">
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <FormError message={error} />
 
             {/* URL with Auto-fill */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
-                Course URL
+                Quest URL
                 {metadataFetched && <span className="text-[10px] font-normal normal-case text-green-500">✓ Metadata loaded</span>}
               </label>
               <div className="flex gap-2">
@@ -298,7 +298,7 @@ export default function NewCoursePage() {
               name="summary"
               value={summary}
               onChange={setSummary}
-              placeholder="Brief one-liner about the course"
+              placeholder="Brief one-liner about the quest"
               autoFilled={metadataFetched && !!summary}
             />
 
@@ -308,7 +308,7 @@ export default function NewCoursePage() {
               type="textarea"
               value={description}
               onChange={setDescription}
-              placeholder="What will students learn?"
+              placeholder="What will adventurers find in this quest?"
               autoFilled={metadataFetched && !!description}
             />
 
@@ -379,7 +379,7 @@ export default function NewCoursePage() {
             <FormDivider />
 
             {/* Exercises */}
-            <FormSection title="Exercises">
+            <FormSection title="Missions">
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -387,13 +387,13 @@ export default function NewCoursePage() {
                   className="px-4 py-2 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-sm">add</span>
-                  Add Exercise
+                  Add Mission
                 </button>
               </div>
 
               {exercises.length === 0 ? (
                 <div className="text-center py-8 border border-dashed border-border">
-                  <p className="text-muted text-sm">No exercises added yet.</p>
+                  <p className="text-muted text-sm">No missions added yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -408,7 +408,7 @@ export default function NewCoursePage() {
                             type="text"
                             value={exercise.title}
                             onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
-                            placeholder="Exercise Title"
+                            placeholder="Mission Title"
                             className="bg-transparent border-none text-text-main font-bold focus:outline-none w-64"
                           />
                         </div>
@@ -461,8 +461,8 @@ export default function NewCoursePage() {
           <ul className="text-xs text-muted space-y-3">
             <li>• Use clear, descriptive titles.</li>
             <li>• Add a high-quality thumbnail.</li>
-            <li>• Check for existing courses before creating a new one.</li>
-            <li>• You can adapt existing courses to your path!</li>
+            <li>• Check for existing quests before creating a new one.</li>
+            <li>• You can adapt existing quests to your expedition!</li>
           </ul>
         </div>
       </div>

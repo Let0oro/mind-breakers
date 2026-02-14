@@ -13,6 +13,7 @@ import {
     type OrganizationListItem
 } from '@/lib/queries'
 import type { PathListItem } from '@/lib/types'
+import GuildHallLoading from '../loading'
 
 type SearchResult = {
     id: string
@@ -177,7 +178,7 @@ function ExplorePageContent() {
         <>
             {/* Header */}
             <header className="mb-10">
-                <h1 className="text-text-main text-4xl font-black italic tracking-tight mb-1">EXPLORE</h1>
+                <h1 className="text-5xl font-header text-foreground tracking-tight mb-1">EXPLORE</h1>
                 <p className="text-muted text-sm mb-6">
                     Discover expeditions, quests, and organizations
                 </p>
@@ -238,7 +239,7 @@ function ExplorePageContent() {
                         {searchQuery ? 'No results found' : 'Start typing to search'}
                     </p>
                     <p className="text-muted text-xs">
-                        {searchQuery ? 'Try different keywords' : 'Search across paths, courses, and organizations'}
+                        {searchQuery ? 'Try different keywords' : 'Search across expeditions, quests, and organizations'}
                     </p>
                 </div>
             )}
@@ -267,8 +268,8 @@ function ResultCard({ result }: { result: SearchResult }) {
 
     const getTypeLabel = () => {
         switch (result.type) {
-            case 'path': return 'Path'
-            case 'course': return 'Course'
+            case 'path': return 'Expedition'
+            case 'course': return 'Quest'
             case 'organization': return 'Organization'
             default: return ''
         }
@@ -322,10 +323,10 @@ function ResultCard({ result }: { result: SearchResult }) {
                         <span>{result.xp_reward} XP</span>
                     )}
                     {result.courseCount !== undefined && result.courseCount > 0 && (
-                        <span>{result.courseCount} courses</span>
+                        <span>{result.courseCount} quests</span>
                     )}
                     {result.pathCount !== undefined && result.pathCount > 0 && (
-                        <span>{result.pathCount} paths</span>
+                        <span>{result.pathCount} expeditions</span>
                     )}
                 </div>
             </div>
@@ -335,7 +336,7 @@ function ResultCard({ result }: { result: SearchResult }) {
 
 export default function ExplorePage() {
     return (
-        <Suspense fallback={<div className="text-text-main">Loading...</div>}>
+        <Suspense fallback={<GuildHallLoading />}>
             <ExplorePageContent />
         </Suspense>
     )

@@ -115,7 +115,7 @@ export function CardPath({
                     </div>
                     <div className="absolute top-2 right-2">
                         <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
-                            Campaign
+                            Expedition
                         </span>
                     </div>
                 </div>

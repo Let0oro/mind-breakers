@@ -332,7 +332,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                             </span>
                                         ) : (
                                             <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
-                                                New Course
+                                                New Quest
                                             </span>
                                         )}
                                     </div>

@@ -57,7 +57,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                         ) : (
                             <div className="col-span-full py-12 text-center border border-dashed border-border">
                                 <span className="material-symbols-outlined text-4xl mb-2 text-muted">school</span>
-                                <p className="text-muted text-sm">No published courses yet.</p>
+                                <p className="text-muted text-sm">No published quests yet.</p>
                             </div>
                         )}
                     </div>
@@ -80,7 +80,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                         ) : (
                             <div className="col-span-full py-12 text-center border border-dashed border-border">
                                 <span className="material-symbols-outlined text-4xl mb-2 text-muted">map</span>
-                                <p className="text-muted text-sm">No learning paths created yet.</p>
+                                <p className="text-muted text-sm">No expeditions created yet.</p>
                             </div>
                         )}
                     </div>

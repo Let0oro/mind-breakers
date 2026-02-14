@@ -30,8 +30,8 @@ export default async function SettingsPage() {
     return (
         <>
             <header className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main mb-1">
-                    Settings
+                <h1 className="text-5xl font-header text-foreground tracking-tight mb-1">
+                    Armory
                 </h1>
                 <p className="text-muted text-sm">
                     Manage your account and preferences
