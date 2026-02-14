@@ -77,8 +77,25 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session si está expirada
-  await supabase.auth.getUser()
+  // Refresh session if expired
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Protect admin routes
+  if (request.nextUrl.pathname.startsWith('/guild-hall/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.is_admin) {
+      return NextResponse.redirect(new URL('/guild-hall', request.url))
+    }
+  }
 
   return response
 }

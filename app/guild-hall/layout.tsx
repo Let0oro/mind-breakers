@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { getUserProfileCached } from '@/lib/cache'
 
 import Breadcrumb from '@/components/ui/breadcrumb'
 import { NotificationBell } from '@/components/features/NotificationBell'
@@ -18,11 +19,7 @@ export default async function DashboardLayout({
     if (authError || !user) redirect('/login')
 
     // Fetch user profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
+    const profile = await getUserProfileCached(supabase, user.id)
 
     return (
         <div className="flex h-screen overflow-hidden bg-main">

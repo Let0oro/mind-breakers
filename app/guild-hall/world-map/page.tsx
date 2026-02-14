@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense, useCallback } from 'react'
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -37,8 +37,11 @@ function ExplorePageContent() {
     const [searchQuery, setSearchQuery] = useState('')
     const [activeTab, setActiveTab] = useState<'all' | 'paths' | 'courses' | 'organizations'>(initialTab)
     const [results, setResults] = useState<SearchResult[]>([])
-    const [loading, setLoading] = useState(false)
-    const [savedCourseIds, setSavedCourseIds] = useState<Set<string>>(new Set())
+    const [loading, setLoading] = useState(true)
+
+    // Use ref for savedCourseIds to avoid triggering performSearch recreation
+    const savedCourseIdsRef = useRef<Set<string>>(new Set())
+    const initializedRef = useRef(false)
 
     const supabase = createClient()
 
@@ -49,6 +52,7 @@ function ExplorePageContent() {
                 setActiveTab(tabFromUrl)
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams])
 
     const handleTabChange = (newTab: typeof activeTab) => {
@@ -57,17 +61,6 @@ function ExplorePageContent() {
         params.set('tab', newTab)
         router.push(`/guild-hall/world-map?${params.toString()}`)
     }
-
-    useEffect(() => {
-        const fetchSavedCourses = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) return
-
-            const savedIds = await getUserSavedCourses(supabase, user.id)
-            setSavedCourseIds(new Set(savedIds))
-        }
-        fetchSavedCourses()
-    }, [supabase])
 
     const performSearch = useCallback(async () => {
         setLoading(true)
@@ -120,7 +113,7 @@ function ExplorePageContent() {
                                 thumbnail_url: course.thumbnail_url,
                                 xp_reward: course.xp_reward,
                                 organization: course.organizations?.[0]?.name,
-                                saved: savedCourseIds.has(course.id)
+                                saved: savedCourseIdsRef.current.has(course.id)
                             })
                         })
                     })
@@ -155,9 +148,28 @@ function ExplorePageContent() {
         } finally {
             setLoading(false)
         }
-    }, [activeTab, searchQuery, savedCourseIds, supabase])
+    }, [activeTab, searchQuery, supabase])
 
+    // Initial load: fetch saved courses first, then perform search
     useEffect(() => {
+        if (initializedRef.current) return
+        initializedRef.current = true
+
+        const initialize = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const savedIds = await getUserSavedCourses(supabase, user.id)
+                savedCourseIdsRef.current = new Set(savedIds)
+            }
+            performSearch()
+        }
+        initialize()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // Re-search when tab or query changes (but not on initial mount)
+    useEffect(() => {
+        if (!initializedRef.current) return
         performSearch()
     }, [performSearch])
 

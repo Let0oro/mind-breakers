@@ -1,8 +1,15 @@
-export default function GuildHallLoading() {
-    return (
-        <div className="flex items-center justify-center h-[60dvh] overflow-hidden ">
+'use client'
 
-        <div className="relative w-64 h-64 md:w-64 md:h-64 flex items-center justify-center">
+export default function DashboardLoading() {
+    return (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-gold-500">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.05)_0%,transparent_70%)]" />
+
+            {/* Main Content */}
+            <div className="relative z-10 flex flex-col items-center gap-8">
+                {/* Central Animation Container */}
+                <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
                     {/* Rotating Rings */}
                     <div className="absolute inset-0 border border-gold rounded-full animate-[spin_10s_linear_infinite]" />
                     <div className="absolute inset-4 border border-gold rounded-full animate-[spin_15s_linear_infinite_reverse]" />
@@ -33,6 +40,7 @@ export default function GuildHallLoading() {
                         </svg>
                     </div>
                 </div>
+            </div>
         </div>
     )
 }
