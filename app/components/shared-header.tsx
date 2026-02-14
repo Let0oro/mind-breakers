@@ -75,8 +75,8 @@ export default function SharedHeader() {
 
             {/* Mobile menu dropdown */}
             {mobileMenuOpen && !isAuthPage && (
-                <div className="md:hidden absolute top-full left-0 right-0 bg-main border-b border-main shadow-lg">
-                    <nav className="flex flex-col p-4 gap-2 items-stretch text-center">
+                <div className="md:hidden absolute top-full left-0 bg-main right-0 border-b border-main shadow-lg">
+                    <nav className="flex flex-col p-4 gap-2 items-stretch bg-main text-center">
                         <Link
                             className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
                             href="/guild-hall/world-map"

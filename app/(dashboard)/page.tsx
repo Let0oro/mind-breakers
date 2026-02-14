@@ -21,7 +21,7 @@ export default function DashboardPage() {
             </div>
             <div className="relative">
               <div className="absolute -top-10 -left-10 w-32 h-32 bg-inverse/20 rounded-full blur-3xl"></div>
-              <div className="relative bg-surface-dark border border-white/10 rounded-xs p-6 shadow-2xl overflow-hidden group">
+              <div className="relative dark:bg-surface-dark bg-background/40 border border-white/10 rounded-xs p-6 shadow-2xl overflow-hidden group">
                 <div className="space-y-4 mb-8">
                   <div className="flex justify-between items-end">
                     <div>
@@ -30,8 +30,8 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-muted font-bold text-sm">2,450 / 3,000 XP</p>
                   </div>
-                  <div className="w-full h-4 bg-main-dark rounded-full border border-white/5 p-1">
-                    <div className="h-full bg-inverse rounded-full neon-glow w-4/5"></div>
+                  <div className="w-full h-4 bg-main-dark rounded-full border dark:border-white/5 border-surface-dark/50 p-1">
+                    <div className="h-full dark:bg-white/40 bg-midnight/40 rounded-full neon-glow w-4/5"></div>
                   </div>
                 </div>
 
