@@ -28,8 +28,8 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`pb-3 text-xs font-bold uppercase tracking-widest transition-colors border-b-2 -mb-px flex items-center gap-2 ${activeTab === tab.key
-                                ? 'border-text-main text-text-main'
-                                : 'border-transparent text-muted hover:text-text-main'
+                            ? 'border-text-main text-text-main'
+                            : 'border-transparent text-muted hover:text-text-main'
                             }`}
                     >
                         <span className="material-symbols-outlined text-sm">{tab.icon}</span>
@@ -56,7 +56,7 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                             ))
                         ) : (
                             <div className="col-span-full py-12 text-center border border-dashed border-border">
-                                <span className="material-symbols-outlined text-4xl mb-2 text-muted">school</span>
+                                <span className="material-symbols-outlined text-4xl mb-2 text-muted">assignment_late</span>
                                 <p className="text-muted text-sm">No published quests yet.</p>
                             </div>
                         )}

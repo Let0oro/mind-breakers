@@ -109,7 +109,7 @@ export default async function PathsListPage() {
           })
         ) : (
           <div className="col-span-full border border-border p-12 text-center">
-            <span className="material-symbols-outlined text-5xl text-muted mb-4 block">route</span>
+            <span className="material-symbols-outlined text-5xl text-muted mb-4 block">flag</span>
             <p className="text-muted text-sm mb-1">No Expeditions</p>
             <p className="text-muted text-xs mb-6">Start your journey by finding an expedition</p>
             <Link

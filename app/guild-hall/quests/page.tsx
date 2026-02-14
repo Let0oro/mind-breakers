@@ -170,7 +170,7 @@ export default async function CoursesPage({
                     })
                 ) : (
                     <div className="col-span-full border border-border p-12 text-center">
-                        <span className="material-symbols-outlined text-5xl text-muted mb-4 block">school</span>
+                        <span className="material-symbols-outlined text-5xl text-muted mb-4 block">assignment_late</span>
                         <p className="text-muted text-sm mb-1">No courses found</p>
                         <p className="text-muted text-xs mb-6">
                             {filter !== 'all' ? `No ${filter} courses.` : "Start by exploring or creating a course."}

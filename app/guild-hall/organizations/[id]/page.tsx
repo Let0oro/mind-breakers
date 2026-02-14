@@ -100,7 +100,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                             <p className="text-sm text-muted dark:text-muted mt-1 line-clamp-1">{path.summary}</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-muted">
-                                            <span className="material-symbols-outlined text-base">school</span>
+                                            <span className="material-symbols-outlined text-base">assignment_late</span>
                                             <span>{path.courses?.length || 0} quests</span>
                                             <span className="material-symbols-outlined text-base ml-2">chevron_right</span>
                                         </div>
@@ -126,7 +126,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                                 <img src={course.thumbnail_url} alt={course.title} className="object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-muted">
-                                                    <span className="material-symbols-outlined text-4xl">school</span>
+                                                    <span className="material-symbols-outlined text-4xl">assignment_late</span>
                                                 </div>
                                             )}
                                             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur text-text-main text-xs px-2 py-1 rounded font-bold">

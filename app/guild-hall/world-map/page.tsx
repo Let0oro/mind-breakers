@@ -259,9 +259,9 @@ function ResultCard({ result }: { result: SearchResult }) {
 
     const getIcon = () => {
         switch (result.type) {
-            case 'path': return 'route'
-            case 'course': return 'school'
-            case 'organization': return 'business'
+            case 'path': return 'flag'
+            case 'course': return 'assignment_late'
+            case 'organization': return 'groups'
             default: return 'help'
         }
     }

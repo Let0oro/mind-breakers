@@ -60,7 +60,7 @@ export function CardPath({
 
                 {/* Icon Box */}
                 <div className="h-16 w-16 shrink-0 border border-border flex items-center justify-center bg-surface">
-                    <span className="material-symbols-outlined text-2xl text-text-main">route</span>
+                    <span className="material-symbols-outlined text-2xl text-text-main">flag</span>
                 </div>
 
                 {/* Content */}
@@ -111,7 +111,7 @@ export function CardPath({
                         type="path"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-inverse/10 pointer-events-none">
-                        <span className="material-symbols-outlined text-4xl text-main-alt">route</span>
+                        <span className="material-symbols-outlined text-4xl text-main-alt">flag</span>
                     </div>
                     <div className="absolute top-2 right-2">
                         <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">

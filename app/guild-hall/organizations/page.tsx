@@ -114,12 +114,12 @@ export default async function OrganizationsPage() {
                                 {/* Stats */}
                                 <div className="flex gap-6 pt-4 border-t border-border">
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined w-4 h-4 text-muted">route</span>
+                                        <span className="material-symbols-outlined w-4 h-4 text-muted">flag</span>
                                         <span className="text-text-main text-sm font-bold">{pathCount}</span>
                                         <span className="text-muted text-xs">expeditions</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined w-4 h-4 text-muted">school</span>
+                                        <span className="material-symbols-outlined w-4 h-4 text-muted">assignment_late</span>
                                         <span className="text-text-main text-sm font-bold">{courseCount}</span>
                                         <span className="text-muted text-xs">quests</span>
                                     </div>
