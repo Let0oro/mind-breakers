@@ -5,7 +5,7 @@ import { getOrganizationsCached } from '@/lib/cache'
 
 export const metadata = {
     title: 'Organizations - MindBreaker',
-    description: 'Browse course providers and organizations',
+    description: 'Browse quest providers and organizations',
 }
 
 export default async function OrganizationsPage() {
@@ -114,14 +114,14 @@ export default async function OrganizationsPage() {
                                 {/* Stats */}
                                 <div className="flex gap-6 pt-4 border-t border-border">
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined w-4 h-4 text-muted">route</span>
+                                        <span className="material-symbols-outlined w-4 h-4 text-muted">flag</span>
                                         <span className="text-text-main text-sm font-bold">{pathCount}</span>
-                                        <span className="text-muted text-xs">paths</span>
+                                        <span className="text-muted text-xs">expeditions</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined w-4 h-4 text-muted">school</span>
+                                        <span className="material-symbols-outlined w-4 h-4 text-muted">assignment_late</span>
                                         <span className="text-text-main text-sm font-bold">{courseCount}</span>
-                                        <span className="text-muted text-xs">courses</span>
+                                        <span className="text-muted text-xs">quests</span>
                                     </div>
                                 </div>
 
@@ -130,7 +130,7 @@ export default async function OrganizationsPage() {
                                     href={`/guild-hall/paths?org=${org.id}`}
                                     className="mt-auto w-full text-center border border-border hover:border-text-main hover:bg-surface text-text-main px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors"
                                 >
-                                    View Paths
+                                    View Expeditions
                                 </Link>
                             </div>
                         )
@@ -139,7 +139,7 @@ export default async function OrganizationsPage() {
                     <div className="col-span-full border border-border bg-main p-12 text-center">
                         <span className="material-symbols-outlined text-5xl text-muted mb-4 block">corporate_fare</span>
                         <p className="text-muted text-sm mb-1">No organizations yet</p>
-                        <p className="text-muted text-xs mb-6">Create an organization to start publishing content</p>
+                        <p className="text-muted text-xs mb-6">Create an organization to start publishing quests and expeditions</p>
                         <Link
                             href="/guild-hall/organizations/new"
                             className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"

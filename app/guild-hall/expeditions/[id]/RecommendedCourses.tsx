@@ -12,10 +12,10 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
         <div className="mt-8 border border-indigo-100 bg-indigo-50/50 p-6 backdrop-blur-sm">
             <div className="mb-6">
                 <h2 className="text-xl font-bold text-text-main">
-                    ✨ También te podría interesar
+                    ✨ You might also be interested in
                 </h2>
                 <p className="text-sm text-muted">
-                    Encontramos estos recursos adicionales en paths similares al que estás viendo.
+                    We found these additional resources in expeditions similar to the one you&apos;re viewing.
                 </p>
             </div>
 
@@ -46,7 +46,7 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
 
                             {/* Badge indicando origen */}
                             <div className="absolute top-2 right-2 rounded-full bg-main/90 px-2 py-1 text-xs font-medium text-muted shadow-sm backdrop-blur-md">
-                                Visto en otro path
+                                Seen in another expedition
                             </div>
                         </div>
 
@@ -64,7 +64,7 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
 
                             <div className="mt-auto flex items-center justify-between text-xs text-muted">
                                 <span className="truncate max-w-[70%]">
-                                    De: {rec.sourcePathTitle}
+                                    From: {rec.sourcePathTitle}
                                 </span>
                                 <span className="material-symbols-outlined text-base">open_in_new</span>
                             </div>

@@ -101,7 +101,7 @@ export default async function CoursesPage({
             <header className="mb-10">
                 <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
                     <div className="flex flex-col gap-1">
-                        <h1 className="text-text-main text-4xl font-black italic tracking-tight">QUESTS</h1>
+                        <h1 className="text-5xl font-header text-foreground tracking-tight">QUESTS</h1>
                         <p className="text-muted text-sm">
                             {courses.length} / {allCoursesCount} quests displayed
                         </p>
@@ -170,7 +170,7 @@ export default async function CoursesPage({
                     })
                 ) : (
                     <div className="col-span-full border border-border p-12 text-center">
-                        <span className="material-symbols-outlined text-5xl text-muted mb-4 block">school</span>
+                        <span className="material-symbols-outlined text-5xl text-muted mb-4 block">assignment_late</span>
                         <p className="text-muted text-sm mb-1">No courses found</p>
                         <p className="text-muted text-xs mb-6">
                             {filter !== 'all' ? `No ${filter} courses.` : "Start by exploring or creating a course."}

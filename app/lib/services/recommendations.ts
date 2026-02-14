@@ -105,7 +105,7 @@ export async function getRecommendedCourses(pathId: string): Promise<Recommended
         const baseRec: RecommendedCourse = {
             url: item.link_url,
             title: item.title,
-            sourcePathTitle: learningPath?.title || 'Unknown Path',
+            sourcePathTitle: learningPath?.title || 'Unknown Expedition',
             sourcePathId: learningPath?.id || '',
         }
 

@@ -47,14 +47,14 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           Content not available
         </h1>
         <p className="text-muted text-sm max-w-md">
-          This learning path is pending validation by an administrator.
+          This expedition is pending validation by an administrator.
         </p>
         <Link
-          href="/guild-hall/paths"
+          href="/guild-hall/expeditions"
           className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
-          Back to paths
+          Back to expeditions
         </Link>
       </div>
     )
@@ -137,7 +137,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           <div>
             <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
             <p className="text-xs text-muted">
-              This path is only visible to you until approved by an admin.
+              This expedition is only visible to you until approved by an admin.
             </p>
           </div>
         </div>
@@ -146,11 +146,11 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
       {/* Header */}
       <header className="mb-10">
         <Link
-          href="/guild-hall/paths"
+          href="/guild-hall/expeditions"
           className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
-          Back to paths
+          Back to expeditions
         </Link>
 
         <div className="flex items-start justify-between mt-4 gap-4">
@@ -226,7 +226,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           {/* About */}
           <div className="border border-border bg-main p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
-              About this path
+              About this expedition
             </h2>
             {path.description ? (
               <p className="text-xs text-muted whitespace-pre-wrap">
@@ -240,7 +240,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
             <div className="mt-6 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted">Total courses:</span>
+                <span className="text-muted">Total quests:</span>
                 <span className="font-bold text-text-main">{totalCourses}</span>
               </div>
               <div className="flex justify-between">
@@ -258,7 +258,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 href={`/guild-hall/quests/new?pathId=${path.id}`}
                 className="mt-6 block w-full px-4 py-2 text-center text-xs font-bold uppercase tracking-widest border border-text-main text-text-main hover:bg-inverse hover:text-main-alt transition-all"
               >
-                + Add course
+                + Add quest
               </Link>
             )}
           </div>
@@ -268,7 +268,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             <div className="flex items-center gap-2 mb-4">
               <span className="material-symbols-outlined text-lg text-text-main">leaderboard</span>
               <h2 className="text-xs font-bold uppercase tracking-widest text-text-main">
-                Top Students
+                Top Adventurers
               </h2>
             </div>
 
@@ -297,7 +297,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                         {student.username}
                       </p>
                       <p className="text-[10px] text-muted">
-                        {student.completedCount} courses
+                        {student.completedCount} quests
                       </p>
                     </div>
                     <div className="text-xs font-bold text-text-main">
@@ -308,7 +308,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </div>
             ) : (
               <p className="text-xs text-muted italic">
-                Be the first to complete courses in this path.
+                Be the first to complete quests in this expedition.
               </p>
             )}
           </div>

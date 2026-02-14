@@ -4,8 +4,8 @@ import { useState, useEffect, Activity } from 'react'
 import Image, { ImageProps } from 'next/image'
 
 const icons = {
-    course: 'school',
-    path: 'map',
+    course: 'assignment_late',
+    path: 'flag',
     user: 'person',
     default: 'image'
 }

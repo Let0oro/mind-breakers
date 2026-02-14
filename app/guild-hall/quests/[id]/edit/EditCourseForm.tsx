@@ -336,7 +336,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         <div className="border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
                             <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
                             <p className="text-amber-500 text-sm">
-                                Saving changes will reset the course validation status to &quot;Pending&quot;.
+                                Saving changes will reset the quest validation status to &quot;Pending&quot;.
                             </p>
                         </div>
                     )}
@@ -344,7 +344,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     {/* URL with Auto-fill */}
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
-                            Course URL
+                            Quest URL
                         </label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
@@ -374,14 +374,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </div>
 
                     <FormField
-                        label="Learning Path"
+                        label="Expedition"
                         name="path_id"
                         type="select"
                         value={pathId}
                         onChange={setPathId}
                         required
                     >
-                        <option value="">Select a learning path</option>
+                        <option value="">Select an expedition</option>
                         {paths.map((path) => (
                             <option key={path.id} value={path.id}>{path.title}</option>
                         ))}
@@ -461,7 +461,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </div>
 
                     <FormField
-                        label="Order in Path"
+                        label="Order in Expedition"
                         name="order_index"
                         type="number"
                         value={orderIndex}
@@ -473,7 +473,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     <FormDivider />
 
                     {/* Exercises */}
-                    <FormSection title="Exercises">
+                    <FormSection title="Missions">
                         <div className="flex justify-end">
                             <button
                                 type="button"
@@ -481,13 +481,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                 className="px-4 py-2 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-sm">add</span>
-                                Add Exercise
+                                Add Mission
                             </button>
                         </div>
 
                         {exercises.length === 0 ? (
                             <div className="text-center py-8 border border-dashed border-border">
-                                <p className="text-muted text-sm">No exercises added yet.</p>
+                                <p className="text-muted text-sm">No missions added yet.</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -502,7 +502,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                                     type="text"
                                                     value={exercise.title}
                                                     onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
-                                                    placeholder="Exercise Title"
+                                                    placeholder="Mission Title"
                                                     className="bg-transparent border-none text-text-main font-bold focus:outline-none w-64"
                                                 />
                                             </div>

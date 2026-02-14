@@ -124,10 +124,10 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
           className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver
+          Back
         </button>
         <h1 className="text-2xl font-bold text-text-main dark:text-text-main">
-          Entregar ejercicio
+          Submit Mission
         </h1>
         <p className="text-muted dark:text-muted mt-2">
           {exercise.title}
@@ -139,7 +139,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
           {exercise.description && (
             <div className="mb-6 rounded-lg bg-brand/10 border border-brand/30 p-4">
               <h3 className="text-sm font-medium text-brand mb-2">
-                Descripción del ejercicio
+                Mission Description
               </h3>
               <p className="text-sm text-muted dark:text-muted whitespace-pre-wrap">
                 {exercise.description}
@@ -150,7 +150,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
           {exercise.requirements && (
             <div className="mb-6 rounded-lg bg-amber-500/10 border border-amber-500/30 p-4">
               <h3 className="text-sm font-medium text-amber-400 mb-2">
-                Requisitos
+                Requirements
               </h3>
               <p className="text-sm text-muted dark:text-muted whitespace-pre-wrap">
                 {exercise.requirements}
@@ -169,13 +169,13 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
             <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 flex gap-3 items-start">
               <span className="material-symbols-outlined text-blue-400 text-xl shrink-0">info</span>
               <p className="text-sm text-text-main dark:text-gray-300">
-                <span className="font-bold text-blue-400">Sugerencia Pro:</span> No es obligatorio, pero sí altamente recomendable que el proyecto entregado cuente con <strong>Test Driven Development (TDD)</strong> completo. ¡Esto demostrará tu calidad como desarrollador!
+                <span className="font-bold text-blue-400">Pro Tip:</span> It is not mandatory, but it is highly recommended that the submitted project has complete <strong>Test Driven Development (TDD)</strong>. This will demonstrate your quality as a developer!
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-text-main dark:text-text-main mb-3">
-                Tipo de entrega
+                Submission Type
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <button
@@ -186,7 +186,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                     : 'border-border dark:border-border text-muted dark:text-muted hover:border-border/50'
                     }`}
                 >
-                  📝 Texto
+                  📝 Text
                 </button>
                 <button
                   type="button"
@@ -196,7 +196,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                     : 'border-border dark:border-border text-muted dark:text-muted hover:border-border/50'
                     }`}
                 >
-                  📦 Archivo ZIP
+                  📦 ZIP File
                 </button>
                 <button
                   type="button"
@@ -227,7 +227,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
             {submissionType === 'text' && (
               <div>
                 <label htmlFor="text-content" className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Tu solución (código, respuestas, etc.)
+                  Your solution (code, answers, etc.)
                 </label>
                 <textarea
                   id="text-content"
@@ -244,7 +244,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
             {submissionType === 'zip' && (
               <div>
                 <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Sube tu proyecto (ZIP)
+                  Upload your project (ZIP)
                 </label>
                 {fileUrl ? (
                   <div className="rounded-lg border-2 border-green-500/50 bg-green-500/10 p-4">
@@ -252,7 +252,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                       <div className="flex items-center gap-3">
                         <span className="material-symbols-outlined h-8 w-8 text-green-400">check_circle</span>
                         <span className="text-sm font-medium text-green-400">
-                          Archivo subido correctamente
+                          File uploaded successfully
                         </span>
                       </div>
                       <button
@@ -260,7 +260,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                         onClick={() => setFileUrl('')}
                         className="text-sm text-red-400 hover:text-red-300"
                       >
-                        Cambiar
+                        Change
                       </button>
                     </div>
                   </div>
@@ -279,7 +279,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
             {submissionType === 'drive' && (
               <div>
                 <label htmlFor="drive-url" className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  URL de Google Drive
+                  Google Drive URL
                 </label>
                 <input
                   type="url"
@@ -291,7 +291,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   placeholder="https://drive.google.com/..."
                 />
                 <p className="mt-2 text-xs text-muted dark:text-muted">
-                  Asegúrate de que el archivo/carpeta tenga permisos de visualización para cualquiera con el enlace
+                  Ensure the file/folder has view permissions for anyone with the link
                 </p>
               </div>
             )}
@@ -299,7 +299,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
             {submissionType === 'github' && (
               <div>
                 <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Selecciona un repositorio de GitHub
+                  Select a GitHub repository
                 </label>
                 <GitHubRepoSelector
                   onSelect={setGithubRepoUrl}
@@ -309,7 +309,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   <div className="mt-3 rounded-lg border-2 border-green-500/50 bg-green-500/10 p-3">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-green-400">check_circle</span>
-                      <span className="text-sm font-medium text-green-400">Repositorio seleccionado</span>
+                      <span className="text-sm font-medium text-green-400">Selected repository</span>
                     </div>
                     <a
                       href={githubRepoUrl}
@@ -330,14 +330,14 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                 onClick={() => router.back()}
                 className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || (submissionType === 'text' && !textContent) || (submissionType === 'zip' && !fileUrl) || (submissionType === 'drive' && !driveUrl) || (submissionType === 'github' && !githubRepoUrl)}
                 className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 disabled:opacity-50 transition-colors"
               >
-                {loading ? 'Enviando...' : 'Enviar ejercicio'}
+                {loading ? 'Submitting...' : 'Submit Mission'}
               </button>
             </div>
           </form>

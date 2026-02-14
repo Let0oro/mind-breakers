@@ -53,7 +53,7 @@ export default async function PathsListPage() {
       <header className="mb-10">
         <div className="flex flex-wrap justify-between items-end gap-6 mb-6">
           <div className="flex flex-col gap-1">
-            <h1 className="text-text-main text-4xl font-black italic tracking-tight">expeditions</h1>
+            <h1 className="text-5xl font-header text-foreground tracking-tight">expeditions</h1>
             <p className="text-muted text-sm">
               {paths.length} expeditions in your journey
             </p>
@@ -109,14 +109,14 @@ export default async function PathsListPage() {
           })
         ) : (
           <div className="col-span-full border border-border p-12 text-center">
-            <span className="material-symbols-outlined text-5xl text-muted mb-4 block">route</span>
-            <p className="text-muted text-sm mb-1">No learning paths</p>
-            <p className="text-muted text-xs mb-6">Start your journey by finding a learning path</p>
+            <span className="material-symbols-outlined text-5xl text-muted mb-4 block">flag</span>
+            <p className="text-muted text-sm mb-1">No Expeditions</p>
+            <p className="text-muted text-xs mb-6">Start your journey by finding an expedition</p>
             <Link
               href="/guild-hall/world-map?tab=paths"
               className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
             >
-              Explore Paths
+              Explore Expeditions
             </Link>
           </div>
         )}

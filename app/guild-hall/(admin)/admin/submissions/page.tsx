@@ -79,7 +79,7 @@ export default async function AdminSubmissionsPage() {
                     </div>
 
                     <p className="text-sm text-muted mb-2">
-                      Course: {sub.course_exercises.courses.title}
+                      Quest: {sub.course_exercises.courses.title}
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-muted">
@@ -137,7 +137,7 @@ export default async function AdminSubmissionsPage() {
                         href={`/guild-hall/quests/${sub.course_exercises.courses.id}`}
                         className="inline-flex items-center gap-2 px-3 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main hover:bg-surface transition-colors"
                       >
-                        View Course
+                        View Quest
                       </Link>
                     </div>
                   </div>

@@ -100,8 +100,8 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                             <p className="text-sm text-muted dark:text-muted mt-1 line-clamp-1">{path.summary}</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-muted">
-                                            <span className="material-symbols-outlined text-base">school</span>
-                                            <span>{path.courses?.length || 0} courses</span>
+                                            <span className="material-symbols-outlined text-base">assignment_late</span>
+                                            <span>{path.courses?.length || 0} quests</span>
                                             <span className="material-symbols-outlined text-base ml-2">chevron_right</span>
                                         </div>
                                     </Link>
@@ -113,7 +113,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                     {/* Courses */}
                     {org.courses && org.courses.length > 0 && (
                         <section>
-                            <h2 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Individual Courses</h2>
+                            <h2 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Individual Quests</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {org.courses.map((course: { id: string, title: string, summary: string, thumbnail_url: string | null, xp_reward: number }) => (
                                     <Link
@@ -126,7 +126,7 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                                                 <img src={course.thumbnail_url} alt={course.title} className="object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-muted">
-                                                    <span className="material-symbols-outlined text-4xl">school</span>
+                                                    <span className="material-symbols-outlined text-4xl">assignment_late</span>
                                                 </div>
                                             )}
                                             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur text-text-main text-xs px-2 py-1 rounded font-bold">
@@ -150,11 +150,11 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         <h3 className="text-sm font-bold text-text-main dark:text-text-main uppercase tracking-wider mb-4">Organization Stats</h3>
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-muted dark:text-muted text-sm">Paths Created</span>
+                                <span className="text-muted dark:text-muted text-sm">Expeditions Created</span>
                                 <span className="font-bold text-text-main dark:text-text-main">{org.learning_paths?.length || 0}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-muted dark:text-muted text-sm">Courses Created</span>
+                                <span className="text-muted dark:text-muted text-sm">Quests Created</span>
                                 <span className="font-bold text-text-main dark:text-text-main">{org.courses?.length || 0}</span>
                             </div>
                         </div>

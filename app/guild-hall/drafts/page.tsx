@@ -64,12 +64,12 @@ export default async function DraftsPage() {
                     <div className="col-span-full border border-border p-12 text-center">
                         <span className="material-symbols-outlined text-5xl text-muted mb-4 block">post_add</span>
                         <p className="text-muted text-sm mb-1">No drafts found</p>
-                        <p className="text-muted text-xs mb-6">Start creating your first course.</p>
+                        <p className="text-muted text-xs mb-6">Start creating your first quest.</p>
                         <Link
                             href="/guild-hall/quests/new"
                             className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
                         >
-                            Start a New Course
+                            Start a New Quest
                         </Link>
                     </div>
                 )}
