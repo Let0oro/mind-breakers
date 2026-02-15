@@ -26,7 +26,7 @@ interface Exercise {
 
 export function EditCourseForm({ courseId }: { courseId: string }) {
     const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
+    const [saving, setSaving] = useState({publish: false, draft: false })
     const [error, setError] = useState<string | null>(null)
 
     const [paths, setPaths] = useState<LearningPath[]>([])
@@ -191,8 +191,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             return
         }
 
-        if (courseStatus === 'published') {
+        if (courseStatus === 'published' && targetStatus === 'published') {
             setShowEditReasonModal(true)
+            return
+        }
+
+        if (targetStatus === 'draft') {
+            setSaving({ ...saving, draft: true })
+            processSave('draft')
             return
         }
 
@@ -200,7 +206,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     }
 
     const processSave = async (targetStatus: 'draft' | 'published', reason?: string) => {
-        setSaving(true)
+        setSaving({ ...saving, [targetStatus]: true })
         setError(null)
 
         const commonData = {
@@ -240,19 +246,17 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         if (updateError) {
             setError(updateError.message)
-            setSaving(false)
+            setSaving({ ...saving, [targetStatus]: false })
             return
         }
 
         await handleExercisesSave()
 
-        setSaving(false)
+        setSaving({ ...saving, [targetStatus]: false })
         setShowEditReasonModal(false)
         router.refresh()
 
-        if (targetStatus === 'published' && courseStatus === 'draft') {
-            router.push(`/guild-hall/quests/${courseId}`)
-        }
+        router.push(`/guild-hall/quests/${courseId}`)
     }
 
     const handleExercisesSave = async () => {
@@ -289,7 +293,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     const handleDelete = async () => {
         if (!confirm('Are you sure?')) return
 
-        setSaving(true)
         if (progressCount > 0) {
             const { error } = await supabase
                 .from('courses')
@@ -298,7 +301,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             if (error) {
                 setError(error.message)
-                setSaving(false)
             } else {
                 router.push('/guild-hall/quests')
             }
@@ -310,7 +312,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             if (error) {
                 setError(error.message)
-                setSaving(false)
             } else {
                 router.push('/guild-hall/quests')
             }
@@ -536,7 +537,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         onSave={() => handleSaveClick('draft')}
                         onPublish={() => handleSaveClick('published')}
                         onDelete={handleDelete}
-                        saving={saving}
+                        saving={saving.draft}
+                        publishing={saving.publish}
                         canSave={isFormValidForDraft()}
                         canPublish={isFormValidForPublish()}
                         publishLabel={courseStatus === 'published' ? 'Update' : 'Publish'}
@@ -573,10 +575,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             </button>
                             <button
                                 onClick={() => processSave('published', editReason)}
-                                disabled={!editReason.trim() || saving}
+                                disabled={!editReason.trim() || saving.publish}
                                 className="px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
                             >
-                                {saving ? 'Submitting...' : 'Submit for Review'}
+                                {saving.publish ? 'Submitting...' : 'Submit for Review'}
                             </button>
                         </div>
                     </div>

@@ -105,6 +105,13 @@ export function NotificationBell({ userId }: { userId: string }) {
     }
   }
 
+  const parsedLink = (link: string) => {
+    return link
+      .replaceAll("dashboard", "guild-hall")
+      .replaceAll("courses", "quests")
+      .replaceAll("paths", "expeditions")
+  }
+
 
   return (
     <div className="relative">
@@ -170,7 +177,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                         </p>
                         {notification.link && (
                           <Link
-                            href={notification.link}
+                            href={parsedLink(notification.link)}
                             onClick={() => {
                               markAsRead(notification.id)
                               setIsOpen(false)
