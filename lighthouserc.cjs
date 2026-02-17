@@ -25,7 +25,7 @@ module.exports = {
 
 
             ],
-            puppeteerScript: './lighthouse-auth-script.js',
+            puppeteerScript: './lighthouse-auth-script.cjs',
             numberOfRuns: 3,
             settings: {
                 // Don't clear localStorage/IndexedDB so credentials persist
