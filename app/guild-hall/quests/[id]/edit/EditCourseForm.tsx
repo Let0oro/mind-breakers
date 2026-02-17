@@ -26,7 +26,7 @@ interface Exercise {
 
 export function EditCourseForm({ courseId }: { courseId: string }) {
     const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
+    const [saving, setSaving] = useState({publish: false, draft: false })
     const [error, setError] = useState<string | null>(null)
 
     const [paths, setPaths] = useState<LearningPath[]>([])
@@ -191,8 +191,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             return
         }
 
-        if (courseStatus === 'published') {
+        if (courseStatus === 'published' && targetStatus === 'published') {
             setShowEditReasonModal(true)
+            return
+        }
+
+        if (targetStatus === 'draft') {
+            setSaving({ ...saving, draft: true })
+            processSave('draft')
             return
         }
 
@@ -200,7 +206,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     }
 
     const processSave = async (targetStatus: 'draft' | 'published', reason?: string) => {
-        setSaving(true)
+        setSaving({ ...saving, [targetStatus]: true })
         setError(null)
 
         const commonData = {
@@ -240,19 +246,17 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         if (updateError) {
             setError(updateError.message)
-            setSaving(false)
+            setSaving({ ...saving, [targetStatus]: false })
             return
         }
 
         await handleExercisesSave()
 
-        setSaving(false)
+        setSaving({ ...saving, [targetStatus]: false })
         setShowEditReasonModal(false)
         router.refresh()
 
-        if (targetStatus === 'published' && courseStatus === 'draft') {
-            router.push(`/guild-hall/quests/${courseId}`)
-        }
+        router.push(`/guild-hall/quests/${courseId}`)
     }
 
     const handleExercisesSave = async () => {
@@ -289,7 +293,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     const handleDelete = async () => {
         if (!confirm('Are you sure?')) return
 
-        setSaving(true)
         if (progressCount > 0) {
             const { error } = await supabase
                 .from('courses')
@@ -298,7 +301,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             if (error) {
                 setError(error.message)
-                setSaving(false)
             } else {
                 router.push('/guild-hall/quests')
             }
@@ -310,7 +312,6 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
             if (error) {
                 setError(error.message)
-                setSaving(false)
             } else {
                 router.push('/guild-hall/quests')
             }
@@ -336,7 +337,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         <div className="border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
                             <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
                             <p className="text-amber-500 text-sm">
-                                Saving changes will reset the course validation status to &quot;Pending&quot;.
+                                Saving changes will reset the quest validation status to &quot;Pending&quot;.
                             </p>
                         </div>
                     )}
@@ -344,7 +345,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     {/* URL with Auto-fill */}
                     <div className="space-y-2">
                         <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
-                            Course URL
+                            Quest URL
                         </label>
                         <div className="flex gap-2">
                             <div className="relative flex-1">
@@ -374,14 +375,14 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </div>
 
                     <FormField
-                        label="Learning Path"
+                        label="Expedition"
                         name="path_id"
                         type="select"
                         value={pathId}
                         onChange={setPathId}
                         required
                     >
-                        <option value="">Select a learning path</option>
+                        <option value="">Select an expedition</option>
                         {paths.map((path) => (
                             <option key={path.id} value={path.id}>{path.title}</option>
                         ))}
@@ -461,7 +462,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     </div>
 
                     <FormField
-                        label="Order in Path"
+                        label="Order in Expedition"
                         name="order_index"
                         type="number"
                         value={orderIndex}
@@ -473,7 +474,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                     <FormDivider />
 
                     {/* Exercises */}
-                    <FormSection title="Exercises">
+                    <FormSection title="Missions">
                         <div className="flex justify-end">
                             <button
                                 type="button"
@@ -481,13 +482,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                 className="px-4 py-2 border border-border text-text-main text-xs font-bold uppercase tracking-widest hover:bg-surface transition-colors flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-sm">add</span>
-                                Add Exercise
+                                Add Mission
                             </button>
                         </div>
 
                         {exercises.length === 0 ? (
                             <div className="text-center py-8 border border-dashed border-border">
-                                <p className="text-muted text-sm">No exercises added yet.</p>
+                                <p className="text-muted text-sm">No missions added yet.</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
@@ -502,7 +503,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                                                     type="text"
                                                     value={exercise.title}
                                                     onChange={(e) => updateExercise(exercise.id, 'title', e.target.value)}
-                                                    placeholder="Exercise Title"
+                                                    placeholder="Mission Title"
                                                     className="bg-transparent border-none text-text-main font-bold focus:outline-none w-64"
                                                 />
                                             </div>
@@ -536,7 +537,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         onSave={() => handleSaveClick('draft')}
                         onPublish={() => handleSaveClick('published')}
                         onDelete={handleDelete}
-                        saving={saving}
+                        saving={saving.draft}
+                        publishing={saving.publish}
                         canSave={isFormValidForDraft()}
                         canPublish={isFormValidForPublish()}
                         publishLabel={courseStatus === 'published' ? 'Update' : 'Publish'}
@@ -573,10 +575,10 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                             </button>
                             <button
                                 onClick={() => processSave('published', editReason)}
-                                disabled={!editReason.trim() || saving}
+                                disabled={!editReason.trim() || saving.publish}
                                 className="px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
                             >
-                                {saving ? 'Submitting...' : 'Submit for Review'}
+                                {saving.publish ? 'Submitting...' : 'Submit for Review'}
                             </button>
                         </div>
                     </div>

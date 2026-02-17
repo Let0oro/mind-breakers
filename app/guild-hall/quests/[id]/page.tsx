@@ -43,14 +43,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           Content not available
         </h1>
         <p className="text-muted text-sm max-w-md">
-          This course is pending validation by an administrator.
+          This quest is pending validation by an administrator.
         </p>
         <Link
           href="/guild-hall/quests"
           className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
-          Back to courses
+          Back to quests
         </Link>
       </div>
     )
@@ -88,7 +88,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <div>
             <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
             <p className="text-xs text-muted">
-              This course is only visible to you until approved by an admin.
+              This quest is only visible to you until approved by an admin.
             </p>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               )}
               <span className="font-bold text-text-main">{course.xp_reward} XP</span>
               {course.course_exercises?.length > 0 && (
-                <span>{course.course_exercises.length} exercise(s)</span>
+                <span>{course.course_exercises.length} mission(s)</span>
               )}
             </div>
           </div>
@@ -188,7 +188,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                 className="flex items-center justify-between border border-text-main p-4 hover:bg-inverse hover:text-main-alt transition-all"
               >
                 <span className="font-bold text-xs uppercase tracking-widest text-text-main">
-                  Go to external course
+                  Go to external quest
                 </span>
                 <span className="material-symbols-outlined text-lg text-text-main">open_in_new</span>
               </a>
@@ -215,7 +215,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {course.course_exercises && course.course_exercises.length > 0 && (
             <div id="exercises" className="border border-border bg-main p-6">
               <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
-                Exercises
+                Missions
               </h2>
               <div className="space-y-4">
                 {course.course_exercises.map((exercise: CourseExercise) => {
@@ -275,7 +275,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                           href={`/guild-hall/missions/${exercise.id}/submit`}
                           className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
                         >
-                          Submit exercise →
+                          Submit mission →
                         </Link>
                       )}
                     </div>
@@ -291,7 +291,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           {/* Course Status */}
           <div className="border border-border bg-main p-6">
             <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
-              Course Status
+              Quest Status
             </h3>
 
             {isCompleted ? (
@@ -314,12 +314,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-muted">
-                  Complete this course to earn <span className="font-bold text-text-main">{course.xp_reward} XP</span>
+                  Complete this quest to earn <span className="font-bold text-text-main">{course.xp_reward} XP</span>
                 </p>
                 {!canComplete && (
                   <div className="border border-muted p-4">
                     <p className="text-xs text-muted">
-                      Submit all exercises to complete this course.
+                      Submit all missions to complete this quest.
                     </p>
                     <p className="mt-2 text-[10px] text-muted">
                       Your submission will be reviewed by an administrator.

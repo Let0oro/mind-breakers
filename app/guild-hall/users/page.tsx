@@ -32,7 +32,7 @@ export default async function UsersPage() {
                     <div className="p-6 bg-main dark:bg-surface rounded-xl border border-border dark:border-border">
                         <span className="material-symbols-outlined text-3xl text-yellow-500 mb-4">leaderboard</span>
                         <h3 className="font-bold text-lg text-text-main dark:text-text-main mb-2">Leaderboards</h3>
-                        <p className="text-sm text-muted dark:text-muted">Compete with friends for top spots on path leaderboards.</p>
+                        <p className="text-sm text-muted dark:text-muted">Compete with friends for top spots on expedition leaderboards.</p>
                     </div>
 
                     <div className="p-6 bg-main dark:bg-surface rounded-xl border border-border dark:border-border">
@@ -44,7 +44,7 @@ export default async function UsersPage() {
                     <div className="p-6 bg-main dark:bg-surface rounded-xl border border-border dark:border-border">
                         <span className="material-symbols-outlined text-3xl text-purple-500 mb-4">handshake</span>
                         <h3 className="font-bold text-lg text-text-main dark:text-text-main mb-2">Collaborate</h3>
-                        <p className="text-sm text-muted dark:text-muted">Work together on creating paths and courses.</p>
+                        <p className="text-sm text-muted dark:text-muted">Work together on creating expeditions and quests.</p>
                     </div>
                 </div>
             </div>

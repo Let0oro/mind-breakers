@@ -25,11 +25,11 @@
     animation: scale 3s;
     animation-fill-mode: both;
 }
-
-::view-transition-group(img-*) {
+/* 
+::view-transition-group(img) {
     opacity: 0;
-    /* mix-blend-mode: difference; */
-}
+    mix-blend-mode: difference;
+} */
 
 @keyframes scale {
     0% {

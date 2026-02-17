@@ -130,7 +130,7 @@ export default function NewOrganizationPage() {
               <div>
                 <p className="text-brand text-sm font-bold mb-1">What&apos;s Next?</p>
                 <p className="text-text-main dark:text-text-main text-sm">
-                  After creating this organization, you can associate it with learning paths and courses when creating them.
+                  After creating this organization, you can associate it with expeditions and quests when creating them.
                 </p>
               </div>
             </div>

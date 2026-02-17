@@ -299,7 +299,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
   if (!path && !error) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="text-muted dark:text-muted">Cargando...</div>
+        <div className="text-muted dark:text-muted">Loading...</div>
       </div>
     )
   }
@@ -320,10 +320,10 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
           className="text-sm text-muted dark:text-muted hover:text-brand mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-base">arrow_back</span>
-          Volver
+          Back
         </button>
         <h1 className="text-2xl font-bold text-text-main dark:text-text-main">
-          Editar Learning Path
+          Edit Expedition
         </h1>
       </header>
 
@@ -341,14 +341,14 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 <div className="flex items-start gap-3">
                   <span className="material-symbols-outlined text-yellow-500 mt-0.5">lock_clock</span>
                   <div>
-                    <h3 className="text-sm font-bold text-yellow-500">Edición Bloqueada</h3>
+                    <h3 className="text-sm font-bold text-yellow-500">Edit Blocked</h3>
                     <p className="text-sm text-yellow-500/80 mt-1">
-                      Este path tiene una solicitud de edición pendiente de validación.
-                      No se pueden realizar más cambios hasta que un administrador la apruebe o rechace.
+                      This expedition has a pending edit request waiting for validation.
+                      No further changes can be made until an administrator approves or rejects it.
                     </p>
                     {pendingRequest.reason && (
                       <p className="text-xs text-yellow-500/60 mt-2 italic">
-                        Razón: &quot;{pendingRequest.reason}&quot;
+                        Reason: &quot;{pendingRequest.reason}&quot;
                       </p>
                     )}
                   </div>
@@ -360,7 +360,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
 
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Título *
+                  Title *
                 </label>
                 <input
                   type="text"
@@ -387,7 +387,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
 
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Descripción completa
+                  Full Description
                 </label>
                 <textarea
                   id="description"
@@ -401,9 +401,9 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
               {/* Courses Reordering Section */}
               <div>
                 <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
-                  Orden de los Cursos
+                  Order of Quests
                 </label>
-                <p className="text-xs text-muted mb-3">Arrastra para reordenar. El orden se guardará al hacer clic en &quot;Guardar cambios&quot;.</p>
+                <p className="text-xs text-muted mb-3">Drag to reorder. The order will be saved when you click &quot;Save changes&quot;.</p>
 
                 <div className="bg-surface dark:bg-main p-4 rounded-lg border border-border dark:border-border">
                   {courses.length > 0 ? (
@@ -424,7 +424,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                       </SortableContext>
                     </DndContext>
                   ) : (
-                    <p className="text-muted italic text-sm text-center">Este path no tiene cursos todavía.</p>
+                    <p className="text-muted italic text-sm text-center">This expedition doesn&apos;t have any courses yet.</p>
                   )}
                 </div>
               </div>
@@ -437,14 +437,14 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 onClick={() => router.back()}
                 className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
               >
-                Cancelar
+                Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="flex-1 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-text-main dark:text-text-main hover:bg-brand/80 disabled:opacity-50 transition-colors"
               >
-                {loading ? 'Procesando...' : (isAdmin ? 'Guardar cambios' : 'Solicitar Validación')}
+                {loading ? 'Processing...' : (isAdmin ? 'Save changes' : 'Request Validation')}
               </button>
             </div>
           </form>
@@ -454,13 +454,13 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
           </div>
 
           <div className="mt-8 border-t border-border dark:border-border pt-8">
-            <h3 className="text-sm font-medium text-red-500 mb-4">Zona peligrosa</h3>
+            <h3 className="text-sm font-medium text-red-500 mb-4">Danger Zone</h3>
             <button
               onClick={handleDelete}
               disabled={loading || !!pendingRequest}
               className="rounded-lg bg-red-600/10 border border-red-600/20 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-600/20 disabled:opacity-50 transition-colors"
             >
-              Eliminar Path
+              Delete Expedition
             </button>
           </div>
         </div>

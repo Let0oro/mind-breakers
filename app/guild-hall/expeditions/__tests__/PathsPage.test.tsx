@@ -72,7 +72,7 @@ describe('PathsListPage', () => {
         const jsx = await PathsListPage()
         render(jsx)
 
-        expect(screen.getByText(/No learning paths/i)).toBeInTheDocument()
+        expect(screen.getByText(/No expeditions/i)).toBeInTheDocument()
     })
 
     test('renders paths list', async () => {

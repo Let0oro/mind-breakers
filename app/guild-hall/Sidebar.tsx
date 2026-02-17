@@ -28,6 +28,9 @@ export function Sidebar({ user, profile }: SidebarProps) {
         if (path === '/guild-hall') {
             return pathname === '/guild-hall'
         }
+        if (path.includes('armory') && pathname?.includes('settings')) {
+            return true
+        }
         return pathname?.startsWith(path)
     }
 
@@ -77,7 +80,7 @@ export function Sidebar({ user, profile }: SidebarProps) {
                         />
                     </div>
 
-                    <h1 className="text-lg font-header text-white-300 mb-2 tracking-wide">
+                    <h1 className="text-lg font-header text-inverse mb-2 tracking-wide">
                         {profile?.username || 'Unknown Hero'}
                     </h1>
 

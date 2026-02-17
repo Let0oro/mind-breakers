@@ -52,8 +52,8 @@ export default function NewPathPage() {
 
   return (
     <FormLayout
-      title="New Path"
-      subtitle="Define a structured learning journey for others to follow"
+      title="New Expedition"
+      subtitle="Define a structured journey for others to follow"
     >
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
         <FormError message={error} />
@@ -75,7 +75,7 @@ export default function NewPathPage() {
           value={summary}
           onChange={setSummary}
           placeholder="Brief description (1-2 lines)"
-          hint="This will appear in search results and path listings"
+          hint="This will appear in search results and expedition listings"
         />
 
         <FormField
@@ -84,7 +84,7 @@ export default function NewPathPage() {
           type="textarea"
           value={description}
           onChange={setDescription}
-          placeholder="Describe what learners will achieve, who it's for, and what makes this path unique..."
+          placeholder="Describe what adventurers will achieve, who it's for, and what makes this expedition unique..."
           rows={6}
         />
 
@@ -97,7 +97,7 @@ export default function NewPathPage() {
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-text-main mb-1">Next Steps</p>
               <p className="text-sm text-muted">
-                After creating your path, you&apos;ll be able to add courses and organize the learning sequence.
+                After creating your expedition, you&apos;ll be able to add quests and organize the learning sequence.
               </p>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function NewPathPage() {
         <FormActions
           onPublish={handleSubmit}
           publishing={loading}
-          publishLabel="Create Path"
+          publishLabel="Create Expedition"
           canPublish={!!title.trim()}
         />
       </form>
