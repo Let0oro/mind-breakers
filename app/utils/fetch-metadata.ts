@@ -65,11 +65,17 @@ export async function fetchUrlMetadata(url: string): Promise<FetchMetadataResult
         return { data: null, error: 'URL is required' }
     }
 
+    const trimmedUrl = url.trim()
+    const isYouTube = isYouTubeUrl(trimmedUrl)
+
     try {
         const supabase = createClient()
 
         const { data, error } = await supabase.functions.invoke('fetch-metadata', {
-            body: { url: url.trim() }
+            body: {
+                url: trimmedUrl,
+                type: isYouTube ? 'youtube' : 'web'
+            }
         })
 
         if (error) {
@@ -105,6 +111,6 @@ export async function fetchUrlMetadata(url: string): Promise<FetchMetadataResult
  * Checks if a URL is a YouTube video URL
  */
 export function isYouTubeUrl(url: string): boolean {
-    return url.includes('youtube.com/watch') || url.includes('youtu.be/')
+    return url.includes('youtube.com') || url.includes('youtu.be')
 }
 

@@ -46,5 +46,5 @@ next-env.d.ts
 *.agent
 *.txt
 .lighthouseci/
-supabase/functions/**/*.ts
+supabase/**
 FUTURE_ROADMAP.md
