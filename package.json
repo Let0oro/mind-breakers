@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev --turbo",
+    "build": "next build --turbo",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lhci": "lhci autorun --config=lighthouserc.cjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
