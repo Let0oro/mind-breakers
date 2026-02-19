@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
+import { CACHE_TAGS } from '@/lib/cache'
 
 type ValidationType = 'organizations' | 'courses' | 'paths'
 
@@ -52,7 +54,47 @@ export async function PATCH(
     const { action, name, description, website_url } = body
 
     if (action === 'approve') {
-        // Just approve without changes
+        if (validationType === 'courses') {
+            // Check if this course has a pending draft edit
+            const { data: course } = await supabase
+                .from('courses')
+                .select('draft_data, is_validated')
+                .eq('id', id)
+                .single()
+
+            if (course?.draft_data) {
+                // It's a shadow draft: merge draft fields into the main course, clear draft_data.
+                // IMPORTANT: exclude Supabase-managed / meta columns from the update.
+                const EXCLUDED_FIELDS = new Set([
+                    'id', 'created_at', 'updated_at', 'edit_reason',
+                    'is_validated', 'status', 'author_id', 'draft_data'
+                ])
+                const draft = course.draft_data as Record<string, unknown>
+                const mergeData: Record<string, unknown> = { draft_data: null }
+                for (const [key, value] of Object.entries(draft)) {
+                    if (!EXCLUDED_FIELDS.has(key) && value !== undefined) {
+                        mergeData[key] = value
+                    }
+                }
+
+                const { error } = await supabase
+                    .from('courses')
+                    .update(mergeData)
+                    .eq('id', id)
+
+                if (error) {
+                    return NextResponse.json({ error: error.message }, { status: 500 })
+                }
+
+                revalidateTag(CACHE_TAGS.ADMIN, 'max')
+                revalidateTag(CACHE_TAGS.QUESTS, 'max')
+                revalidatePath('/guild-hall/admin/validations')
+                revalidatePath('/guild-hall/admin')
+                return NextResponse.json({ success: true })
+            }
+        }
+
+        // Standard approve: set is_validated = true
         const { error } = await supabase
             .from(table)
             .update({ is_validated: true })
@@ -61,6 +103,13 @@ export async function PATCH(
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        revalidateTag(CACHE_TAGS.ADMIN, 'max')
+        revalidateTag(CACHE_TAGS.QUESTS, 'max')
+        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
+        revalidatePath('/guild-hall/admin/validations')
+        revalidatePath('/guild-hall/admin')
 
         return NextResponse.json({ success: true })
     }
@@ -87,6 +136,13 @@ export async function PATCH(
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 500 })
         }
+
+        revalidateTag(CACHE_TAGS.ADMIN, 'max')
+        revalidateTag(CACHE_TAGS.QUESTS, 'max')
+        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
+        revalidatePath('/guild-hall/admin/validations')
+        revalidatePath('/guild-hall/admin')
 
         return NextResponse.json({ success: true })
     }
@@ -147,6 +203,10 @@ export async function PATCH(
             return NextResponse.json({ error: 'Rejection with reason is only supported for Courses' }, { status: 400 })
         }
 
+        revalidateTag(CACHE_TAGS.ADMIN, 'max')
+        revalidateTag(CACHE_TAGS.QUESTS, 'max')
+        revalidatePath('/guild-hall/admin/validations')
+        revalidatePath('/guild-hall/admin')
         return NextResponse.json({ success: true })
     }
 
@@ -271,6 +331,11 @@ export async function POST(
         }
     }
 
+    revalidateTag(CACHE_TAGS.ADMIN, 'max')
+    revalidateTag(CACHE_TAGS.QUESTS, 'max')
+    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
+
     return NextResponse.json({ success: true })
 }
 
@@ -314,6 +379,11 @@ export async function DELETE(
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
+
+    revalidateTag(CACHE_TAGS.ADMIN, 'max')
+    revalidateTag(CACHE_TAGS.QUESTS, 'max')
+    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
 
     return NextResponse.json({ success: true })
 }
