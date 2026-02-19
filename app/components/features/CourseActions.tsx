@@ -162,7 +162,7 @@ export function CourseActions({
       <button
         onClick={handleToggleSave}
         disabled={loading}
-        className={`h-10 px-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2 ${isSaved
+        className={`h-10 px-4 text-xs cursor-pointer font-bold uppercase tracking-widest transition-colors flex items-center gap-2 ${isSaved
           ? 'bg-inverse text-inverse'
           : 'border border-border text-text-main hover:bg-surface'
           } disabled:opacity-50`}
@@ -179,7 +179,7 @@ export function CourseActions({
             <button
               onClick={handleMarkComplete}
               disabled={loading}
-              className="h-10 px-4 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="h-10 px-4 cursor-pointer bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-sm">check_circle</span>
               {loading ? 'Saving...' : 'Complete'}
@@ -187,7 +187,7 @@ export function CourseActions({
           ) : (
             <a
               href="#exercises"
-              className="h-10 px-4 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors flex items-center gap-2"
+              className="h-10 px-4 cursor-pointer bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-sm">arrow_downward</span>
               Go to Exercises
@@ -197,7 +197,7 @@ export function CourseActions({
           <button
             onClick={handleMarkIncomplete}
             disabled={loading}
-            className="h-10 px-4 border border-muted text-muted text-xs font-bold uppercase tracking-widest hover:border-text-main hover:text-text-main disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="h-10 px-4 cursor-pointer border border-muted text-muted text-xs font-bold uppercase tracking-widest hover:border-text-main hover:text-text-main disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-sm">undo</span>
             {loading ? 'Saving...' : 'Undo Complete'}

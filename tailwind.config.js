@@ -8,13 +8,6 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        "primary": "#2525f4",
-        "accent": "#00f2ff",
-        "background-light": "#f5f5f8",
-        "background-dark": "#0a0a0a",
-        "surface-dark": "#16162a",
-      },
       fontFamily: {
         "display": ["Space Grotesk", "sans-serif"]
       },

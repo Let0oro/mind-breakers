@@ -13,8 +13,8 @@ interface BreadcrumbProps {
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard: 'Dashboard',
     quests: 'Quests',
-    paths: 'Paths',
-    exercises: 'Exercises',
+    expeditions: 'Expeditions',
+    missions: 'Missions',
     organizations: 'Orgs',
     leaderboard: 'Leaderboard',
     admin: 'Admin',
@@ -47,11 +47,11 @@ export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbPro
             if (segment.match(/^[0-9a-f-]+$/i) || segment.match(/^\d+$/)) {
                 // Para IDs, intentar usar un nombre más descriptivo basado en el contexto
                 const previousSegment = segments[index - 1]
-                if (previousSegment === 'courses') {
+                if (previousSegment === 'quests') {
                     label = 'Details'
-                } else if (previousSegment === 'paths') {
+                } else if (previousSegment === 'expeditions') {
                     label = 'Details'
-                } else if (previousSegment === 'exercises') {
+                } else if (previousSegment === 'missions') {
                     label = 'Details'
                 } else if (previousSegment === 'organizations') {
                     label = 'Details'
@@ -103,7 +103,7 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
                                     href={item.href?.includes("organizations") ? "/guild-hall/organizations/new" : item.href || '#'}
                                     className="text-muted hover:text-text-main transition-colors"
                                 >
-                                    {item.label}
+                                    {item.label == "Settings" ? "Armory" : item.label}
                                 </Link>
                                 <span className="text-sm text-muted">
                                     {"•"}
