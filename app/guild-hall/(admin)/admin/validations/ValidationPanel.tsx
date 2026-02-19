@@ -67,6 +67,10 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const [loading, setLoading] = useState<string | null>(null)
     const router = useRouter()
 
+    // Split courses: new quests vs draft edits  
+    const newQuestCourses = pendingItems.courses.filter(c => !c.draft_data)
+    const draftEditCourses = pendingItems.courses.filter(c => !!c.draft_data)
+
     const getOrgName = (org: { id: string; name: string } | { id: string; name: string }[] | undefined): string | undefined => {
         if (!org) return undefined
         if (Array.isArray(org)) return org[0]?.name
@@ -75,16 +79,20 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const tabs: { key: TabType; label: string; count: number; icon: string }[] = [
         { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length, icon: 'corporate_fare' },
-        { key: 'courses', label: 'Courses', count: pendingItems.courses.length, icon: 'school' },
+        { key: 'courses', label: 'Courses', count: newQuestCourses.length, icon: 'school' },
         { key: 'paths', label: 'Learning Paths', count: pendingItems.paths.length, icon: 'route' },
-        { key: 'edits', label: 'Edits', count: pendingItems.edits.length, icon: 'edit_note' },
+        { key: 'edits', label: 'Edits', count: pendingItems.edits.length + draftEditCourses.length, icon: 'edit_note' },
     ]
 
     const [rejectionModal, setRejectionModal] = useState<{
         type: TabType | 'edits'
         id: string
+        isCourseEdit?: boolean
     } | null>(null)
     const [rejectionReason, setRejectionReason] = useState('')
+
+    // Draft-data preview modal
+    const [draftPreviewModal, setDraftPreviewModal] = useState<PendingCourse | null>(null)
 
     const handleApprove = async (type: TabType | 'edits', id: string) => {
         setLoading(id)
@@ -107,8 +115,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         }
     }
 
-    const openRejectionModal = (type: TabType | 'edits', id: string) => {
-        setRejectionModal({ type, id })
+    const openRejectionModal = (type: TabType | 'edits', id: string, isCourseEdit?: boolean) => {
+        setRejectionModal({ type, id, isCourseEdit })
         setRejectionReason('')
     }
 
@@ -144,8 +152,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
         setLoading(rejectionModal.id)
         try {
-            const { type, id } = rejectionModal
-            const endpoint = type === 'edits'
+            const { type, id, isCourseEdit } = rejectionModal
+            // Course draft edits and regular edits both use courses endpoint for rejection
+            const endpoint = (type === 'edits' && !isCourseEdit)
                 ? `/api/admin/validations/edits/${id}`
                 : `/api/admin/validations/${type}/${id}`
 
@@ -302,91 +311,58 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const renderCourses = () => (
         <div className="space-y-4">
-            {pendingItems.courses.length === 0 ? (
+            {newQuestCourses.length === 0 ? (
                 <div className="border border-border bg-main p-12 text-center">
                     <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
                     <p className="text-muted text-sm uppercase tracking-widest">No pending courses</p>
                 </div>
             ) : (
-                pendingItems.courses.map((course) => {
-                    const isShadowDraft = !!course.draft_data
-                    const draft = course.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
-
-                    return (
-                        <div
-                            key={course.id}
-                            className={`border bg-main p-6 transition-colors ${isShadowDraft
-                                ? 'border-purple-500/30 hover:border-purple-500/50'
-                                : 'border-border hover:border-text-main'
-                                }`}
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h3 className="font-bold text-text-main truncate">
-                                            {isShadowDraft && draft?.title ? draft.title : course.title}
-                                        </h3>
-                                        {isShadowDraft ? (
-                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
-                                                Pending Edit
-                                            </span>
-                                        ) : (
-                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
-                                                New Quest
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-muted mb-2 line-clamp-2">
-                                        {isShadowDraft && draft?.summary ? draft.summary : course.summary}
-                                    </p>
-
-                                    {isShadowDraft && draft?.edit_reason && (
-                                        <div className="mt-2 text-sm bg-surface p-2 border border-border text-text-main">
-                                            <strong>Edit reason:</strong> {draft.edit_reason}
-                                        </div>
-                                    )}
-
-                                    {getOrgName(course.organizations) && (
-                                        <p className="text-xs text-muted mt-1">
-                                            Organization: {getOrgName(course.organizations)}
-                                        </p>
-                                    )}
-                                    <p className="text-xs text-muted mt-2">
-                                        Updated: {new Date(course.created_at).toLocaleDateString()}
-                                    </p>
+                newQuestCourses.map((course) => (
+                    <div
+                        key={course.id}
+                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <h3 className="font-bold text-text-main truncate">{course.title}</h3>
+                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
+                                        New Quest
+                                    </span>
                                 </div>
+                                <p className="text-sm text-muted mb-2 line-clamp-2">{course.summary}</p>
 
-                                <div className="flex gap-2 shrink-0">
-                                    {isShadowDraft && (
-                                        <details className="text-xs">
-                                            <summary className="p-2 border border-border cursor-pointer hover:bg-surface">JSON</summary>
-                                            <pre className="absolute bg-inverse text-inverse p-4 z-10 max-w-sm overflow-auto text-xs">
-                                                {JSON.stringify(course.draft_data, null, 2)}
-                                            </pre>
-                                        </details>
-                                    )}
+                                {getOrgName(course.organizations) && (
+                                    <p className="text-xs text-muted mt-1">
+                                        Organization: {getOrgName(course.organizations)}
+                                    </p>
+                                )}
+                                <p className="text-xs text-muted mt-2">
+                                    Updated: {new Date(course.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
 
-                                    <button
-                                        onClick={() => openRejectionModal('courses', course.id)}
-                                        disabled={loading === course.id}
-                                        className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
-                                        title="Reject"
-                                    >
-                                        <span className="material-symbols-outlined text-lg">close</span>
-                                    </button>
+                            <div className="flex gap-2 shrink-0">
+                                <button
+                                    onClick={() => openRejectionModal('courses', course.id)}
+                                    disabled={loading === course.id}
+                                    className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                    title="Reject"
+                                >
+                                    <span className="material-symbols-outlined text-lg">close</span>
+                                </button>
 
-                                    <button
-                                        onClick={() => handleApprove('courses', course.id)}
-                                        disabled={loading === course.id}
-                                        className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
-                                    >
-                                        {loading === course.id ? '...' : (isShadowDraft ? 'Approve Edit' : 'Approve')}
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={() => handleApprove('courses', course.id)}
+                                    disabled={loading === course.id}
+                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
+                                >
+                                    {loading === course.id ? '...' : 'Approve'}
+                                </button>
                             </div>
                         </div>
-                    )
-                })
+                    </div>
+                ))
             )}
         </div>
     )
@@ -469,63 +445,134 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const renderEdits = () => (
         <div className="space-y-4">
-            {pendingItems.edits.length === 0 ? (
-                <div className="border border-border bg-main p-12 text-center">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
-                    <p className="text-muted text-sm uppercase tracking-widest">No pending edits</p>
-                </div>
-            ) : (
-                pendingItems.edits.map((item) => (
+            {/* Draft-edit courses (validated courses with pending draft_data) */}
+            {draftEditCourses.map((course) => {
+                const draft = course.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
+                return (
                     <div
-                        key={item.id}
-                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
+                        key={course.id}
+                        className="border border-purple-500/30 bg-main p-6 hover:border-purple-500/50 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="font-bold text-text-main truncate">
-                                        Edit: {item.resource_title || item.resource_id}
+                                        {draft?.title || course.title}
                                     </h3>
                                     <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
-                                        {item.resource_type}
+                                        Pending Edit
                                     </span>
                                 </div>
-                                <p className="text-sm text-muted mb-2">
-                                    Reason: {item.reason || 'No reason specified'}
+                                <p className="text-sm text-muted mb-2 line-clamp-2">
+                                    {draft?.summary || course.summary}
                                 </p>
 
-                                <details className="mt-2 text-xs">
-                                    <summary className="cursor-pointer text-text-main hover:underline">View JSON Changes</summary>
-                                    <pre className="mt-2 p-2 bg-surface border border-border overflow-x-auto">
-                                        {JSON.stringify(item.data, null, 2)}
-                                    </pre>
-                                </details>
+                                {draft?.edit_reason && (
+                                    <div className="mt-2 text-sm bg-surface p-2 border border-border text-text-main">
+                                        <strong>Edit reason:</strong> {draft.edit_reason}
+                                    </div>
+                                )}
 
+                                {getOrgName(course.organizations) && (
+                                    <p className="text-xs text-muted mt-1">
+                                        Organization: {getOrgName(course.organizations)}
+                                    </p>
+                                )}
                                 <p className="text-xs text-muted mt-2">
-                                    Requested: {new Date(item.created_at).toLocaleDateString()}
+                                    Updated: {new Date(course.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
                             <div className="flex gap-2 shrink-0">
                                 <button
-                                    onClick={() => handleApprove('edits', item.id)}
-                                    disabled={loading === item.id}
-                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
+                                    onClick={() => setDraftPreviewModal(course)}
+                                    className="px-3 py-2 border border-purple-500/30 text-purple-400 text-xs font-bold uppercase tracking-widest hover:bg-purple-500/10 transition-colors flex items-center gap-1.5"
+                                    title="Preview changes"
                                 >
-                                    {loading === item.id ? '...' : 'Approve Edit'}
+                                    <span className="material-symbols-outlined text-sm">preview</span>
+                                    Preview
                                 </button>
+
                                 <button
-                                    onClick={() => handleDelete('edits', item.id)}
-                                    disabled={loading === item.id}
+                                    onClick={() => openRejectionModal('courses', course.id, true)}
+                                    disabled={loading === course.id}
                                     className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                                     title="Reject"
                                 >
                                     <span className="material-symbols-outlined text-lg">close</span>
                                 </button>
+
+                                <button
+                                    onClick={() => handleApprove('courses', course.id)}
+                                    disabled={loading === course.id}
+                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
+                                >
+                                    {loading === course.id ? '...' : 'Approve Edit'}
+                                </button>
                             </div>
                         </div>
                     </div>
-                ))
+                )
+            })}
+
+            {/* Edit requests from the edit_requests table */}
+            {pendingItems.edits.map((item) => (
+                <div
+                    key={item.id}
+                    className="border border-border bg-main p-6 hover:border-text-main transition-colors"
+                >
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="font-bold text-text-main truncate">
+                                    Edit: {item.resource_title || item.resource_id}
+                                </h3>
+                                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
+                                    {item.resource_type}
+                                </span>
+                            </div>
+                            <p className="text-sm text-muted mb-2">
+                                Reason: {item.reason || 'No reason specified'}
+                            </p>
+
+                            <details className="mt-2 text-xs">
+                                <summary className="cursor-pointer text-text-main hover:underline">View JSON Changes</summary>
+                                <pre className="mt-2 p-2 bg-surface border border-border overflow-x-auto">
+                                    {JSON.stringify(item.data, null, 2)}
+                                </pre>
+                            </details>
+
+                            <p className="text-xs text-muted mt-2">
+                                Requested: {new Date(item.created_at).toLocaleDateString()}
+                            </p>
+                        </div>
+
+                        <div className="flex gap-2 shrink-0">
+                            <button
+                                onClick={() => handleApprove('edits', item.id)}
+                                disabled={loading === item.id}
+                                className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
+                            >
+                                {loading === item.id ? '...' : 'Approve Edit'}
+                            </button>
+                            <button
+                                onClick={() => openRejectionModal('edits', item.id)}
+                                disabled={loading === item.id}
+                                className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                title="Reject"
+                            >
+                                <span className="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ))}
+
+            {draftEditCourses.length === 0 && pendingItems.edits.length === 0 && (
+                <div className="border border-border bg-main p-12 text-center">
+                    <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending edits</p>
+                </div>
             )}
         </div>
     )
@@ -681,7 +728,165 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                     </div>
                 </div>
             )}
+
+            {/* Draft Preview Modal */}
+            {draftPreviewModal && (
+                <CourseEditPreviewModal
+                    course={draftPreviewModal}
+                    onClose={() => setDraftPreviewModal(null)}
+                />
+            )}
         </>
+    )
+}
+
+// ─── CourseEditPreviewModal ───────────────────────────────────────────────────
+
+interface CourseEditPreviewModalProps {
+    course: PendingCourse
+    onClose: () => void
+}
+
+function CourseEditPreviewModal({ course, onClose }: CourseEditPreviewModalProps) {
+    const draft = course.draft_data as Record<string, unknown> | undefined
+    if (!draft) return null
+
+    // Fields to show in the preview
+    const previewFields: { key: string; label: string }[] = [
+        { key: 'title', label: 'Title' },
+        { key: 'summary', label: 'Summary' },
+        { key: 'description', label: 'Description' },
+        { key: 'thumbnail_url', label: 'Thumbnail URL' },
+        { key: 'xp_reward', label: 'XP Reward' },
+    ]
+
+    const currentValues: Record<string, unknown> = {
+        title: course.title,
+        summary: course.summary,
+        description: (course as unknown as Record<string, unknown>).description,
+        thumbnail_url: (course as unknown as Record<string, unknown>).thumbnail_url,
+        xp_reward: (course as unknown as Record<string, unknown>).xp_reward,
+    }
+
+    // Get changed fields only (ignore meta fields like edit_reason)
+    const changedFields = previewFields.filter(
+        f => f.key in draft && draft[f.key] !== currentValues[f.key]
+    )
+
+    const unchangedFields = previewFields.filter(
+        f => !(f.key in draft) || draft[f.key] === currentValues[f.key]
+    )
+
+    const editReason = draft.edit_reason as string | undefined
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-2xl border border-border bg-main mx-4 flex flex-col max-h-[90vh]">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-border shrink-0">
+                    <div>
+                        <h2 className="text-lg font-bold uppercase tracking-widest text-text-main">
+                            Edit Preview
+                        </h2>
+                        <p className="text-xs text-muted mt-0.5">{course.title}</p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-muted hover:text-text-main transition-colors"
+                    >
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="overflow-y-auto p-6 space-y-6 flex-1">
+                    {/* Edit reason */}
+                    {editReason && (
+                        <div className="bg-purple-500/10 border border-purple-500/30 p-4">
+                            <p className="text-xs font-bold uppercase tracking-widest text-purple-400 mb-1">Edit Reason</p>
+                            <p className="text-sm text-text-main">{editReason}</p>
+                        </div>
+                    )}
+
+                    {/* Changed fields */}
+                    {changedFields.length > 0 && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-widest text-text-main mb-3 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-sm text-amber-500">change_circle</span>
+                                Changed Fields ({changedFields.length})
+                            </p>
+                            <div className="space-y-4">
+                                {changedFields.map(({ key, label }) => (
+                                    <div key={key} className="border border-border">
+                                        <div className="px-3 py-1.5 bg-surface border-b border-border">
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted">{label}</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 divide-x divide-border">
+                                            {/* Before */}
+                                            <div className="p-3">
+                                                <p className="text-[9px] font-bold uppercase tracking-widest text-red-400 mb-1.5">Before</p>
+                                                <p className="text-sm text-muted break-words">
+                                                    {currentValues[key] != null
+                                                        ? String(currentValues[key])
+                                                        : <em className="text-muted/50">empty</em>
+                                                    }
+                                                </p>
+                                            </div>
+                                            {/* After */}
+                                            <div className="p-3 bg-green-500/5">
+                                                <p className="text-[9px] font-bold uppercase tracking-widest text-green-400 mb-1.5">After</p>
+                                                <p className="text-sm text-text-main break-words">
+                                                    {draft[key] != null
+                                                        ? String(draft[key])
+                                                        : <em className="text-muted/50">empty</em>
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Unchanged fields (collapsed) */}
+                    {unchangedFields.length > 0 && changedFields.length > 0 && (
+                        <details className="text-xs">
+                            <summary className="cursor-pointer text-muted hover:text-text-main flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-sm">expand_more</span>
+                                {unchangedFields.length} unchanged field{unchangedFields.length !== 1 ? 's' : ''}
+                            </summary>
+                            <div className="mt-3 space-y-2 pl-4 border-l border-border">
+                                {unchangedFields.map(({ key, label }) => (
+                                    <div key={key} className="flex items-start gap-3">
+                                        <span className="text-muted w-28 shrink-0">{label}:</span>
+                                        <span className="text-text-main break-words">
+                                            {currentValues[key] != null ? String(currentValues[key]) : '—'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </details>
+                    )}
+
+                    {changedFields.length === 0 && (
+                        <div className="text-center py-8 text-muted text-sm">
+                            No recognizable field changes detected in draft data.
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-6 border-t border-border shrink-0">
+                    <button
+                        onClick={onClose}
+                        className="w-full px-4 py-2 border border-border text-muted text-xs font-bold uppercase tracking-widest hover:text-text-main hover:bg-surface transition-colors"
+                    >
+                        Close Preview
+                    </button>
+                </div>
+            </div>
+        </div>
     )
 }
 
