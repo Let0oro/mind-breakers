@@ -146,7 +146,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             {(isOwner || profile?.is_admin) && (
               <Link
                 href={`/guild-hall/quests/${course.id}/edit`}
-                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors flex items-center gap-2"
+                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest border-text-main text-text-main hover:bg-surface transition-colors flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">edit</span>
                 Edit

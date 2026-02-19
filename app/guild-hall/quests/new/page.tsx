@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { FormLayout, FormField, FormActions, FormError, FormSection, FormDivider } from '@/components/ui/Form'
 import SimilarItemsList from '@/components/features/SimilarItemsList'
@@ -31,6 +31,7 @@ export default function NewCoursePage() {
   const [paths, setPaths] = useState<LearningPath[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   // Form fields
@@ -42,6 +43,7 @@ export default function NewCoursePage() {
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [xpReward, setXpReward] = useState(100)
+  const [showXpTooltip, setShowXpTooltip] = useState(false)
   const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
   const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
   const [orderIndex, setOrderIndex] = useState(0)
@@ -89,8 +91,12 @@ export default function NewCoursePage() {
 
       if (calculatedXP === 0) {
         setXpNeedsAttention(true)
+        setShowXpTooltip(true)
         if (xpTooltipTimeout.current) clearTimeout(xpTooltipTimeout.current)
-        xpTooltipTimeout.current = setTimeout(() => setXpNeedsAttention(false), 4000)
+        xpTooltipTimeout.current = setTimeout(() => {
+          setShowXpTooltip(false)
+          setXpNeedsAttention(false)
+        }, 4000)
       }
 
       setMetadataFetched(true)
@@ -109,11 +115,18 @@ export default function NewCoursePage() {
         supabase.from('organizations').select('id, name').order('name'),
       ])
 
-      if (pathsRes.data) setPaths(pathsRes.data)
+      if (pathsRes.data) {
+        setPaths(pathsRes.data)
+        // Pre-select expedition from URL param (e.g. coming from expedition detail page)
+        const paramPathId = searchParams.get('pathId')
+        if (paramPathId && pathsRes.data.some((p) => p.id === paramPathId)) {
+          setPathId(paramPathId)
+        }
+      }
       if (orgsRes.data) setOrganizations(orgsRes.data)
     }
     fetchData()
-  }, [supabase])
+  }, [supabase, searchParams])
 
   useEffect(() => {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -352,18 +365,55 @@ export default function NewCoursePage() {
                 ))}
               </FormField>
 
-              <FormField
-                label="XP Reward"
-                name="xp_reward"
-                type="number"
-                value={xpReward}
-                onChange={(v) => { setXpReward(parseInt(v) || 0); setXpNeedsAttention(false) }}
-                min={0}
-                max={300}
-                step={25}
-                needsAttention={xpNeedsAttention}
-                autoFilled={metadataFetched && xpReward > 0}
-              />
+              <div className="space-y-2 relative">
+                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
+                  XP Reward
+                  {metadataFetched && xpReward > 0 && (
+                    <span className="text-[10px] font-normal normal-case text-green-500">✓ Auto-calculated</span>
+                  )}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onMouseEnter={() => setShowXpTooltip(true)}
+                      onMouseLeave={() => !xpNeedsAttention && setShowXpTooltip(false)}
+                      onClick={() => setShowXpTooltip(!showXpTooltip)}
+                      className="text-muted hover:text-text-main transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base">info</span>
+                    </button>
+                    {showXpTooltip && (
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 dark:bg-surface-dark bg-surface text-text-main text-xs border border-border backdrop-blur-sm shadow-xl z-50">
+                        <p className="font-bold mb-2">📊 XP by Duration:</p>
+                        <ul className="space-y-1 text-muted">
+                          <li>&lt; 2h → 25 XP</li>
+                          <li>2–4h → 50 XP</li>
+                          <li>4–8h → 100 XP</li>
+                          <li>8–20h → 150 XP</li>
+                          <li>20–40h → 200 XP</li>
+                          <li>40h+ → 300 XP (max)</li>
+                        </ul>
+                        {xpNeedsAttention && (
+                          <p className="mt-2 text-amber-400 font-medium">⚠️ Duration not found. Set XP manually.</p>
+                        )}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full border-8 border-transparent border-t-border" />
+                      </div>
+                    )}
+                  </div>
+                </label>
+                <input
+                  type="number"
+                  name="xp_reward"
+                  value={xpReward}
+                  onChange={(e) => { setXpReward(parseInt(e.target.value) || 0); setXpNeedsAttention(false) }}
+                  min={0}
+                  max={300}
+                  step={25}
+                  className={`w-full h-12 px-4 bg-surface border text-text-main focus:outline-none focus:border-text-main transition-all ${xpNeedsAttention
+                      ? 'border-amber-500 animate-pulse ring-2 ring-amber-500/30'
+                      : 'border-border'
+                    }`}
+                />
+              </div>
             </div>
 
             <FormField

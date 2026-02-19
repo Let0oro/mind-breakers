@@ -12,7 +12,7 @@ export default function SharedHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
-        <header className="sticky top-0 z-50 border-b border-main bg-main/80 backdrop-blur-md px-4 sm:px-6 lg:px-20 py-2">
+        <header className="sticky top-0 z-50 border-b  backdrop-blur-md px-4 sm:px-6 lg:px-20 py-2">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/" className="flex items-center gap-2 sm:gap-3 text-foreground hover:opacity-80 transition-opacity">
@@ -75,8 +75,8 @@ export default function SharedHeader() {
 
             {/* Mobile menu dropdown */}
             {mobileMenuOpen && !isAuthPage && (
-                <div className="md:hidden absolute top-full left-0 bg-main right-0 border-b border-main shadow-lg">
-                    <nav className="flex flex-col p-4 gap-2 items-stretch bg-main text-center">
+                <div className="md:hidden absolute top-full left-0 border-background bg-background dark:border-midnight dark:bg-midnight right-0 border-b shadow-lg">
+                    <nav className="flex flex-col p-4 gap-2 items-stretch bg-background dark:bg-midnight text-center">
                         <Link
                             className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
                             href="/guild-hall/world-map"
