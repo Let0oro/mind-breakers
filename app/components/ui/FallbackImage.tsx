@@ -55,7 +55,7 @@ export function FallbackImage({
                 style={{ viewTransitionName: transitionName } as React.CSSProperties}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 {...props as any} // Cast because ImageProps has Next.js specific props
-            /> : (imgSrc ? <Image
+            /> : (imgSrc ? <img
                 src={imgSrc}
                 alt={alt}
                 className={className}

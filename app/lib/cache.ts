@@ -24,7 +24,7 @@ const CACHE_DURATION = {
 
 export const CACHE_TAGS = {
     QUESTS: 'quests',
-    PATHS: 'expeditions',
+    EXPEDITIONS: 'expeditions',
     ORGANIZATIONS: 'organizations',
     USER_PROGRESS: 'user-progress',
     USER_SAVED: 'user-saved',
@@ -288,7 +288,7 @@ export const getValidatedExpeditionsCached = (supabase: SupabaseClient, limit?: 
         [`validated-expeditions-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
-            tags: [CACHE_TAGS.PATHS],
+            tags: [CACHE_TAGS.EXPEDITIONS],
         }
     )()
 
@@ -322,7 +322,7 @@ export const getExpeditionCached = (supabase: SupabaseClient, expeditionId: stri
         [`expedition-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
-            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, `expedition-${expeditionId}`],
         }
     )()
 
@@ -353,7 +353,7 @@ export const getExpeditionDetailCached = (supabase: SupabaseClient, expeditionId
         [`expedition-detail-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
-            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, `expedition-${expeditionId}`],
         }
     )()
 
@@ -374,7 +374,7 @@ export const getExpeditionResourcesCached = (supabase: SupabaseClient, expeditio
         [`expedition-resources-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, `expedition-${expeditionId}`],
         }
     )()
 
@@ -431,7 +431,7 @@ export const getExpeditionsByIdsCached = (supabase: SupabaseClient, userId: stri
         async () => {
             if (expeditionIds.length === 0) return []
 
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('expeditions')
                 .select(`
                     id,
@@ -448,12 +448,17 @@ export const getExpeditionsByIdsCached = (supabase: SupabaseClient, userId: stri
                 .in('id', expeditionIds)
                 .order('created_at', { ascending: false })
 
+            if (error) {
+                console.error('Error in getExpeditionsByIdsCached:', error)
+                return []
+            }
+
             return (data as ExpeditionListItem[]) || []
         },
         [`expeditions-by-ids-${userId}-${expeditionIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS, `user-${userId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, `user-${userId}`],
         }
     )()
 
@@ -473,7 +478,7 @@ export const getUserCreatedExpeditionIdsCached = (supabase: SupabaseClient, user
         [`user-created-expeditions-${userId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS, `user-${userId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, `user-${userId}`],
         }
     )()
 
@@ -485,17 +490,22 @@ export const getExpeditionIdsFromQuestProgressCached = (supabase: SupabaseClient
         async () => {
             if (questIds.length === 0) return []
 
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('quests')
                 .select('expedition_id')
                 .in('id', questIds)
+
+            if (error) {
+                console.error('Error in getExpeditionIdsFromQuestProgressCached:', error)
+                return []
+            }
 
             return [...new Set(data?.map(c => c.expedition_id).filter(Boolean) || [])]
         },
         [`expedition-ids-from-quests-${userId}-${questIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS, CACHE_TAGS.USER_PROGRESS, `user-${userId}`],
+            tags: [CACHE_TAGS.EXPEDITIONS, CACHE_TAGS.USER_PROGRESS, `user-${userId}`],
         }
     )()
 
@@ -732,7 +742,7 @@ export const getUserSavedExpeditionsWithQuestsCached = (supabase: SupabaseClient
         [`user-saved-expeditions-with-quests-${userId}-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.USER_SAVED, CACHE_TAGS.PATHS, `user-${userId}`],
+            tags: [CACHE_TAGS.USER_SAVED, CACHE_TAGS.EXPEDITIONS, `user-${userId}`],
         }
     )()
 
@@ -846,7 +856,7 @@ export const getPendingValidationsCached = (supabase: SupabaseClient) =>
         ['pending-validations'],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.ADMIN, CACHE_TAGS.QUESTS, CACHE_TAGS.PATHS, CACHE_TAGS.ORGANIZATIONS],
+            tags: [CACHE_TAGS.ADMIN, CACHE_TAGS.QUESTS, CACHE_TAGS.EXPEDITIONS, CACHE_TAGS.ORGANIZATIONS],
         }
     )()
 
@@ -1074,7 +1084,7 @@ export const getPendingExpeditionsListCached = (supabase: SupabaseClient) =>
         ['pending-expeditions-list'],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.ADMIN, CACHE_TAGS.PATHS],
+            tags: [CACHE_TAGS.ADMIN, CACHE_TAGS.EXPEDITIONS],
         }
     )()
 

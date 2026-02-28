@@ -78,10 +78,10 @@ export default async function LibraryPage() {
 
     // Fetch all library data using centralized query function
     const libraryData = await getUserLibraryData(supabase, user.id, {
-        drafts: 4,
-        quests: 4,
-        expeditions: 4,
-        organizations: 6
+        drafts: 100,
+        quests: 100,
+        expeditions: 100,
+        organizations: 12
     })
 
     const { drafts, quests, expeditions, organizations, savedExpeditionIds, exerciseStats } = libraryData
@@ -182,6 +182,13 @@ export default async function LibraryPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {expeditions.map((expedition) => {
                         const questCount = expedition.quests?.length || 0
+                        const expeditionQuestIds = new Set(expedition.quests?.map(q => q.id) || [])
+                        const completedQuestsCount = quests.filter(q =>
+                            expeditionQuestIds.has(q.id) &&
+                            q.user_quest_progress?.[0]?.completed
+                        ).length
+
+                        const progressPercent = questCount > 0 ? (completedQuestsCount / questCount) * 100 : 0
                         const org = Array.isArray(expedition.organizations) ? expedition.organizations[0] : expedition.organizations
 
                         return (
@@ -190,9 +197,9 @@ export default async function LibraryPage() {
                                 id={expedition.id}
                                 title={expedition.title}
                                 summary={expedition.summary}
-                                completedQuests={0}
+                                completedQuests={completedQuestsCount}
                                 totalQuests={questCount}
-                                progressPercent={0}
+                                progressPercent={progressPercent}
                                 isSaved={savedExpeditionIds.has(expedition.id)}
                                 isValidated={expedition.is_validated}
                                 isOwner={expedition.created_by === user.id}

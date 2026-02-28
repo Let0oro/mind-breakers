@@ -102,13 +102,11 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                 { name: 'guild-hall', icon: 'swords' },
                                 { name: 'world-map', icon: 'map' },
                                 { name: 'archives', icon: 'local_library' },
-                                { name: 'quests', icon: 'assignment_late' },
-                                { name: 'expeditions', icon: 'flag' },
                                 { name: 'armory', icon: 'handyman' }].map((expedition) => (
                                     <Link
                                         key={expedition.name}
                                         className={getLinkClassName(`${expedition.name == 'guild-hall' ? '/guild-hall' : '/guild-hall/' + expedition.name}`)}
-                                        href={`/guild-hall/${expedition.name == 'armory' ? 'settings' : expedition.name == 'guild-hall' ? '' : expedition.name}`}
+                                        href={`/guild-hall/${expedition.name == 'guild-hall' ? '' : expedition.name}`}
                                         onClick={() => setIsOpen(false)}
                                     >
                                         <span className={`material-symbols-outlined text-base transition-transform duration-300 scale-80 group-hover:scale-90`}>{expedition.icon}</span>

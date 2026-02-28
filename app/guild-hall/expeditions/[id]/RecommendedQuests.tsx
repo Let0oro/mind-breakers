@@ -31,12 +31,10 @@ export default async function RecommendedQuests({ expeditionId }: { expeditionId
                         {/* Image / Placeholder */}
                         <div className="relative aspect-video w-full overflow-hidden bg-surface">
                             {rec.image ? (
-                                <Image
+                                <img
                                     src={rec.image}
-                                    alt={rec.title}
-                                    fill
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    alt={rec.title || ''}
+                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-indigo-50 text-indigo-200">

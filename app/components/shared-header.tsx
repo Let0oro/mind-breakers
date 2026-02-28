@@ -16,7 +16,7 @@ export default function SharedHeader() {
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href="/" className="flex items-center gap-2 sm:gap-3 text-foreground hover:opacity-80 transition-opacity">
-                        <Image src="/icon.png" alt="MindBreaker" width={38} height={38} />
+                        <img src="/icon.png" alt="MindBreaker" width={38} height={38} />
                         <h2 className="text-foreground text-xl sm:text-2xl font-bold tracking-tight">MindBreaker</h2>
                     </Link>
                 </div>

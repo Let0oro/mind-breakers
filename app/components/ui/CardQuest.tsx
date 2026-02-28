@@ -55,7 +55,7 @@ export function CardQuest({
         return (
             <Link
                 href={href}
-                className={`group relative md:min-w-48 min-w-32 h-min flex flex-col p-6 bg-background/10 border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] ${rotation} hover:rotate-0 hover:z-[1] isolate ${className}`}
+                className={`group relative md:min-w-48 min-w-32 h-min flex flex-col p-6 bg-background/10 border border-border shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] ${rotation} hover:rotate-0 hover:z-[1] isolate cursor-pointer ${className}`}
             >
                 {/* Pin Visual */}
                 <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-main -rotate-45 z-[2] border border-gold/50 flex items-center justify-center">
@@ -117,7 +117,7 @@ export function CardQuest({
                     <div className="absolute left-5 top-12 bottom-0 w-px border-l border-dashed border-border" />
                 )}
 
-                <Link href={href} className="group flex items-start gap-6">
+                <Link href={href} className="group flex items-start gap-6 cursor-pointer">
                     {/* Square icon */}
                     <div className={`relative z-10 w-10 h-10 flex items-center justify-center shrink-0 border transition-all ${isCompleted
                         ? 'border-text-main bg-inverse'
@@ -136,7 +136,7 @@ export function CardQuest({
                     <div className="flex-1 pb-8">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline">
+                                <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline group-hover:text-gold transition-colors">
                                     {title}
                                 </h3>
                                 {summary && (
@@ -156,7 +156,7 @@ export function CardQuest({
                             {/* Status badge */}
                             <div className="flex items-center gap-2 shrink-0">
                                 {isActive && (
-                                    <span className="px-2 py-0.5 border border-text-main text-[10px] font-bold uppercase tracking-widest text-text-main">
+                                    <span className="px-2 py-0.5 border border-gold text-[10px] font-bold uppercase tracking-widest text-gold cursor-default">
                                         Active
                                     </span>
                                 )}
@@ -178,7 +178,7 @@ export function CardQuest({
         return (
             <Link
                 href={href}
-                className={`block group border border-border hover:border-text-main bg-main transition-all overflow-hidden ${className}`}
+                className={`block group border border-border hover:border-gold bg-main transition-all overflow-hidden cursor-pointer ${className}`}
             >
                 {thumbnail_url && (
                     <div className="h-32 bg-surface-dark relative overflow-hidden grayscale group-hover:grayscale-0 transition-all">
@@ -191,7 +191,7 @@ export function CardQuest({
                     </div>
                 )}
                 <div className="p-4">
-                    <h4 className="font-bold uppercase tracking-wide text-xs text-text-main group-hover:underline truncate">
+                    <h4 className="font-bold uppercase tracking-wide text-xs text-text-main group-hover:text-gold group-hover:underline truncate transition-colors">
                         {title}
                     </h4>
                     {summary && (
@@ -215,11 +215,11 @@ export function CardQuest({
         return (
             <Link
                 href={href}
-                className={`block group ${className}`}
+                className={`block group cursor-pointer ${className}`}
             >
                 <div className={`border p-4 transition-all ${isCompleted
-                    ? 'border-text-main bg-inverse/5'
-                    : 'border-border bg-main hover:border-text-main'
+                    ? 'border-gold bg-gold/5'
+                    : 'border-border bg-main hover:border-gold'
                     }`}>
                     <div className="flex flex-col md:flex-row gap-4 relative">
                         {/* Index Number */}
@@ -245,7 +245,7 @@ export function CardQuest({
                         <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
-                                    <h3 className="uppercase font-bold text-sm tracking-wide text-text-main group-hover:underline line-clamp-1">
+                                    <h3 className="uppercase font-bold text-sm tracking-wide text-text-main group-hover:text-gold group-hover:underline line-clamp-1 transition-colors">
                                         {title}
                                     </h3>
 
@@ -272,7 +272,7 @@ export function CardQuest({
                                         </span>
                                     )}
                                     {isCompleted && (
-                                        <span className="material-symbols-outlined text-text-main">check</span>
+                                        <span className="material-symbols-outlined text-gold">check</span>
                                     )}
                                 </div>
                             </div>
@@ -288,7 +288,7 @@ export function CardQuest({
         return (
             <Link
                 href={href}
-                className={`p-3 border border-border hover:border-text-main bg-main transition-colors cursor-pointer group flex flex-col ${className}`}
+                className={`p-3 border border-border hover:border-gold bg-main transition-colors cursor-pointer group flex flex-col ${className}`}
             >
                 <div className="aspect-video w-full relative overflow-hidden mb-2 bg-surface-dark grayscale group-hover:grayscale-0 transition-all">
                     <FallbackImage
@@ -299,7 +299,7 @@ export function CardQuest({
                         type="quest"
                     />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-wide text-text-main truncate text-left">
+                <p className="text-xs font-bold uppercase tracking-wide text-text-main group-hover:text-gold transition-colors truncate text-left">
                     {title}
                 </p>
                 <p className="text-[11px] text-muted text-left">
@@ -314,7 +314,7 @@ export function CardQuest({
         return (
             <Link
                 href={href}
-                className={`group flex flex-col border border-border hover:border-text-main bg-main overflow-hidden transition-all cursor-pointer ${className}`}
+                className={`group flex flex-col border border-border hover:border-gold bg-main overflow-hidden transition-all cursor-pointer ${className}`}
             >
                 <div className="h-40 relative flex items-center justify-center bg-surface-dark overflow-hidden grayscale group-hover:grayscale-0 transition-all">
                     <FallbackImage
@@ -331,7 +331,7 @@ export function CardQuest({
                     </div>
                 </div>
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline line-clamp-1">
+                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:text-gold group-hover:underline transition-colors line-clamp-1">
                         {title}
                     </h3>
                     <p className="text-muted text-xs">{xp_reward} XP</p>
@@ -352,7 +352,7 @@ export function CardQuest({
     return (
         <Link
             href={href}
-            className={`group border border-border hover:border-text-main bg-main overflow-hidden transition-all cursor-pointer flex flex-col relative ${className}`}
+            className={`group border border-border hover:border-gold bg-main overflow-hidden transition-all cursor-pointer flex flex-col relative ${className}`}
         >
             {/* Thumbnail */}
             <div className="h-40 bg-surface-dark relative overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all">
@@ -367,7 +367,7 @@ export function CardQuest({
                 {/* Right Top Badges */}
                 <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
                     {isCompleted && (
-                        <span className="bg-inverse text-main-alt px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                        <span className="bg-gold text-main-alt px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
                             <span className="material-symbols-outlined text-xs">check</span>
                             Complete
                         </span>
@@ -390,7 +390,7 @@ export function CardQuest({
 
             {/* Content */}
             <div className="p-4 flex flex-col gap-2 flex-1">
-                <h4 className="font-bold uppercase tracking-wide text-sm line-clamp-2 text-text-main group-hover:underline">
+                <h4 className="font-bold uppercase tracking-wide text-sm line-clamp-2 text-text-main group-hover:text-gold group-hover:underline transition-colors">
                     {title}
                 </h4>
 
@@ -411,11 +411,11 @@ export function CardQuest({
                     <div className="mt-auto pt-3">
                         <div className="flex items-center justify-between mb-1">
                             <span className="text-muted text-[10px] uppercase tracking-widest">Progress</span>
-                            <span className="text-text-main text-xs font-bold">{progress}%</span>
+                            <span className="text-gold text-xs font-bold">{progress}%</span>
                         </div>
                         <div className="h-1 w-full bg-surface-dark">
                             <div
-                                className="h-full bg-inverse transition-all"
+                                className="h-full bg-gold transition-all"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>

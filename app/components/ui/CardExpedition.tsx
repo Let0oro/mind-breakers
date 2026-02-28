@@ -49,7 +49,7 @@ export function CardExpedition({
         return (
             <Link
                 href={href}
-                className={`p-6 border border-border hover:border-text-main bg-main transition-all flex gap-6 items-start group ${className}`}
+                className={`p-6 border border-border hover:border-gold bg-main transition-all flex gap-6 items-start group cursor-pointer ${className}`}
             >
                 {/* Index Number */}
                 {index !== undefined && (
@@ -65,7 +65,7 @@ export function CardExpedition({
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                    <h4 className="font-bold uppercase tracking-wide text-sm text-text-main group-hover:underline line-clamp-1">
+                    <h4 className="font-bold uppercase tracking-wide text-sm text-text-main group-hover:text-gold group-hover:underline transition-colors line-clamp-1">
                         {title}
                     </h4>
                     <p className="text-muted text-xs mt-1 uppercase tracking-wider">
@@ -77,7 +77,7 @@ export function CardExpedition({
                         <div className="flex gap-1">
                             {/* Filled dots for completed */}
                             {[...Array(Math.min(completedQuests, 5))].map((_, i) => (
-                                <div key={i} className="w-3 h-3 bg-inverse" />
+                                <div key={i} className="w-3 h-3 bg-gold" />
                             ))}
                             {/* Empty dots for remaining */}
                             {[...Array(Math.min(totalQuests - completedQuests, 5))].map((_, i) => (
@@ -100,7 +100,7 @@ export function CardExpedition({
         return (
             <Link
                 href={href}
-                className={`group flex flex-col border border-border hover:border-text-main bg-main overflow-hidden transition-all cursor-pointer ${className}`}
+                className={`group flex flex-col border border-border hover:border-gold bg-main overflow-hidden transition-all cursor-pointer ${className}`}
             >
                 <div className="h-40 relative flex items-center justify-center bg-surface-dark overflow-hidden grayscale group-hover:grayscale-0 transition-all">
                     <FallbackImage
@@ -120,7 +120,7 @@ export function CardExpedition({
                     </div>
                 </div>
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline line-clamp-1">
+                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:text-gold group-hover:underline transition-colors line-clamp-1">
                         {title}
                     </h3>
                     {summary && (
@@ -142,12 +142,12 @@ export function CardExpedition({
     return (
         <Link
             href={href}
-            className={`group border border-border hover:border-text-main bg-main transition-all p-6 flex flex-col gap-4 ${className}`}
+            className={`group border border-border hover:border-gold bg-main transition-all p-6 flex flex-col gap-4 cursor-pointer ${className}`}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:underline line-clamp-2">
+                    <h3 className="text-text-main font-bold uppercase tracking-wide text-sm group-hover:text-gold group-hover:underline transition-colors line-clamp-2">
                         {title}
                     </h3>
                     {organizationName && (
@@ -163,7 +163,7 @@ export function CardExpedition({
                         </span>
                     )}
                     {isSaved && (
-                        <span className="material-symbols-outlined text-text-main text-lg">bookmark</span>
+                        <span className="material-symbols-outlined text-gold text-lg">bookmark</span>
                     )}
                 </div>
             </div>
@@ -188,11 +188,11 @@ export function CardExpedition({
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                         <span className="text-muted uppercase tracking-wider">Progress</span>
-                        <span className="text-text-main font-bold">{Math.round(progressPercent)}%</span>
+                        <span className="text-gold font-bold">{Math.round(progressPercent)}%</span>
                     </div>
                     <div className="h-1 bg-surface-dark dark:bg-surface">
                         <div
-                            className="h-full bg-inverse transition-all"
+                            className="h-full bg-gold transition-all"
                             style={{ width: `${progressPercent}%` }}
                         />
                     </div>

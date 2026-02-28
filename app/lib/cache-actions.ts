@@ -37,7 +37,7 @@ export async function invalidateQuestCache(questId: string) {
  * Invalidate all expedition caches
  */
 export async function invalidateExpeditionsCache() {
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
 }
 
 /**
@@ -45,7 +45,7 @@ export async function invalidateExpeditionsCache() {
  */
 export async function invalidateExpeditionCache(expeditionId: string) {
     revalidateTag(`expedition-${expeditionId}`, REVALIDATE_PROFILE)
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
 }
 
 /**
@@ -145,7 +145,7 @@ export async function afterExpeditionChange(expeditionId?: string) {
     if (expeditionId) {
         revalidateTag(`expedition-${expeditionId}`, REVALIDATE_PROFILE)
     }
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall')
     revalidatePath('/guild-hall/library')
@@ -185,6 +185,8 @@ export async function afterSaveExpeditionChange(userId: string) {
 export async function afterProgressChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_PROGRESS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall')
     revalidatePath('/guild-hall/library')
 }
@@ -207,7 +209,7 @@ export async function afterExerciseSubmission(userId: string) {
 export async function afterAdminValidation() {
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall/admin')
     revalidatePath('/guild-hall/admin/validations')

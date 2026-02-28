@@ -497,7 +497,8 @@ export async function getUserLibraryData(
     const [quests, expeditions] = await Promise.all([
         getQuestsByIds(supabase, Array.from(allQuestIds), {
             status: 'published',
-            limit: limits?.quests
+            limit: limits?.quests,
+            includeProgress: true
         }),
         getExpeditionsByIds(supabase, Array.from(allExpeditionIds), limits?.expeditions)
     ])

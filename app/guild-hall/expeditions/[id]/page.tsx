@@ -17,6 +17,7 @@ import {
   isExpeditionSavedCached,
   getUserQuestsProgressCached
 } from '@/lib/cache'
+import { afterProgressChange } from '@/lib/cache-actions'
 
 export default async function ExpeditionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -43,7 +44,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
         <span className="material-symbols-outlined text-5xl text-muted mb-4">pending</span>
-        <h1 className="text-xl font-bold uppercase tracking-wide text-text-main mb-2">
+        <h1 className="text-xl font-bold uppercase tracking-wide text-gold mb-2">
           Content not available
         </h1>
         <p className="text-muted text-sm max-w-md">
@@ -51,7 +52,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
         </p>
         <Link
           href="/guild-hall/expeditions"
-          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
+          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold hover:underline cursor-pointer"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to expeditions
@@ -126,7 +127,8 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
     }
   }
 
-  const totalXp = expedition.quests?.reduce((sum: number, c: Quest) => sum + c.xp_reward, 0) || 0
+  const totalAvailableXp = expedition.quests?.reduce((sum: number, c: Quest) => sum + c.xp_reward, 0) || 0
+  const userEarnedXp = Array.from(progressMap.values()).reduce((sum: number, p: { xp_earned: number }) => sum + (p.xp_earned || 0), 0)
 
   return (
     <>
@@ -135,7 +137,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
         <div className="mb-6 border border-muted p-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-muted">pending</span>
           <div>
-            <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
+            <p className="font-bold uppercase tracking-wide text-xs text-gold">Pending validation</p>
             <p className="text-xs text-muted">
               This expedition is only visible to you until approved by an admin.
             </p>
@@ -147,7 +149,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
       <header className="mb-10">
         <Link
           href="/guild-hall/expeditions"
-          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-gold mb-4 inline-flex items-center gap-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to expeditions
@@ -155,7 +157,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
 
         <div className="flex items-start justify-between mt-4 gap-4">
           <div className="flex-1">
-            <h1 className="text-4xl font-black italic tracking-tight text-text-main">
+            <h1 className="text-4xl font-black italic tracking-tight text-gold">
               {expedition.title.toUpperCase()}
             </h1>
             {expedition.summary && (
@@ -170,7 +172,71 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <form
+              className={progressMap.size === 0 && expedition.quests && expedition.quests.length > 0 ? "block" : "hidden"}
+              action={async () => {
+                'use server'
+                const supabase = await createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+
+                if (user) {
+                  await supabase
+                    .from('user_quest_progress')
+                    .upsert({
+                      user_id: user.id,
+                      quest_id: expedition.quests[0].id,
+                      completed: false,
+                      xp_earned: 0
+                    }, { onConflict: 'user_id,quest_id' })
+
+                  await afterProgressChange(user.id)
+                  await afterProgressChange(user.id)
+                  revalidatePath('/', 'layout')
+                }
+              }}
+            >
+              <button
+                type="submit"
+                className="px-4 py-2 border border-gold bg-gold text-main-alt text-xs font-bold uppercase tracking-widest hover:bg-gold/90 transition-colors cursor-pointer"
+              >
+                Start Expedition
+              </button>
+            </form>
+
+            <form
+              className={progressMap.size > 0 && userEarnedXp === 0 ? "block" : "hidden"}
+              action={async () => {
+                'use server'
+                const supabase = await createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+
+                if (user && expedition.quests && expedition.quests.length > 0) {
+                  // Solo borramos el phantom progress
+                  const { error } = await supabase
+                    .from('user_quest_progress')
+                    .delete()
+                    .eq('user_id', user.id)
+                    .in('quest_id', expedition.quests.map((q: Quest) => q.id))
+
+                  if (error) {
+                    console.error("ERROR deleting progress on abandon:", error)
+                  }
+
+                  await afterProgressChange(user.id)
+                  await afterProgressChange(user.id)
+                  revalidatePath('/', 'layout')
+                }
+              }}
+            >
+              <button
+                type="submit"
+                className="px-4 py-2 border border-destructive text-destructive bg-transparent hover:bg-destructive hover:text-white text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer"
+              >
+                Abandon
+              </button>
+            </form>
+
             <form
               action={async () => {
                 'use server'
@@ -195,9 +261,9 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
             >
               <button
                 type="submit"
-                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${isSaved
-                  ? 'border border-text-main bg-inverse text-main-alt'
-                  : 'border border-border text-muted hover:border-text-main hover:text-text-main'
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer ${isSaved
+                  ? 'border border-gold bg-gold text-main-alt'
+                  : 'border border-border text-muted hover:border-gold hover:text-gold'
                   }`}
               >
                 {isSaved ? 'Saved' : 'Save'}
@@ -206,7 +272,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
 
             <Link
               href={`/guild-hall/expeditions/${expedition.id}/edit`}
-              className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors"
+              className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-gold hover:text-gold transition-colors cursor-pointer"
             >
               Edit
             </Link>
@@ -225,7 +291,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
         <div className="lg:col-span-1 space-y-6">
           {/* About */}
           <div className="border border-border bg-main p-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gold mb-4">
               About this expedition
             </h2>
             {expedition.description ? (
@@ -241,22 +307,22 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
             <div className="mt-6 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted">Total quests:</span>
-                <span className="font-bold text-text-main">{totalQuests}</span>
+                <span className="font-bold text-gold">{totalQuests}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">Completed:</span>
-                <span className="font-bold text-text-main">{completedQuests}</span>
+                <span className="font-bold text-gold">{completedQuests}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">Total XP:</span>
-                <span className="font-bold text-text-main">{totalXp} XP</span>
+                <span className="font-bold text-gold">{totalAvailableXp} XP</span>
               </div>
             </div>
 
             {expedition.created_by === user.id && (
               <Link
                 href={`/guild-hall/quests/new?expeditionId=${expedition.id}`}
-                className="mt-6 block w-full px-4 py-2 text-center text-xs font-bold uppercase tracking-widest border border-text-main text-text-main hover:bg-inverse hover:text-main-alt transition-all"
+                className="mt-6 block w-full px-4 py-2 text-center text-xs font-bold uppercase tracking-widest border border-gold text-gold hover:bg-gold hover:text-main-alt transition-all cursor-pointer"
               >
                 + Add quest
               </Link>
@@ -266,8 +332,8 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
           {/* Leaderboard */}
           <div className="border border-border bg-main p-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-lg text-text-main">leaderboard</span>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-text-main">
+              <span className="material-symbols-outlined text-lg text-gold">leaderboard</span>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gold">
                 Top Adventurers
               </h2>
             </div>
@@ -278,7 +344,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
                   <Link
                     key={student.userId}
                     href={`/guild-hall/users/${student.userId}`}
-                    className="flex items-center gap-3 p-2 hover:bg-surface transition-colors"
+                    className="flex items-center gap-3 p-2 hover:bg-surface transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-center w-5 h-5 text-[10px] font-bold border border-border text-muted">
                       {index + 1}
@@ -293,14 +359,14 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-text-main truncate uppercase tracking-wide">
+                      <p className="text-xs font-bold text-gold truncate uppercase tracking-wide">
                         {student.username}
                       </p>
                       <p className="text-[10px] text-muted">
                         {student.completedCount} quests
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-text-main">
+                    <div className="text-xs font-bold text-gold">
                       {student.totalXp} XP
                     </div>
                   </Link>
@@ -357,7 +423,7 @@ export default async function ExpeditionDetailPage({ params }: { params: Promise
               {expedition.created_by === user.id && (
                 <Link
                   href={`/guild-hall/quests/new?expeditionId=${expedition.id}`}
-                  className="mt-6 inline-block px-6 py-3 border border-dashed border-border text-xs font-bold uppercase tracking-widest text-text-main hover:bg-surface hover:border-gold transition-all"
+                  className="mt-6 inline-block px-6 py-3 border border-dashed border-border text-xs font-bold uppercase tracking-widest text-gold hover:bg-surface hover:border-gold transition-all cursor-pointer"
                 >
                   Post a new quest
                 </Link>

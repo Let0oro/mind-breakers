@@ -162,9 +162,9 @@ export function QuestActions({
       <button
         onClick={handleToggleSave}
         disabled={loading}
-        className={`h-10 px-4 text-xs cursor-pointer font-bold uppercase tracking-widest transition-colors flex items-center gap-2 ${isSaved
-          ? 'bg-inverse text-inverse'
-          : 'border border-border text-text-main hover:bg-surface'
+        className={`h-10 px-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2 cursor-pointer ${isSaved
+          ? 'bg-gold text-main-alt'
+          : 'border border-gold text-gold hover:bg-gold/10'
           } disabled:opacity-50`}
       >
         <span className="material-symbols-outlined text-sm">
@@ -179,7 +179,7 @@ export function QuestActions({
             <button
               onClick={handleMarkComplete}
               disabled={loading}
-              className="h-10 px-4 cursor-pointer bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="h-10 px-4 bg-gold text-main-alt text-xs font-bold uppercase tracking-widest hover:bg-gold/90 disabled:opacity-50 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">check_circle</span>
               {loading ? 'Saving...' : 'Complete'}
@@ -187,7 +187,7 @@ export function QuestActions({
           ) : (
             <a
               href="#exercises"
-              className="h-10 px-4 cursor-pointer bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-colors flex items-center gap-2"
+              className="h-10 px-4 bg-gold text-main-alt text-xs font-bold uppercase tracking-widest hover:bg-gold/90 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm">arrow_downward</span>
               Go to Exercises
@@ -197,7 +197,7 @@ export function QuestActions({
           <button
             onClick={handleMarkIncomplete}
             disabled={loading}
-            className="h-10 px-4 cursor-pointer border border-muted text-muted text-xs font-bold uppercase tracking-widest hover:border-text-main hover:text-text-main disabled:opacity-50 transition-colors flex items-center gap-2"
+            className="h-10 px-4 border border-muted text-muted text-xs font-bold uppercase tracking-widest hover:border-gold hover:text-gold disabled:opacity-50 transition-colors flex items-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">undo</span>
             {loading ? 'Saving...' : 'Undo Complete'}

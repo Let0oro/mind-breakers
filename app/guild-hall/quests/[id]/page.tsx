@@ -47,7 +47,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
         </p>
         <Link
           href="/guild-hall/quests"
-          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main hover:underline"
+          className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold hover:underline cursor-pointer"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to quests
@@ -86,7 +86,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
         <div className="mb-6 border border-muted p-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-muted">pending</span>
           <div>
-            <p className="font-bold uppercase tracking-wide text-xs text-text-main">Pending validation</p>
+            <p className="font-bold uppercase tracking-wide text-xs text-gold">Pending validation</p>
             <p className="text-xs text-muted">
               This quest is only visible to you until approved by an admin.
             </p>
@@ -98,7 +98,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
       <header className="mb-10">
         <Link
           href={`/guild-hall/expeditions/${quest.expeditions.id}`}
-          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-bold uppercase tracking-widest text-muted hover:text-gold mb-4 inline-flex items-center gap-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back to {quest.expeditions.title}
@@ -107,11 +107,11 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mt-4 gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-4xl font-black italic tracking-tight text-text-main">
+              <h1 className="text-4xl font-black italic tracking-tight text-gold">
                 {quest.title.toUpperCase()}
               </h1>
               {quest.status === 'published' && (
-                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-text-main text-text-main">
+                <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-gold text-gold">
                   Published
                 </span>
               )}
@@ -135,7 +135,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
               {quest.organizations && (
                 <span>{quest.organizations.name}</span>
               )}
-              <span className="font-bold text-text-main">{quest.xp_reward} XP</span>
+              <span className="font-bold text-gold">{quest.xp_reward} XP</span>
               {quest.quest_exercises?.length > 0 && (
                 <span>{quest.quest_exercises.length} mission(s)</span>
               )}
@@ -146,7 +146,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
             {(isOwner || profile?.is_admin) && (
               <Link
                 href={`/guild-hall/quests/${quest.id}/edit`}
-                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors flex items-center gap-2"
+                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-gold hover:text-gold transition-colors flex items-center gap-2 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-sm">edit</span>
                 Edit
@@ -185,19 +185,19 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
                 href={quest.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between border border-text-main p-4 hover:bg-inverse hover:text-main-alt transition-all"
+                className="flex items-center justify-between border border-gold p-4 hover:bg-gold hover:text-main-alt transition-all group cursor-pointer"
               >
-                <span className="font-bold text-xs uppercase tracking-widest text-text-main">
+                <span className="font-bold text-xs uppercase tracking-widest text-gold group-hover:text-main-alt transition-colors">
                   Go to external quest
                 </span>
-                <span className="material-symbols-outlined text-lg text-text-main">open_in_new</span>
+                <span className="material-symbols-outlined text-lg text-gold group-hover:text-main-alt transition-colors">open_in_new</span>
               </a>
             </div>
           )}
 
           {/* Description */}
           <div className="border border-border bg-main p-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-gold mb-4">
               Description
             </h2>
             {quest.description ? (
@@ -214,7 +214,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
           {/* Exercises */}
           {quest.quest_exercises && quest.quest_exercises.length > 0 && (
             <div id="exercises" className="border border-border bg-main p-6">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gold mb-4">
                 Missions
               </h2>
               <div className="space-y-4">
@@ -225,7 +225,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
                     <div
                       key={exercise.id}
                       className={`border p-4 ${submission?.status === 'approved'
-                        ? 'border-text-main bg-inverse/5'
+                        ? 'border-gold bg-gold/5'
                         : submission
                           ? 'border-muted bg-surface'
                           : 'border-border bg-main'
@@ -233,7 +233,7 @@ export default async function QuestDetailPage({ params }: { params: Promise<{ id
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-text-main">
+                          <h3 className="font-bold text-sm uppercase tracking-wide text-gold">
                             {exercise.title}
                           </h3>
                           {exercise.description && (
