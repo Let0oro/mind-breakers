@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
-import { Course, CourseExercise } from '@/lib/types'
+import { Quest, QuestExercise } from '@/lib/types'
 import { FormLayout, FormField, FormActions, FormError, FormSection, FormDivider } from '@/components/ui/Form'
 
-interface LearningPath {
+interface Expedition {
     id: string
     title: string
 }
@@ -24,12 +24,12 @@ interface Exercise {
     requirements: string
 }
 
-export function EditCourseForm({ courseId }: { courseId: string }) {
+export function EditQuestForm({ questId }: { questId: string }) {
     const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState({publish: false, draft: false })
+    const [saving, setSaving] = useState({ publish: false, draft: false })
     const [error, setError] = useState<string | null>(null)
 
-    const [paths, setPaths] = useState<LearningPath[]>([])
+    const [expeditions, setExpeditions] = useState<Expedition[]>([])
     const [organizations, setOrganizations] = useState<Organization[]>([])
 
     const router = useRouter()
@@ -38,7 +38,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     // Form Fields
     const [linkUrl, setLinkUrl] = useState('')
     const [isFetchingMetadata, setIsFetchingMetadata] = useState(false)
-    const [pathId, setPathId] = useState('')
+    const [expeditionId, setExpeditionId] = useState('')
     const [organizationId, setOrganizationId] = useState('')
     const [title, setTitle] = useState('')
     const [summary, setSummary] = useState('')
@@ -48,7 +48,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
     const [orderIndex, setOrderIndex] = useState(0)
 
     // Workflow State
-    const [courseStatus, setCourseStatus] = useState<'draft' | 'published' | 'archived'>('draft')
+    const [questStatus, setQuestStatus] = useState<'draft' | 'published' | 'archived'>('draft')
     const [showEditReasonModal, setShowEditReasonModal] = useState(false)
     const [editReason, setEditReason] = useState('')
     const [progressCount, setProgressCount] = useState(0)
@@ -113,48 +113,48 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                 return
             }
 
-            const [pathsRes, orgsRes] = await Promise.all([
-                supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
+            const [expeditionsRes, orgsRes] = await Promise.all([
+                supabase.from('expeditions').select('id, title').eq('created_by', user.id).order('title'),
                 supabase.from('organizations').select('id, name').order('name'),
             ])
 
-            if (pathsRes.data) setPaths(pathsRes.data)
+            if (expeditionsRes.data) setExpeditions(expeditionsRes.data)
             if (orgsRes.data) setOrganizations(orgsRes.data)
 
-            const { data: course, error: courseError } = await supabase
-                .from('courses')
+            const { data: quest, error: questError } = await supabase
+                .from('quests')
                 .select(`
                 *,
-                course_exercises (*),
-                user_course_progress (count)
+                quest_exercises (*),
+                user_quest_progress (count)
             `)
-                .eq('id', courseId)
+                .eq('id', questId)
                 .single()
 
-            if (courseError || !course) {
-                setError("Failed to load course")
+            if (questError || !quest) {
+                setError("Failed to load quest")
                 setLoading(false)
                 return
             }
 
-            setCourseStatus(course.status as 'draft' | 'published' | 'archived')
-            const pCount = course.user_course_progress?.[0]?.count || 0
+            setQuestStatus(quest.status as 'draft' | 'published' | 'archived')
+            const pCount = quest.user_quest_progress?.[0]?.count || 0
             setProgressCount(pCount)
 
-            const sourceData = (course.draft_data as unknown as Course) || course
+            const sourceData = (quest.draft_data as unknown as Quest) || quest
 
-            setTitle(sourceData.title || course.title)
-            setSummary(sourceData.summary || course.summary || '')
-            setDescription(sourceData.description || course.description || '')
-            setLinkUrl(sourceData.link_url || course.link_url || '')
-            setThumbnailUrl(sourceData.thumbnail_url || course.thumbnail_url || '')
-            setXpReward(sourceData.xp_reward ?? course.xp_reward)
-            setOrderIndex(sourceData.order_index ?? course.order_index)
-            setPathId(sourceData.path_id || course.path_id)
-            setOrganizationId(sourceData.organization_id || course.organization_id || '')
+            setTitle(sourceData.title || quest.title)
+            setSummary(sourceData.summary || quest.summary || '')
+            setDescription(sourceData.description || quest.description || '')
+            setLinkUrl(sourceData.link_url || quest.link_url || '')
+            setThumbnailUrl(sourceData.thumbnail_url || quest.thumbnail_url || '')
+            setXpReward(sourceData.xp_reward ?? quest.xp_reward)
+            setOrderIndex(sourceData.order_index ?? quest.order_index)
+            setExpeditionId(sourceData.expedition_id || quest.expedition_id)
+            setOrganizationId(sourceData.organization_id || quest.organization_id || '')
 
-            if (course.course_exercises) {
-                setExercises(course.course_exercises.map((ex: CourseExercise) => ({
+            if (quest.quest_exercises) {
+                setExercises(quest.quest_exercises.map((ex: QuestExercise) => ({
                     id: ex.id,
                     title: ex.title,
                     description: ex.description || '',
@@ -166,13 +166,13 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         }
 
         initData()
-    }, [courseId, supabase, router])
+    }, [questId, supabase, router])
 
     const isFormValidForDraft = () => !!(title.trim() || linkUrl.trim())
 
     const isFormValidForPublish = () => !!(
         title.trim() &&
-        pathId &&
+        expeditionId &&
         summary.trim() &&
         description.trim() &&
         thumbnailUrl.trim() &&
@@ -191,7 +191,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             return
         }
 
-        if (courseStatus === 'published' && targetStatus === 'published') {
+        if (questStatus === 'published' && targetStatus === 'published') {
             setShowEditReasonModal(true)
             return
         }
@@ -210,7 +210,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         setError(null)
 
         const commonData = {
-            path_id: pathId,
+            expedition_id: expeditionId,
             title: title,
             summary: summary,
             description: description,
@@ -223,7 +223,7 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         let updatePayload: Record<string, unknown> = {}
 
-        if (courseStatus === 'published') {
+        if (questStatus === 'published') {
             updatePayload = {
                 draft_data: {
                     ...commonData,
@@ -240,9 +240,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         }
 
         const { error: updateError } = await supabase
-            .from('courses')
+            .from('quests')
             .update(updatePayload)
-            .eq('id', courseId)
+            .eq('id', questId)
 
         if (updateError) {
             setError(updateError.message)
@@ -256,34 +256,34 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
         setShowEditReasonModal(false)
         router.refresh()
 
-        router.push(`/guild-hall/quests/${courseId}`)
+        router.push(`/guild-hall/quests/${questId}`)
     }
 
     const handleExercisesSave = async () => {
         const { data: existingIdsData } = await supabase
-            .from('course_exercises')
+            .from('quest_exercises')
             .select('id')
-            .eq('course_id', courseId)
+            .eq('quest_id', questId)
 
         const existingIds = existingIdsData?.map(x => x.id) || []
         const currentFormIds = exercises.map(x => x.id)
         const idsToDelete = existingIds.filter(id => !currentFormIds.includes(id))
 
         if (idsToDelete.length > 0) {
-            await supabase.from('course_exercises').delete().in('id', idsToDelete)
+            await supabase.from('quest_exercises').delete().in('id', idsToDelete)
         }
 
         if (exercises.length > 0) {
             const exercisesToUpsert = exercises.map(ex => ({
                 id: ex.id,
-                course_id: courseId,
+                quest_id: questId,
                 title: ex.title.trim(),
                 description: ex.description.trim() || null,
                 requirements: ex.requirements.trim() || null,
             }))
 
             const { error: exerciseError } = await supabase
-                .from('course_exercises')
+                .from('quest_exercises')
                 .upsert(exercisesToUpsert)
 
             if (exerciseError) console.error('Error saving exercises:', exerciseError)
@@ -295,9 +295,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
         if (progressCount > 0) {
             const { error } = await supabase
-                .from('courses')
+                .from('quests')
                 .update({ status: 'archived', archived_at: new Date().toISOString() })
-                .eq('id', courseId)
+                .eq('id', questId)
 
             if (error) {
                 setError(error.message)
@@ -306,9 +306,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             }
         } else {
             const { error } = await supabase
-                .from('courses')
+                .from('quests')
                 .delete()
-                .eq('id', courseId)
+                .eq('id', questId)
 
             if (error) {
                 setError(error.message)
@@ -328,12 +328,12 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
     return (
         <>
-            <FormLayout title="Edit Quest" subtitle="Update your course details">
+            <FormLayout title="Edit Quest" subtitle="Update your quest details">
                 <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                     <FormError message={error} />
 
-                    {/* Warning Banner for Published Courses */}
-                    {courseStatus === 'published' && (
+                    {/* Warning Banner for Published Quests */}
+                    {questStatus === 'published' && (
                         <div className="border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
                             <span className="material-symbols-outlined text-amber-500 text-lg">warning</span>
                             <p className="text-amber-500 text-sm">
@@ -376,15 +376,15 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
 
                     <FormField
                         label="Expedition"
-                        name="path_id"
+                        name="expedition_id"
                         type="select"
-                        value={pathId}
-                        onChange={setPathId}
+                        value={expeditionId}
+                        onChange={setExpeditionId}
                         required
                     >
                         <option value="">Select an expedition</option>
-                        {paths.map((path) => (
-                            <option key={path.id} value={path.id}>{path.title}</option>
+                        {expeditions.map((expedition) => (
+                            <option key={expedition.id} value={expedition.id}>{expedition.title}</option>
                         ))}
                     </FormField>
 
@@ -541,8 +541,8 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
                         publishing={saving.publish}
                         canSave={isFormValidForDraft()}
                         canPublish={isFormValidForPublish()}
-                        publishLabel={courseStatus === 'published' ? 'Update' : 'Publish'}
-                        deleteLabel={progressCount > 0 ? 'Archive Course' : 'Delete Course'}
+                        publishLabel={questStatus === 'published' ? 'Update' : 'Publish'}
+                        deleteLabel={progressCount > 0 ? 'Archive Quest' : 'Delete Quest'}
                         showDelete={true}
                     />
                 </form>
@@ -552,9 +552,9 @@ export function EditCourseForm({ courseId }: { courseId: string }) {
             {showEditReasonModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-main border border-border p-6 max-w-md w-full">
-                        <h3 className="text-xl font-black uppercase tracking-tight text-text-main mb-4">Update Published Course</h3>
+                        <h3 className="text-xl font-black uppercase tracking-tight text-text-main mb-4">Update Published Quest</h3>
                         <p className="text-sm text-muted mb-4">
-                            Since this course is published, your changes will be saved as a draft for admin review. The live version will remain unchanged until approved.
+                            Since this quest is published, your changes will be saved as a draft for admin review. The live version will remain unchanged until approved.
                         </p>
                         <label className="block text-xs font-bold uppercase tracking-widest text-text-main mb-2">
                             Reason for changes <span className="text-red-500">*</span>

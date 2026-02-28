@@ -1,8 +1,8 @@
-import { getRecommendedCourses } from '@/lib/services/recommendations'
+import { getRecommendedQuests } from '@/lib/services/recommendations'
 import Image from 'next/image'
 
-export default async function RecommendedCourses({ pathId }: { pathId: string }) {
-    const recommendations = await getRecommendedCourses(pathId)
+export default async function RecommendedQuests({ expeditionId }: { expeditionId: string }) {
+    const recommendations = await getRecommendedQuests(expeditionId)
 
     if (recommendations.length === 0) {
         return null
@@ -64,7 +64,7 @@ export default async function RecommendedCourses({ pathId }: { pathId: string })
 
                             <div className="mt-auto flex items-center justify-between text-xs text-muted">
                                 <span className="truncate max-w-[70%]">
-                                    From: {rec.sourcePathTitle}
+                                    From: {rec.sourceExpeditionTitle}
                                 </span>
                                 <span className="material-symbols-outlined text-base">open_in_new</span>
                             </div>

@@ -5,39 +5,39 @@ import { createClient } from '@/utils/supabase/server'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import Link from 'next/link'
 import { FallbackImage } from '@/components/ui/FallbackImage'
-import { CardCourse } from '@/components/ui/CardCourse'
-import type { Course, PathResource } from '@/lib/types'
+import { CardQuest } from '@/components/ui/CardQuest'
+import type { Quest, ExpeditionResource } from '@/lib/types'
 
-import RecommendedCourses from './RecommendedCourses'
+import RecommendedQuests from './RecommendedQuests'
 import Recommendations from '@/components/features/Recommendations'
-import PathResources from '@/components/features/PathResources'
+import ExpeditionResources from '@/components/features/ExpeditionResources'
 import {
-  getPathDetailCached,
-  getPathResourcesCached,
-  isPathSavedCached,
-  getUserCoursesProgressCached
+  getExpeditionDetailCached,
+  getExpeditionResourcesCached,
+  isExpeditionSavedCached,
+  getUserQuestsProgressCached
 } from '@/lib/cache'
 
-export default async function PathDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ExpeditionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { id } = await params;
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch path data and resources (cached)
+  // Fetch expedition data and resources (cached)
   const [
-    { data: path, error },
+    { data: expedition, error },
     initialResources
   ] = await Promise.all([
-    getPathDetailCached(supabase, id),
-    getPathResourcesCached(supabase, id) as Promise<PathResource[]>
+    getExpeditionDetailCached(supabase, id),
+    getExpeditionResourcesCached(supabase, id) as Promise<ExpeditionResource[]>
   ])
 
-  if (error || !path) notFound()
+  if (error || !expedition) notFound()
 
-  const isOwner = path.created_by === user.id
-  const isValidated = path.is_validated === true
+  const isOwner = expedition.created_by === user.id
+  const isValidated = expedition.is_validated === true
 
   if (!isValidated && !isOwner) {
     return (
@@ -60,32 +60,32 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
     )
   }
 
-  // Get course IDs for progress query
-  const courseIds = path.courses?.map((c: Course) => c.id) || []
+  // Get quest IDs for progress query
+  const questIds = expedition.quests?.map((c: Quest) => c.id) || []
 
   // Fetch user-specific data (cached)
   const [isSaved, userProgress] = await Promise.all([
-    isPathSavedCached(supabase, user.id, id),
-    getUserCoursesProgressCached(supabase, user.id, courseIds)
+    isExpeditionSavedCached(supabase, user.id, id),
+    getUserQuestsProgressCached(supabase, user.id, questIds)
   ])
 
-  // Create a map of course progress
-  const progressMap = new Map(userProgress.map(p => [p.course_id, p]))
+  // Create a map of quest progress
+  const progressMap = new Map(userProgress.map(p => [p.quest_id, p]))
 
-  const totalCourses = path.courses?.length || 0
-  const completedCourses = path.courses?.filter((c: Course) =>
+  const totalQuests = expedition.quests?.length || 0
+  const completedQuests = expedition.quests?.filter((c: Quest) =>
     progressMap.get(c.id)?.completed
   ).length || 0
 
   // Leaderboard
-  const pathCourseIds = path.courses?.map((c: Course) => c.id) || []
+  const expeditionQuestIds = expedition.quests?.map((c: Quest) => c.id) || []
   let leaderboard: { userId: string; username: string; avatarUrl: string; totalXp: number; completedCount: number }[] = []
 
-  if (pathCourseIds.length > 0) {
+  if (expeditionQuestIds.length > 0) {
     const { data: allProgress } = await supabase
-      .from('user_course_progress')
+      .from('user_quest_progress')
       .select('user_id, xp_earned, completed')
-      .in('course_id', pathCourseIds)
+      .in('quest_id', expeditionQuestIds)
 
     if (allProgress) {
       const statsByUser = new Map<string, { totalXp: number; completedCount: number }>()
@@ -126,7 +126,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
     }
   }
 
-  const totalXp = path.courses?.reduce((sum: number, c: Course) => sum + c.xp_reward, 0) || 0
+  const totalXp = expedition.quests?.reduce((sum: number, c: Quest) => sum + c.xp_reward, 0) || 0
 
   return (
     <>
@@ -156,16 +156,16 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
         <div className="flex items-start justify-between mt-4 gap-4">
           <div className="flex-1">
             <h1 className="text-4xl font-black italic tracking-tight text-text-main">
-              {path.title.toUpperCase()}
+              {expedition.title.toUpperCase()}
             </h1>
-            {path.summary && (
+            {expedition.summary && (
               <p className="mt-2 text-muted text-sm">
-                {path.summary}
+                {expedition.summary}
               </p>
             )}
-            {path.organizations && (
+            {expedition.organizations && (
               <p className="mt-2 text-xs text-muted uppercase tracking-wider">
-                By {path.organizations.name}
+                By {expedition.organizations.name}
               </p>
             )}
           </div>
@@ -179,18 +179,18 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
                 if (isSaved) {
                   await supabase
-                    .from('saved_paths')
+                    .from('saved_expeditions')
                     .delete()
                     .eq('user_id', user!.id)
-                    .eq('path_id', id)
+                    .eq('expedition_id', id)
                 } else {
                   await supabase
-                    .from('saved_paths')
-                    .insert({ user_id: user!.id, path_id: id })
+                    .from('saved_expeditions')
+                    .insert({ user_id: user!.id, expedition_id: id })
                 }
 
-                revalidatePath(`/guild-hall/paths/${id}`)
-                revalidatePath(`/guild-hall/paths`)
+                revalidatePath(`/guild-hall/expeditions/${id}`)
+                revalidatePath(`/guild-hall/expeditions`)
               }}
             >
               <button
@@ -205,7 +205,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             </form>
 
             <Link
-              href={`/guild-hall/paths/${path.id}/edit`}
+              href={`/guild-hall/expeditions/${expedition.id}/edit`}
               className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors"
             >
               Edit
@@ -215,7 +215,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
 
         {/* Progress */}
         <div className="mt-6">
-          <ProgressBar current={completedCourses} total={totalCourses} />
+          <ProgressBar current={completedQuests} total={totalQuests} />
         </div>
       </header>
 
@@ -228,9 +228,9 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
               About this expedition
             </h2>
-            {path.description ? (
+            {expedition.description ? (
               <p className="text-xs text-muted whitespace-pre-wrap">
-                {path.description}
+                {expedition.description}
               </p>
             ) : (
               <p className="text-xs text-muted italic">
@@ -241,11 +241,11 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
             <div className="mt-6 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted">Total quests:</span>
-                <span className="font-bold text-text-main">{totalCourses}</span>
+                <span className="font-bold text-text-main">{totalQuests}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">Completed:</span>
-                <span className="font-bold text-text-main">{completedCourses}</span>
+                <span className="font-bold text-text-main">{completedQuests}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted">Total XP:</span>
@@ -253,9 +253,9 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </div>
             </div>
 
-            {path.created_by === user.id && (
+            {expedition.created_by === user.id && (
               <Link
-                href={`/guild-hall/quests/new?pathId=${path.id}`}
+                href={`/guild-hall/quests/new?expeditionId=${expedition.id}`}
                 className="mt-6 block w-full px-4 py-2 text-center text-xs font-bold uppercase tracking-widest border border-text-main text-text-main hover:bg-inverse hover:text-main-alt transition-all"
               >
                 + Add quest
@@ -314,36 +314,36 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           {/* Resources */}
-          <PathResources pathId={path.id} initialResources={initialResources || []} />
+          <ExpeditionResources expeditionId={expedition.id} initialResources={initialResources || []} />
         </div>
 
-        {/* Course Timeline */}
+        {/* Quest Timeline */}
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3 mb-6">
             <span className="material-symbols-outlined text-gold">dashboard</span>
             <h2 className="text-xl font-header text-foreground italic">Mission Board</h2>
-          </div>{path.courses && path.courses.length > 0 ? (
+          </div>{expedition.quests && expedition.quests.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 grid-cols-1fr p-4 md:p-8 bg-main border border-border/50 min-h-[400px]">
               {/* Board Title / Decor (Optional, maybe implied by the container) */}
 
-              {path.courses.map((course: Course, index: number) => {
-                const courseProgress = progressMap.get(course.id)
-                const isCompleted = courseProgress?.completed
-                const hasProgress = courseProgress !== undefined
+              {expedition.quests.map((quest: Quest, index: number) => {
+                const questProgress = progressMap.get(quest.id)
+                const isCompleted = questProgress?.completed
+                const hasProgress = questProgress !== undefined
                 const progress = isCompleted ? 100 : (hasProgress ? 50 : 0)
 
                 return (
-                  <CardCourse
-                    key={course.id}
-                    id={course.id}
-                    title={course.title}
-                    summary={course.summary || undefined}
-                    xp_reward={course.xp_reward}
+                  <CardQuest
+                    key={quest.id}
+                    id={quest.id}
+                    title={quest.title}
+                    summary={quest.summary || undefined}
+                    xp_reward={quest.xp_reward}
                     variant="board"
-                    organizationName={course.organizations?.name}
-                    exercisesCount={course.course_exercises?.length || 0}
+                    organizationName={quest.organizations?.name}
+                    exercisesCount={quest.quest_exercises?.length || 0}
                     progress={progress}
-                    status={course.status}
+                    status={quest.status}
                     index={index}
                   />
                 )
@@ -354,9 +354,9 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               <p className="text-muted text-sm italic">
                 &quot;The quest board is currently empty.&quot;
               </p>
-              {path.created_by === user.id && (
+              {expedition.created_by === user.id && (
                 <Link
-                  href={`/guild-hall/quests/new?pathId=${path.id}`}
+                  href={`/guild-hall/quests/new?expeditionId=${expedition.id}`}
                   className="mt-6 inline-block px-6 py-3 border border-dashed border-border text-xs font-bold uppercase tracking-widest text-text-main hover:bg-surface hover:border-gold transition-all"
                 >
                   Post a new quest
@@ -376,7 +376,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
               </div>
             </div>
           }>
-            <RecommendedCourses pathId={id} />
+            <RecommendedQuests expeditionId={id} />
           </Suspense>
           <div className="mt-10">
             <Suspense fallback={
@@ -389,7 +389,7 @@ export default async function PathDetailPage({ params }: { params: Promise<{ id:
                 </div>
               </div>
             }>
-              <Recommendations mode="similar" contextId={path.id} contextType="path" />
+              <Recommendations mode="similar" contextId={expedition.id} contextType="expedition" />
             </Suspense>
           </div>
         </div>

@@ -15,15 +15,15 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
     if (!profile) notFound()
 
-    const { data: courses } = await supabase
-        .from('courses')
+    const { data: quests } = await supabase
+        .from('quests')
         .select('*')
         .eq('created_by', id)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
 
-    const { data: paths } = await supabase
-        .from('learning_paths')
+    const { data: expeditions } = await supabase
+        .from('expeditions')
         .select('*')
         .eq('created_by', id)
         .eq('is_validated', true)
@@ -199,7 +199,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 </div>
             </div>
 
-            <ProfileTabs courses={courses} paths={paths} />
+            <ProfileTabs quests={quests} expeditions={expeditions} />
         </div>
     )
 }

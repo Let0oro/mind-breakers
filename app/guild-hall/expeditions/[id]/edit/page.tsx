@@ -20,12 +20,12 @@ import {
 } from '@dnd-kit/sortable'
 
 // Import our new component (assuming it's in components folder relative to app root or alias)
-// Since we used write_to_file in dashboard/paths/[id]/edit context previously? No, app/components.
-import { SortableCourseItem } from '@/components/SortableCourseItem'
+// Since we used write_to_file in dashboard/expeditions/[id]/edit context previously? No, app/components.
+import { SortableQuestItem } from '@/components/SortableQuestItem'
 import { ManageCoOwners } from '@/components/features/ManageCoOwners'
 import type { AdminRequest } from '@/lib/types'
 
-interface LearningPath {
+interface Expedition {
   id: string
   title: string
   summary: string | null
@@ -33,19 +33,19 @@ interface LearningPath {
   created_by: string
 }
 
-interface CourseItem {
+interface QuestItem {
   id: string
   title: string
   order_index: number
 }
 
-export default function EditPathPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditExpeditionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [path, setPath] = useState<LearningPath | null>(null)
-  const [courses, setCourses] = useState<CourseItem[]>([])
+  const [expedition, setExpedition] = useState<Expedition | null>(null)
+  const [quests, setQuests] = useState<QuestItem[]>([])
 
   const [isAdmin, setIsAdmin] = useState(false)
   const [pendingRequest, setPendingRequest] = useState<AdminRequest | null>(null)
@@ -77,29 +77,29 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       const userIsAdmin = profile?.is_admin || false
       setIsAdmin(userIsAdmin)
 
-      // 1. Fetch Path
-      const { data: pathData, error: pathError } = await supabase
-        .from('learning_paths')
+      // 1. Fetch Expedition
+      const { data: expeditionData, error: expeditionError } = await supabase
+        .from('expeditions')
         .select('*')
         .eq('id', id)
         .single()
 
-      if (pathError || !pathData) {
-        setError('Path no encontrado')
+      if (expeditionError || !expeditionData) {
+        setError('Expedition no encontrado')
         return
       }
 
-      setPath(pathData)
+      setExpedition(expeditionData)
 
       // Check if user is creator or co-owner
-      const isCreator = pathData.created_by === user.id
+      const isCreator = expeditionData.created_by === user.id
       let isCoOwner = false
 
       if (!isCreator) {
         const { data: coOwnerData } = await supabase
-          .from('path_owners')
+          .from('expedition_owners')
           .select('*')
-          .eq('path_id', id)
+          .eq('expedition_id', id)
           .eq('user_id', user.id)
           .single()
         isCoOwner = !!coOwnerData
@@ -115,14 +115,14 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       // So setting `setIsAdmin(canDirectEdit)` effectively achieves "If you are Creator/CoOwner/Admin you edit directly".
       // This matches the goal.
 
-      // 2. Fetch Courses
-      const { data: coursesData } = await supabase
-        .from('courses')
+      // 2. Fetch Quests
+      const { data: questsData } = await supabase
+        .from('quests')
         .select('id, title, order_index')
-        .eq('path_id', id)
+        .eq('expedition_id', id)
         .order('order_index', { ascending: true })
 
-      setCourses(coursesData || [])
+      setQuests(questsData || [])
 
       // Check for pending edit requests (Only relevant if they can't direct edit?)
       // Actually, if there is a pending request, MAYBE we block edits even for owners to avoid conflict?
@@ -142,14 +142,14 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       // Design decision: Block strictly for the user who made it OR block globally?
       // Current: global block for this resource if `single()` finds one.
       // Let's refine: Only block if `user_id === user.id` OR if we want a global "Under Review" lock.
-      // User requirement: "can edit but the path admin verifies".
+      // User requirement: "can edit but the expedition admin verifies".
       // If I edit and submit, it goes to pending. If I come back, I should see "Pending".
       // So fetch request for THIS user.
       const { data: request } = await supabase
         .from('edit_requests')
         .select('*')
         .eq('resource_id', id)
-        .eq('resource_type', 'learning_paths')
+        .eq('resource_type', 'expeditions')
         .eq('status', 'pending')
         .eq('user_id', user.id) // Only my requests
         .single()
@@ -166,7 +166,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
     const { active, over } = event
 
     if (active.id !== over?.id) {
-      setCourses((items) => {
+      setQuests((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id)
         const newIndex = items.findIndex((item) => item.id === over?.id)
 
@@ -186,11 +186,11 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       title: formData.get('title') as string,
       summary: formData.get('summary') as string,
       description: formData.get('description') as string,
-      // Note: courses reordering is tied to this submit too, but complex to store in JSON request well.
+      // Note: quests reordering is tied to this submit too, but complex to store in JSON request well.
       // For now, if requesting changes, we might only support basic info edits OR we need to include order in JSON?
       // The user wants to reorder with drag and drop. Reordering IS an edit.
       // So we should capture the new COURSE ORDER in the request JSON too.
-      _courses_order_update: courses.map((c, i) => ({ id: c.id, order_index: i }))
+      _quests_order_update: quests.map((c, i) => ({ id: c.id, order_index: i }))
     }
 
     // 1. If Creator (Non-Admin), Request Edit
@@ -211,7 +211,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       const { error: requestError } = await supabase
         .from('edit_requests')
         .insert({
-          resource_type: 'learning_paths', // Match table content
+          resource_type: 'expeditions', // Match table content
           resource_id: id,
           user_id: user?.id,
           data: updates,
@@ -235,9 +235,9 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
     // Actually, the existing logic used separate update calls. We should preserve that for Admin.
 
 
-    // 1. Update Path Details
+    // 1. Update Expedition Details
     const { error: updateError } = await supabase
-      .from('learning_paths')
+      .from('expeditions')
       .update({
         title: formData.get('title') as string,
         summary: formData.get('summary') as string,
@@ -251,12 +251,12 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
       return
     }
 
-    // 2. Update Courses Order
-    // We update all courses with their new index
-    if (courses.length > 0) {
+    // 2. Update Quests Order
+    // We update all quests with their new index
+    if (quests.length > 0) {
       // Prepare updates
-      const updates = courses.map((course, index) => ({
-        id: course.id,
+      const updates = quests.map((quest, index) => ({
+        id: quest.id,
         order_index: index,
         // We only need to update order_index, but upsert requires specific handling or multiple update calls.
         // Supabase JS doesn't support bulk update with different values easily in one call unless we use upsert with all required fields.
@@ -265,7 +265,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
 
       // Using Promise.all for parallel updates
       const updatePromises = updates.map(u =>
-        supabase.from('courses').update({ order_index: u.order_index }).eq('id', u.id)
+        supabase.from('quests').update({ order_index: u.order_index }).eq('id', u.id)
       )
 
       await Promise.all(updatePromises)
@@ -276,14 +276,14 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
   }
 
   const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este path? Esta acción no se puede deshacer.')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este expedition? Esta acción no se puede deshacer.')) {
       return
     }
 
     setLoading(true)
 
     const { error: deleteError } = await supabase
-      .from('learning_paths')
+      .from('expeditions')
       .delete()
       .eq('id', id)
 
@@ -296,7 +296,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
     router.push('/guild-hall/expeditions')
   }
 
-  if (!path && !error) {
+  if (!expedition && !error) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="text-muted dark:text-muted">Loading...</div>
@@ -367,7 +367,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   id="title"
                   name="title"
                   required
-                  defaultValue={path?.title}
+                  defaultValue={expedition?.title}
                   className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </div>
@@ -380,7 +380,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   type="text"
                   id="summary"
                   name="summary"
-                  defaultValue={path?.summary || ''}
+                  defaultValue={expedition?.summary || ''}
                   className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </div>
@@ -393,12 +393,12 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                   id="description"
                   name="description"
                   rows={6}
-                  defaultValue={path?.description || ''}
+                  defaultValue={expedition?.description || ''}
                   className="w-full rounded-lg border border-border dark:border-border bg-sidebar dark:bg-sidebar px-4 py-2 text-text-main dark:text-text-main placeholder:text-muted dark:text-muted/50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-ring resize-none"
                 />
               </div>
 
-              {/* Courses Reordering Section */}
+              {/* Quests Reordering Section */}
               <div>
                 <label className="block text-sm font-medium text-text-main dark:text-text-main mb-2">
                   Order of Quests
@@ -406,25 +406,25 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
                 <p className="text-xs text-muted mb-3">Drag to reorder. The order will be saved when you click &quot;Save changes&quot;.</p>
 
                 <div className="bg-surface dark:bg-main p-4 rounded-lg border border-border dark:border-border">
-                  {courses.length > 0 ? (
+                  {quests.length > 0 ? (
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
                       onDragEnd={handleDragEnd}
                     >
                       <SortableContext
-                        items={courses.map(c => c.id)}
+                        items={quests.map(c => c.id)}
                         strategy={verticalListSortingStrategy}
                       >
-                        {courses.map((course) => (
-                          <SortableCourseItem key={course.id} id={course.id}>
-                            <div className="font-medium text-text-main dark:text-text-main">{course.title}</div>
-                          </SortableCourseItem>
+                        {quests.map((quest) => (
+                          <SortableQuestItem key={quest.id} id={quest.id}>
+                            <div className="font-medium text-text-main dark:text-text-main">{quest.title}</div>
+                          </SortableQuestItem>
                         ))}
                       </SortableContext>
                     </DndContext>
                   ) : (
-                    <p className="text-muted italic text-sm text-center">This expedition doesn&apos;t have any courses yet.</p>
+                    <p className="text-muted italic text-sm text-center">This expedition doesn&apos;t have any quests yet.</p>
                   )}
                 </div>
               </div>
@@ -435,7 +435,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
+                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-border/30 transition-colors"
               >
                 Cancel
               </button>
@@ -450,7 +450,7 @@ export default function EditPathPage({ params }: { params: Promise<{ id: string 
           </form>
 
           <div className="mt-8 border-t border-border dark:border-border pt-8">
-            <ManageCoOwners pathId={id} createdBy={path?.created_by || ''} />
+            <ManageCoOwners expeditionId={id} createdBy={expedition?.created_by || ''} />
           </div>
 
           <div className="mt-8 border-t border-border dark:border-border pt-8">

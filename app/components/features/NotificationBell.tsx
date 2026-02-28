@@ -108,8 +108,8 @@ export function NotificationBell({ userId }: { userId: string }) {
   const parsedLink = (link: string) => {
     return link
       .replaceAll("dashboard", "guild-hall")
-      .replaceAll("courses", "quests")
-      .replaceAll("paths", "expeditions")
+      .replaceAll("quests", "quests")
+      .replaceAll("expeditions", "expeditions")
   }
 
 

@@ -2,18 +2,18 @@ import { Suspense } from 'react'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { YouTubePlayer } from '@/components/ui/YouTubePlayer'
-import { CourseActions } from '@/components/features/CourseActions'
+import { QuestActions } from '@/components/features/QuestActions'
 import Link from 'next/link'
-import type { CourseExercise } from '@/lib/types'
+import type { QuestExercise, ExerciseSubmission } from '@/lib/types'
 import Recommendations from '@/components/features/Recommendations'
 import {
   getQuestDetailCached,
-  getUserCourseProgressCached,
+  getUserQuestProgressCached,
   getUserExerciseSubmissionsCached,
-  isCourseSavedCached
+  isQuestSavedCached
 } from '@/lib/cache'
 
-export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function QuestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { id } = await params;
 
@@ -27,13 +27,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .eq('id', user.id)
     .single()
 
-  // Use cached query for course data
-  const { data: course, error } = await getQuestDetailCached(supabase, id)
+  // Use cached query for quest data
+  const { data: quest, error } = await getQuestDetailCached(supabase, id)
 
-  if (error || !course) notFound()
+  if (error || !quest) notFound()
 
-  const isOwner = course.created_by === user.id
-  const isValidated = course.is_validated === true
+  const isOwner = quest.created_by === user.id
+  const isValidated = quest.is_validated === true
 
   if (!isValidated && !isOwner) {
     return (
@@ -57,24 +57,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   }
 
   // Get exercise IDs for submissions query
-  const exerciseIds = course.course_exercises?.map((e: CourseExercise) => e.id) || []
+  const exerciseIds = quest.quest_exercises?.map((e: QuestExercise) => e.id) || []
 
   // Use cached queries for user-specific data
   const [progress, submissions, isSaved] = await Promise.all([
-    getUserCourseProgressCached(supabase, user.id, id),
+    getUserQuestProgressCached(supabase, user.id, id),
     getUserExerciseSubmissionsCached(supabase, user.id, exerciseIds),
-    isCourseSavedCached(supabase, user.id, id)
+    isQuestSavedCached(supabase, user.id, id)
   ])
 
   const isCompleted = progress?.completed || false
 
-  const isYouTube = course.link_url &&
-    (course.link_url.includes('youtube.com') || course.link_url.includes('youtu.be'))
+  const isYouTube = quest.link_url &&
+    (quest.link_url.includes('youtube.com') || quest.link_url.includes('youtu.be'))
 
-  const exercises = course.course_exercises || []
+  const exercises = quest.quest_exercises || []
   const totalExercises = exercises.length
-  const submittedExercisesCount = exercises.filter((e: CourseExercise) =>
-    submissions?.some(s => s.exercise_id === e.id)
+  const submittedExercisesCount = exercises.filter((e: QuestExercise) =>
+    submissions?.some((s: ExerciseSubmission) => s.exercise_id === e.id)
   ).length
 
   const canComplete = totalExercises === 0 || submittedExercisesCount === totalExercises
@@ -97,47 +97,47 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       {/* Header */}
       <header className="mb-10">
         <Link
-          href={`/guild-hall/paths/${course.learning_paths.id}`}
+          href={`/guild-hall/expeditions/${quest.expeditions.id}`}
           className="text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main mb-4 inline-flex items-center gap-1 transition-colors"
         >
           <span className="material-symbols-outlined text-sm">arrow_back</span>
-          Back to {course.learning_paths.title}
+          Back to {quest.expeditions.title}
         </Link>
 
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mt-4 gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-4xl font-black italic tracking-tight text-text-main">
-                {course.title.toUpperCase()}
+                {quest.title.toUpperCase()}
               </h1>
-              {course.status === 'published' && (
+              {quest.status === 'published' && (
                 <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-text-main text-text-main">
                   Published
                 </span>
               )}
-              {course.status === 'draft' && (
+              {quest.status === 'draft' && (
                 <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
                   Draft
                 </span>
               )}
-              {course.status === 'archived' && (
+              {quest.status === 'archived' && (
                 <span className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest border border-muted text-muted">
                   Archived
                 </span>
               )}
             </div>
-            {course.summary && (
+            {quest.summary && (
               <p className="mt-2 text-muted text-sm">
-                {course.summary}
+                {quest.summary}
               </p>
             )}
             <div className="mt-3 flex items-center gap-4 text-xs text-muted">
-              {course.organizations && (
-                <span>{course.organizations.name}</span>
+              {quest.organizations && (
+                <span>{quest.organizations.name}</span>
               )}
-              <span className="font-bold text-text-main">{course.xp_reward} XP</span>
-              {course.course_exercises?.length > 0 && (
-                <span>{course.course_exercises.length} mission(s)</span>
+              <span className="font-bold text-text-main">{quest.xp_reward} XP</span>
+              {quest.quest_exercises?.length > 0 && (
+                <span>{quest.quest_exercises.length} mission(s)</span>
               )}
             </div>
           </div>
@@ -145,22 +145,22 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           <div className="flex items-center gap-2">
             {(isOwner || profile?.is_admin) && (
               <Link
-                href={`/guild-hall/quests/${course.id}/edit`}
-                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest border-text-main text-text-main hover:bg-surface transition-colors flex items-center gap-2"
+                href={`/guild-hall/quests/${quest.id}/edit`}
+                className="px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-colors flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">edit</span>
                 Edit
               </Link>
             )}
 
-            <CourseActions
-              courseId={course.id}
-              status={course.status}
+            <QuestActions
+              questId={quest.id}
+              status={quest.status}
               userId={user.id}
               isSaved={isSaved}
               isCompleted={isCompleted}
               progressId={progress?.id}
-              xpReward={course.xp_reward}
+              xpReward={quest.xp_reward}
               canComplete={canComplete}
             />
           </div>
@@ -172,17 +172,17 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Video player */}
-          {course.link_url && isYouTube && (
+          {quest.link_url && isYouTube && (
             <div className="border border-border bg-main p-6">
-              <YouTubePlayer url={course.link_url} />
+              <YouTubePlayer url={quest.link_url} />
             </div>
           )}
 
           {/* External link */}
-          {course.link_url && !isYouTube && (
+          {quest.link_url && !isYouTube && (
             <div className="border border-border bg-main p-6">
               <a
-                href={course.link_url}
+                href={quest.link_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between border border-text-main p-4 hover:bg-inverse hover:text-main-alt transition-all"
@@ -200,9 +200,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
               Description
             </h2>
-            {course.description ? (
+            {quest.description ? (
               <div className="prose prose-sm max-w-none text-muted">
-                <p className="whitespace-pre-wrap text-sm">{course.description}</p>
+                <p className="whitespace-pre-wrap text-sm">{quest.description}</p>
               </div>
             ) : (
               <p className="text-muted text-xs italic">
@@ -212,14 +212,14 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
           </div>
 
           {/* Exercises */}
-          {course.course_exercises && course.course_exercises.length > 0 && (
+          {quest.quest_exercises && quest.quest_exercises.length > 0 && (
             <div id="exercises" className="border border-border bg-main p-6">
               <h2 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
                 Missions
               </h2>
               <div className="space-y-4">
-                {course.course_exercises.map((exercise: CourseExercise) => {
-                  const submission = submissions?.find(s => s.exercise_id === exercise.id)
+                {quest.quest_exercises.map((exercise: QuestExercise) => {
+                  const submission = submissions?.find((s: ExerciseSubmission) => s.exercise_id === exercise.id)
 
                   return (
                     <div
@@ -288,7 +288,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
         {/* Sidebar */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Course Status */}
+          {/* Quest Status */}
           <div className="border border-border bg-main p-6">
             <h3 className="text-xs font-bold uppercase tracking-widest text-text-main mb-4">
               Quest Status
@@ -314,7 +314,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             ) : (
               <div className="space-y-3">
                 <p className="text-xs text-muted">
-                  Complete this quest to earn <span className="font-bold text-text-main">{course.xp_reward} XP</span>
+                  Complete this quest to earn <span className="font-bold text-text-main">{quest.xp_reward} XP</span>
                 </p>
                 {!canComplete && (
                   <div className="border border-muted p-4">
@@ -337,31 +337,31 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </h3>
             <dl className="space-y-3 text-xs">
               <div>
-                <dt className="text-muted uppercase tracking-widest text-[10px]">Learning Path</dt>
+                <dt className="text-muted uppercase tracking-widest text-[10px]">Expedition</dt>
                 <dd className="mt-1 font-bold text-text-main">
                   <Link
-                    href={`/guild-hall/paths/${course.learning_paths.id}`}
+                    href={`/guild-hall/expeditions/${quest.expeditions.id}`}
                     className="hover:underline"
                   >
-                    {course.learning_paths.title}
+                    {quest.expeditions.title}
                   </Link>
                 </dd>
               </div>
-              {course.organizations && (
+              {quest.organizations && (
                 <div>
                   <dt className="text-muted uppercase tracking-widest text-[10px]">Organization</dt>
                   <dd className="mt-1 font-bold text-text-main">
-                    {course.organizations.website_url ? (
+                    {quest.organizations.website_url ? (
                       <a
-                        href={course.organizations.website_url}
+                        href={quest.organizations.website_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:underline"
                       >
-                        {course.organizations.name}
+                        {quest.organizations.name}
                       </a>
                     ) : (
-                      course.organizations.name
+                      quest.organizations.name
                     )}
                   </dd>
                 </div>
@@ -369,7 +369,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <div>
                 <dt className="text-muted uppercase tracking-widest text-[10px]">XP Reward</dt>
                 <dd className="mt-1 font-bold text-text-main">
-                  {course.xp_reward} XP
+                  {quest.xp_reward} XP
                 </dd>
               </div>
             </dl>
@@ -387,7 +387,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </div>
         }>
-          <Recommendations mode="similar" contextId={course.id} contextType="course" />
+          <Recommendations mode="similar" contextId={quest.id} contextType="quest" />
         </Suspense>
       </div>
     </>

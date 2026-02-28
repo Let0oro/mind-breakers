@@ -5,27 +5,27 @@ import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
-    searchPaths,
-    searchCourses,
+    searchExpeditions,
+    searchQuests,
     searchOrganizations,
-    getUserSavedCourses,
-    type CourseListItem,
+    getUserSavedQuests,
+    type QuestListItem,
     type OrganizationListItem
 } from '@/lib/queries'
-import type { PathListItem } from '@/lib/types'
+import type { ExpeditionListItem } from '@/lib/types'
 import GuildHallLoading from '../loading'
 
 type SearchResult = {
     id: string
-    type: 'path' | 'course' | 'organization'
+    type: 'expedition' | 'quest' | 'organization'
     title: string
     description?: string
     summary?: string
     thumbnail_url?: string
     xp_reward?: number
     organization?: string
-    courseCount?: number
-    pathCount?: number
+    questCount?: number
+    expeditionCount?: number
     saved?: boolean
 }
 
@@ -33,22 +33,22 @@ function ExplorePageContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
 
-    const initialTab = (searchParams.get('tab') as 'all' | 'paths' | 'courses' | 'organizations') || 'all'
+    const initialTab = (searchParams.get('tab') as 'all' | 'expeditions' | 'quests' | 'organizations') || 'all'
 
     const [searchQuery, setSearchQuery] = useState('')
-    const [activeTab, setActiveTab] = useState<'all' | 'paths' | 'courses' | 'organizations'>(initialTab)
+    const [activeTab, setActiveTab] = useState<'all' | 'expeditions' | 'quests' | 'organizations'>(initialTab)
     const [results, setResults] = useState<SearchResult[]>([])
     const [loading, setLoading] = useState(true)
 
-    // Use ref for savedCourseIds to avoid triggering performSearch recreation
-    const savedCourseIdsRef = useRef<Set<string>>(new Set())
+    // Use ref for savedQuestIds to avoid triggering performSearch recreation
+    const savedQuestIdsRef = useRef<Set<string>>(new Set())
     const initializedRef = useRef(false)
 
     const supabase = createClient()
 
     useEffect(() => {
         const tabFromUrl = searchParams.get('tab') as typeof activeTab
-        if (tabFromUrl && ['all', 'paths', 'courses', 'organizations'].includes(tabFromUrl)) {
+        if (tabFromUrl && ['all', 'expeditions', 'quests', 'organizations'].includes(tabFromUrl)) {
             if (tabFromUrl !== activeTab) {
                 setActiveTab(tabFromUrl)
             }
@@ -70,51 +70,51 @@ function ExplorePageContent() {
         try {
             const promises: Promise<void>[] = []
 
-            // Fetch paths
-            if (activeTab === 'all' || activeTab === 'paths') {
+            // Fetch expeditions
+            if (activeTab === 'all' || activeTab === 'expeditions') {
                 promises.push(
-                    searchPaths(supabase, {
+                    searchExpeditions(supabase, {
                         query: searchQuery || undefined,
                         validated: true,
                         limit: 20
-                    }).then((paths: PathListItem[]) => {
-                        paths.forEach(path => {
-                            const org = Array.isArray(path.organizations)
-                                ? path.organizations[0]
-                                : path.organizations
+                    }).then((expeditions: ExpeditionListItem[]) => {
+                        expeditions.forEach(expedition => {
+                            const org = Array.isArray(expedition.organizations)
+                                ? expedition.organizations[0]
+                                : expedition.organizations
                             allResults.push({
-                                id: path.id,
-                                type: 'path',
-                                title: path.title,
-                                description: path.description,
-                                summary: path.summary,
+                                id: expedition.id,
+                                type: 'expedition',
+                                title: expedition.title,
+                                description: expedition.description,
+                                summary: expedition.summary,
                                 organization: org?.name,
-                                courseCount: path.courses?.length || 0,
+                                questCount: expedition.quests?.length || 0,
                             })
                         })
                     })
                 )
             }
 
-            // Fetch courses
-            if (activeTab === 'all' || activeTab === 'courses') {
+            // Fetch quests
+            if (activeTab === 'all' || activeTab === 'quests') {
                 promises.push(
-                    searchCourses(supabase, {
+                    searchQuests(supabase, {
                         query: searchQuery || undefined,
                         validated: true,
                         status: 'published',
                         limit: 20
-                    }).then((courses: CourseListItem[]) => {
-                        courses.forEach(course => {
+                    }).then((quests: QuestListItem[]) => {
+                        quests.forEach(quest => {
                             allResults.push({
-                                id: course.id,
-                                type: 'course',
-                                title: course.title,
-                                summary: course.summary,
-                                thumbnail_url: course.thumbnail_url,
-                                xp_reward: course.xp_reward,
-                                organization: course.organizations?.[0]?.name,
-                                saved: savedCourseIdsRef.current.has(course.id)
+                                id: quest.id,
+                                type: 'quest',
+                                title: quest.title,
+                                summary: quest.summary,
+                                thumbnail_url: quest.thumbnail_url,
+                                xp_reward: quest.xp_reward,
+                                organization: quest.organizations?.[0]?.name,
+                                saved: savedQuestIdsRef.current.has(quest.id)
                             })
                         })
                     })
@@ -134,8 +134,8 @@ function ExplorePageContent() {
                                 type: 'organization',
                                 title: org.name,
                                 description: org.description,
-                                pathCount: org.learning_paths?.length || 0,
-                                courseCount: org.courses?.length || 0,
+                                expeditionCount: org.expeditions?.length || 0,
+                                questCount: org.quests?.length || 0,
                             })
                         })
                     })
@@ -151,7 +151,7 @@ function ExplorePageContent() {
         }
     }, [activeTab, searchQuery, supabase])
 
-    // Initial load: fetch saved courses first, then perform search
+    // Initial load: fetch saved quests first, then perform search
     useEffect(() => {
         if (initializedRef.current) return
         initializedRef.current = true
@@ -159,8 +159,8 @@ function ExplorePageContent() {
         const initialize = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
-                const savedIds = await getUserSavedCourses(supabase, user.id)
-                savedCourseIdsRef.current = new Set(savedIds)
+                const savedIds = await getUserSavedQuests(supabase, user.id)
+                savedQuestIdsRef.current = new Set(savedIds)
             }
             performSearch()
         }
@@ -202,8 +202,8 @@ function ExplorePageContent() {
             <div className="flex gap-6 mb-8 border-b border-border">
                 {[
                     { key: 'all', label: 'ALL' },
-                    { key: 'paths', label: 'expeditions' },
-                    { key: 'courses', label: 'QUESTS' },
+                    { key: 'expeditions', label: 'expeditions' },
+                    { key: 'quests', label: 'QUESTS' },
                     { key: 'organizations', label: 'ORGANIZATIONS' },
                 ].map((tab) => (
                     <button
@@ -250,8 +250,8 @@ function ExplorePageContent() {
 function ResultCard({ result }: { result: SearchResult }) {
     const getLink = () => {
         switch (result.type) {
-            case 'path': return `/guild-hall/expeditions/${result.id}`
-            case 'course': return `/guild-hall/quests/${result.id}`
+            case 'expedition': return `/guild-hall/expeditions/${result.id}`
+            case 'quest': return `/guild-hall/quests/${result.id}`
             case 'organization': return `/guild-hall/organizations/${result.id}`
             default: return '#'
         }
@@ -259,8 +259,8 @@ function ResultCard({ result }: { result: SearchResult }) {
 
     const getIcon = () => {
         switch (result.type) {
-            case 'path': return 'flag'
-            case 'course': return 'assignment_late'
+            case 'expedition': return 'flag'
+            case 'quest': return 'assignment_late'
             case 'organization': return 'groups'
             default: return 'help'
         }
@@ -268,8 +268,8 @@ function ResultCard({ result }: { result: SearchResult }) {
 
     const getTypeLabel = () => {
         switch (result.type) {
-            case 'path': return 'Expedition'
-            case 'course': return 'Quest'
+            case 'expedition': return 'Expedition'
+            case 'quest': return 'Quest'
             case 'organization': return 'Organization'
             default: return ''
         }
@@ -322,11 +322,11 @@ function ResultCard({ result }: { result: SearchResult }) {
                     {result.xp_reward && (
                         <span>{result.xp_reward} XP</span>
                     )}
-                    {result.courseCount !== undefined && result.courseCount > 0 && (
-                        <span>{result.courseCount} quests</span>
+                    {result.questCount !== undefined && result.questCount > 0 && (
+                        <span>{result.questCount} quests</span>
                     )}
-                    {result.pathCount !== undefined && result.pathCount > 0 && (
-                        <span>{result.pathCount} expeditions</span>
+                    {result.expeditionCount !== undefined && result.expeditionCount > 0 && (
+                        <span>{result.expeditionCount} expeditions</span>
                     )}
                 </div>
             </div>

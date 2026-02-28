@@ -7,8 +7,8 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import Image from 'next/image'
 
 export default function SharedHeader() {
-    const pathname = usePathname()
-    const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/register')
+    const expeditionname = usePathname()
+    const isAuthPage = expeditionname?.startsWith('/login') || expeditionname?.startsWith('/register')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
@@ -32,7 +32,7 @@ export default function SharedHeader() {
                             >
                                 Back to Home
                             </Link>
-                            {pathname?.startsWith('/login') ? (
+                            {expeditionname?.startsWith('/login') ? (
                                 <Link href="/register" className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-text-main text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
                                     <span className="truncate">Create account</span>
                                 </Link>
@@ -101,7 +101,7 @@ export default function SharedHeader() {
                             </Link>
                             <Link
                                 href="/register"
-                                className="bg-inverse hover:bg-inverse/90 text-text-mainse px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
+                                className="bg-inverse hover:bg-inverse/90 text-text-main px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Sign Up

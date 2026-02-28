@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 
 interface FileUploadProps {
   bucket: string
-  path?: string
+  expedition?: string
   accept?: string
   onUploadComplete: (url: string) => void
   maxSizeMB?: number
@@ -13,7 +13,7 @@ interface FileUploadProps {
 
 export function FileUpload({
   bucket,
-  path = '',
+  expedition = '',
   accept = 'image/*',
   onUploadComplete,
   maxSizeMB = 5,
@@ -47,7 +47,7 @@ export function FileUpload({
 
       // Generar nombre único
       const fileExt = file.name.split('.').pop()
-      const fileName = `${path}${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const fileName = `${expedition}${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
 
       // Upload a Supabase Storage
       const { data, error: uploadError } = await supabase.storage
@@ -62,7 +62,7 @@ export function FileUpload({
       // Obtener URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
-        .getPublicUrl(data.path)
+        .getPublicUrl(data!.path)
 
       onUploadComplete(publicUrl)
       setUploading(false)

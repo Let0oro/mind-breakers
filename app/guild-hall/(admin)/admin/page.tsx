@@ -31,12 +31,11 @@ export default async function AdminDashboardPage() {
         redirect('/guild-hall')
     }
 
-    // Use all cached queries
     const [
         pendingValidations,
         pendingSubmissions,
         pendingRequests,
-        recentCourses,
+        recentQuests,
         recentSubmissions,
         recentRequests
     ] = await Promise.all([
@@ -55,12 +54,12 @@ export default async function AdminDashboardPage() {
     const sections = [
         {
             title: 'Content Validation',
-            description: 'Review and approve new courses, paths, and organizations',
+            description: 'Review and approve new quests, expeditions, and organizations',
             icon: 'verified',
             href: '/guild-hall/admin/validations',
             count: validationCount,
             color: 'amber',
-            preview: recentCourses.map(c => ({
+            preview: recentQuests.map(c => ({
                 label: c.title,
                 sub: new Date(c.created_at).toLocaleDateString()
             }))
@@ -73,7 +72,7 @@ export default async function AdminDashboardPage() {
             count: submissionCount,
             color: 'purple',
             preview: recentSubmissions.map(s => ({
-                label: Array.isArray(s.course_exercises) ? s.course_exercises[0]?.title : (s.course_exercises as { title: string })?.title || 'Exercise',
+                label: Array.isArray(s.quest_exercises) ? s.quest_exercises[0]?.title : (s.quest_exercises as { title: string })?.title || 'Exercise',
                 sub: new Date(s.submitted_at).toLocaleDateString()
             }))
         },

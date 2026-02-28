@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { PathResource } from '@/lib/types'
+import { ExpeditionResource } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 
-interface PathResourcesProps {
-    pathId: string
-    initialResources?: PathResource[]
+interface ExpeditionResourcesProps {
+    expeditionId: string
+    initialResources?: ExpeditionResource[]
 }
 
-export default function PathResources({ pathId, initialResources = [] }: PathResourcesProps) {
-    const [resources, setResources] = useState<PathResource[]>(initialResources)
+export default function ExpeditionResources({ expeditionId, initialResources = [] }: ExpeditionResourcesProps) {
+    const [resources, setResources] = useState<ExpeditionResource[]>(initialResources)
     const [isAdmin, setIsAdmin] = useState(false)
     const [currentUserId, setCurrentUserId] = useState<string | null>(null)
     const router = useRouter()
@@ -55,9 +55,9 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
 
         setSubmitting(true)
         const { error } = await supabase
-            .from('path_resources')
+            .from('expedition_resources')
             .insert({
-                path_id: pathId,
+                expedition_id: expeditionId,
                 user_id: currentUserId,
                 title,
                 type: linkType,
@@ -79,7 +79,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
         if (!confirm('Are you sure you want to delete this resource?')) return
 
         const { error } = await supabase
-            .from('path_resources')
+            .from('expedition_resources')
             .delete()
             .eq('id', resourceId)
 
@@ -181,7 +181,7 @@ export default function PathResources({ pathId, initialResources = [] }: PathRes
                     {resources.map((resource) => (
                         <div
                             key={resource.id}
-                            className="flex items-start justify-between p-3 border border-border dark:border-border hover:bg-surface dark:hover:bg-sidebar-border/20 transition-colors group"
+                            className="flex items-start justify-between p-3 border border-border dark:border-border hover:bg-surface dark:hover:bg-border/20 transition-colors group"
                         >
                             <div className="flex items-start gap-3">
                                 <div className="mt-1">

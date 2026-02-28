@@ -4,13 +4,13 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { PathListItem } from './types'
+import type { ExpeditionListItem } from './types'
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface CourseListItem {
+export interface QuestListItem {
     id: string
     title: string
     summary?: string
@@ -20,8 +20,8 @@ export interface CourseListItem {
     created_by: string
     status: 'draft' | 'published' | 'archived'
     organizations: { name: string }[] | null
-    user_course_progress?: { completed: boolean; xp_earned: number }[]
-    saved_courses?: { user_id: string }[]
+    user_quest_progress?: { completed: boolean; xp_earned: number }[]
+    saved_quests?: { user_id: string }[]
 }
 
 export interface OrganizationListItem {
@@ -31,8 +31,8 @@ export interface OrganizationListItem {
     website_url?: string
     is_validated: boolean
     created_by?: string
-    learning_paths?: { id: string }[]
-    courses?: { id: string }[]
+    expeditions?: { id: string }[]
+    quests?: { id: string }[]
 }
 
 export interface ExerciseListItem {
@@ -41,8 +41,8 @@ export interface ExerciseListItem {
     description?: string
     status: 'completed' | 'in_progress' | 'pending_review' | 'not_started'
     xp_reward: number
-    course_title?: string
-    course_id?: string
+    quest_title?: string
+    quest_id?: string
     submitted_at?: string
 }
 
@@ -58,11 +58,11 @@ export interface DraftItem {
 
 export interface UserLibraryData {
     drafts: DraftItem[]
-    courses: CourseListItem[]
-    paths: PathListItem[]
+    quests: QuestListItem[]
+    expeditions: ExpeditionListItem[]
     organizations: OrganizationListItem[]
-    savedCourseIds: Set<string>
-    savedPathIds: Set<string>
+    savedQuestIds: Set<string>
+    savedExpeditionIds: Set<string>
     exerciseStats: {
         total: number
         completed: number
@@ -75,59 +75,59 @@ export interface UserLibraryData {
 // ============================================================================
 
 /**
- * Get user's saved course IDs
+ * Get user's saved quest IDs
  */
-export async function getUserSavedCourses(
+export async function getUserSavedQuests(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('saved_courses')
-        .select('course_id')
+        .from('saved_quests')
+        .select('quest_id')
         .eq('user_id', userId)
 
-    return data?.map(c => c.course_id) || []
+    return data?.map(c => c.quest_id) || []
 }
 
 /**
- * Get user's saved path IDs
+ * Get user's saved expedition IDs
  */
-export async function getUserSavedPaths(
+export async function getUserSavedExpeditions(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('saved_paths')
-        .select('path_id')
+        .from('saved_expeditions')
+        .select('expedition_id')
         .eq('user_id', userId)
 
-    return data?.map(p => p.path_id) || []
+    return data?.map(p => p.expedition_id) || []
 }
 
 /**
- * Get user's course progress IDs
+ * Get user's quest progress IDs
  */
-export async function getUserProgressCourses(
+export async function getUserProgressQuests(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('user_course_progress')
-        .select('course_id')
+        .from('user_quest_progress')
+        .select('quest_id')
         .eq('user_id', userId)
 
-    return data?.map(c => c.course_id) || []
+    return data?.map(c => c.quest_id) || []
 }
 
 /**
- * Get user's created course IDs
+ * Get user's created quest IDs
  */
-export async function getUserCreatedCourses(
+export async function getUserCreatedQuests(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('courses')
+        .from('quests')
         .select('id')
         .eq('created_by', userId)
 
@@ -135,14 +135,14 @@ export async function getUserCreatedCourses(
 }
 
 /**
- * Get user's created path IDs
+ * Get user's created expedition IDs
  */
-export async function getUserCreatedPaths(
+export async function getUserCreatedExpeditions(
     supabase: SupabaseClient,
     userId: string
 ): Promise<string[]> {
     const { data } = await supabase
-        .from('learning_paths')
+        .from('expeditions')
         .select('id')
         .eq('created_by', userId)
 
@@ -150,26 +150,26 @@ export async function getUserCreatedPaths(
 }
 
 // ============================================================================
-// Course Queries
+// Quest Queries
 // ============================================================================
 
 /**
- * Get courses by IDs with full details
+ * Get quests by IDs with full details
  */
-export async function getCoursesByIds(
+export async function getQuestsByIds(
     supabase: SupabaseClient,
-    courseIds: string[],
+    questIds: string[],
     options?: {
         includeProgress?: boolean
         includeSaved?: boolean
         status?: 'draft' | 'published' | 'archived'
         limit?: number
     }
-): Promise<CourseListItem[]> {
-    if (courseIds.length === 0) return []
+): Promise<QuestListItem[]> {
+    if (questIds.length === 0) return []
 
     let query = supabase
-        .from('courses')
+        .from('quests')
         .select(`
             id,
             title,
@@ -180,10 +180,10 @@ export async function getCoursesByIds(
             created_by,
             status,
             organizations (name)
-            ${options?.includeProgress ? ', user_course_progress (completed, xp_earned)' : ''}
-            ${options?.includeSaved ? ', saved_courses (user_id)' : ''}
+            ${options?.includeProgress ? ', user_quest_progress (completed, xp_earned)' : ''}
+            ${options?.includeSaved ? ', saved_quests (user_id)' : ''}
         `)
-        .in('id', courseIds)
+        .in('id', questIds)
         .order('created_at', { ascending: false })
 
     if (options?.status) {
@@ -195,11 +195,11 @@ export async function getCoursesByIds(
     }
 
     const { data } = await query
-    return (data as unknown as CourseListItem[]) || []
+    return (data as unknown as QuestListItem[]) || []
 }
 
 /**
- * Get user's draft courses
+ * Get user's draft quests
  */
 export async function getUserDrafts(
     supabase: SupabaseClient,
@@ -207,7 +207,7 @@ export async function getUserDrafts(
     limit?: number
 ): Promise<DraftItem[]> {
     let query = supabase
-        .from('courses')
+        .from('quests')
         .select(`
             id,
             title,
@@ -230,9 +230,9 @@ export async function getUserDrafts(
 }
 
 /**
- * Search courses with optional filters
+ * Search quests with optional filters
  */
-export async function searchCourses(
+export async function searchQuests(
     supabase: SupabaseClient,
     options?: {
         query?: string
@@ -240,9 +240,9 @@ export async function searchCourses(
         status?: 'published' | 'draft' | 'archived'
         limit?: number
     }
-): Promise<CourseListItem[]> {
+): Promise<QuestListItem[]> {
     let dbQuery = supabase
-        .from('courses')
+        .from('quests')
         .select(`id, title, summary, thumbnail_url, xp_reward, organizations (name)`)
         .order('created_at', { ascending: false })
 
@@ -263,25 +263,25 @@ export async function searchCourses(
     }
 
     const { data } = await dbQuery
-    return (data as unknown as CourseListItem[]) || []
+    return (data as unknown as QuestListItem[]) || []
 }
 
 // ============================================================================
-// Path Queries
+// Expedition Queries
 // ============================================================================
 
 /**
- * Get paths by IDs with full details
+ * Get expeditions by IDs with full details
  */
-export async function getPathsByIds(
+export async function getExpeditionsByIds(
     supabase: SupabaseClient,
-    pathIds: string[],
+    expeditionIds: string[],
     limit?: number
-): Promise<PathListItem[]> {
-    if (pathIds.length === 0) return []
+): Promise<ExpeditionListItem[]> {
+    if (expeditionIds.length === 0) return []
 
     let query = supabase
-        .from('learning_paths')
+        .from('expeditions')
         .select(`
             id,
             title,
@@ -291,9 +291,9 @@ export async function getPathsByIds(
             is_validated,
             created_by,
             organizations (id, name),
-            courses (id)
+            quests (id)
         `)
-        .in('id', pathIds)
+        .in('id', expeditionIds)
         .order('created_at', { ascending: false })
 
     if (limit) {
@@ -305,19 +305,19 @@ export async function getPathsByIds(
 }
 
 /**
- * Search paths with optional filters
+ * Search expeditions with optional filters
  */
-export async function searchPaths(
+export async function searchExpeditions(
     supabase: SupabaseClient,
     options?: {
         query?: string
         validated?: boolean
         limit?: number
     }
-): Promise<PathListItem[]> {
+): Promise<ExpeditionListItem[]> {
     let dbQuery = supabase
-        .from('learning_paths')
-        .select(`id, title, summary, description, created_at, created_by, is_validated, organizations (id, name), courses (id)`)
+        .from('expeditions')
+        .select(`id, title, summary, description, created_at, created_by, is_validated, organizations (id, name), quests (id)`)
         .order('created_at', { ascending: false })
 
     if (options?.validated !== undefined) {
@@ -357,8 +357,8 @@ export async function getOrganizations(
             website_url,
             is_validated,
             created_by,
-            learning_paths (id),
-            courses (id)
+            expeditions (id),
+            quests (id)
         `)
         .order('name')
 
@@ -388,7 +388,7 @@ export async function searchOrganizations(
 ): Promise<OrganizationListItem[]> {
     let dbQuery = supabase
         .from('organizations')
-        .select(`id, name, description, learning_paths (id), courses (id)`)
+        .select(`id, name, description, expeditions (id), quests (id)`)
         .order('name')
 
     if (options?.query) {
@@ -414,19 +414,19 @@ export async function getUserExerciseStats(
     supabase: SupabaseClient,
     userId: string
 ): Promise<{ total: number; completed: number; pending: number }> {
-    const { data: enrolledCourses } = await supabase
-        .from('user_course_progress')
-        .select('course_id')
+    const { data: enrolledQuests } = await supabase
+        .from('user_quest_progress')
+        .select('quest_id')
         .eq('user_id', userId)
 
-    if (!enrolledCourses || enrolledCourses.length === 0) {
+    if (!enrolledQuests || enrolledQuests.length === 0) {
         return { total: 0, completed: 0, pending: 0 }
     }
 
     const { count: totalExercises } = await supabase
-        .from('course_exercises')
+        .from('quest_exercises')
         .select('id', { count: 'exact' })
-        .in('course_id', enrolledCourses.map(c => c.course_id))
+        .in('quest_id', enrolledQuests.map(c => c.quest_id))
 
     const { data: submissions } = await supabase
         .from('exercise_submissions')
@@ -452,63 +452,63 @@ export async function getUserLibraryData(
     userId: string,
     limits?: {
         drafts?: number
-        courses?: number
-        paths?: number
+        quests?: number
+        expeditions?: number
         organizations?: number
     }
 ): Promise<UserLibraryData> {
     // Parallel fetch of all user-related IDs
     const [
-        savedCourseIds,
-        savedPathIds,
-        progressCourseIds,
-        createdCourseIds,
-        createdPathIds,
+        savedQuestIds,
+        savedExpeditionIds,
+        progressQuestIds,
+        createdQuestIds,
+        createdExpeditionIds,
         drafts,
         organizations,
         exerciseStats
     ] = await Promise.all([
-        getUserSavedCourses(supabase, userId),
-        getUserSavedPaths(supabase, userId),
-        getUserProgressCourses(supabase, userId),
-        getUserCreatedCourses(supabase, userId),
-        getUserCreatedPaths(supabase, userId),
+        getUserSavedQuests(supabase, userId),
+        getUserSavedExpeditions(supabase, userId),
+        getUserProgressQuests(supabase, userId),
+        getUserCreatedQuests(supabase, userId),
+        getUserCreatedExpeditions(supabase, userId),
         getUserDrafts(supabase, userId, limits?.drafts),
         getOrganizations(supabase, userId, limits?.organizations),
         getUserExerciseStats(supabase, userId)
     ])
 
-    // Combine IDs for courses and paths
-    const allCourseIds = new Set([
-        ...savedCourseIds,
-        ...progressCourseIds,
-        ...createdCourseIds.filter(id => {
+    // Combine IDs for quests and expeditions
+    const allQuestIds = new Set([
+        ...savedQuestIds,
+        ...progressQuestIds,
+        ...createdQuestIds.filter(id => {
             // Filter out drafts since they're already fetched
             return !drafts.some(d => d.id === id)
         })
     ])
 
-    const allPathIds = new Set([
-        ...savedPathIds,
-        ...createdPathIds
+    const allExpeditionIds = new Set([
+        ...savedExpeditionIds,
+        ...createdExpeditionIds
     ])
 
-    // Fetch courses and paths
-    const [courses, paths] = await Promise.all([
-        getCoursesByIds(supabase, Array.from(allCourseIds), {
+    // Fetch quests and expeditions
+    const [quests, expeditions] = await Promise.all([
+        getQuestsByIds(supabase, Array.from(allQuestIds), {
             status: 'published',
-            limit: limits?.courses
+            limit: limits?.quests
         }),
-        getPathsByIds(supabase, Array.from(allPathIds), limits?.paths)
+        getExpeditionsByIds(supabase, Array.from(allExpeditionIds), limits?.expeditions)
     ])
 
     return {
         drafts,
-        courses,
-        paths,
+        quests,
+        expeditions,
         organizations,
-        savedCourseIds: new Set(savedCourseIds),
-        savedPathIds: new Set(savedPathIds),
+        savedQuestIds: new Set(savedQuestIds),
+        savedExpeditionIds: new Set(savedExpeditionIds),
         exerciseStats
     }
 }
@@ -521,47 +521,47 @@ export async function getExploreData(
     supabase: SupabaseClient,
     options?: {
         query?: string
-        tab?: 'all' | 'paths' | 'courses' | 'organizations'
+        tab?: 'all' | 'expeditions' | 'quests' | 'organizations'
         limit?: number
     }
 ): Promise<{
-    paths: PathListItem[]
-    courses: CourseListItem[]
+    expeditions: ExpeditionListItem[]
+    quests: QuestListItem[]
     organizations: OrganizationListItem[]
 }> {
     const tab = options?.tab || 'all'
     const limit = options?.limit || 20
 
     const results: {
-        paths: PathListItem[]
-        courses: CourseListItem[]
+        expeditions: ExpeditionListItem[]
+        quests: QuestListItem[]
         organizations: OrganizationListItem[]
     } = {
-        paths: [],
-        courses: [],
+        expeditions: [],
+        quests: [],
         organizations: []
     }
 
     const promises: Promise<void>[] = []
 
-    if (tab === 'all' || tab === 'paths') {
+    if (tab === 'all' || tab === 'expeditions') {
         promises.push(
-            searchPaths(supabase, {
+            searchExpeditions(supabase, {
                 query: options?.query,
                 validated: true,
                 limit
-            }).then(data => { results.paths = data })
+            }).then(data => { results.expeditions = data })
         )
     }
 
-    if (tab === 'all' || tab === 'courses') {
+    if (tab === 'all' || tab === 'quests') {
         promises.push(
-            searchCourses(supabase, {
+            searchQuests(supabase, {
                 query: options?.query,
                 validated: true,
                 status: 'published',
                 limit
-            }).then(data => { results.courses = data })
+            }).then(data => { results.quests = data })
         )
     }
 

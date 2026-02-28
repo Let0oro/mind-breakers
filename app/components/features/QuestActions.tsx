@@ -6,8 +6,8 @@ import { createClient } from '@/utils/supabase/client'
 import { getLevelFromXp } from '@/lib/gamification'
 import { levelUpEvent } from '@/lib/events'
 
-interface CourseActionsProps {
-  courseId: string
+interface QuestActionsProps {
+  questId: string
   userId: string
   isSaved: boolean
   isCompleted: boolean
@@ -17,8 +17,8 @@ interface CourseActionsProps {
   status: string
 }
 
-export function CourseActions({
-  courseId,
+export function QuestActions({
+  questId,
   userId,
   isSaved: initialIsSaved,
   isCompleted: initialIsCompleted,
@@ -26,7 +26,7 @@ export function CourseActions({
   xpReward,
   canComplete = true,
   status,
-}: CourseActionsProps) {
+}: QuestActionsProps) {
   const [isSaved, setIsSaved] = useState(initialIsSaved)
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted)
   const [loading, setLoading] = useState(false)
@@ -39,14 +39,14 @@ export function CourseActions({
 
       if (isSaved) {
         await supabase
-          .from('saved_courses')
+          .from('saved_quests')
           .delete()
           .eq('user_id', userId)
-          .eq('course_id', courseId)
+          .eq('quest_id', questId)
       } else {
         await supabase
-          .from('saved_courses')
-          .insert({ user_id: userId, course_id: courseId })
+          .from('saved_quests')
+          .insert({ user_id: userId, quest_id: questId })
       }
 
       setIsSaved(!isSaved)
@@ -63,7 +63,7 @@ export function CourseActions({
 
       if (progressId) {
         await supabase
-          .from('user_course_progress')
+          .from('user_quest_progress')
           .update({
             completed: true,
             completed_at: new Date().toISOString(),
@@ -72,10 +72,10 @@ export function CourseActions({
           .eq('id', progressId)
       } else {
         await supabase
-          .from('user_course_progress')
+          .from('user_quest_progress')
           .insert({
             user_id: userId,
-            course_id: courseId,
+            quest_id: questId,
             completed: true,
             completed_at: new Date().toISOString(),
             xp_earned: xpReward,
@@ -120,7 +120,7 @@ export function CourseActions({
 
       if (progressId) {
         await supabase
-          .from('user_course_progress')
+          .from('user_quest_progress')
           .update({
             completed: false,
             completed_at: null,

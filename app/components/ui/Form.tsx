@@ -196,6 +196,7 @@ interface FormActionsProps {
     canSave?: boolean
     canPublish?: boolean
     showDelete?: boolean
+    publishDisabledReason?: string // Tooltip shown when Publish is disabled
 }
 
 export function FormActions({
@@ -210,7 +211,8 @@ export function FormActions({
     deleteLabel = 'Delete',
     canSave = true,
     canPublish = true,
-    showDelete = false
+    showDelete = false,
+    publishDisabledReason
 }: FormActionsProps) {
     const router = useRouter()
 
@@ -248,23 +250,37 @@ export function FormActions({
                 )}
 
                 {onPublish && (
-                    <button
-                        type="button"
-                        onClick={onPublish}
-                        disabled={publishing || !canPublish}
-                        className="cursor-pointer px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:bg-border transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                        {publishing ? (
-                            <>
-                                <div className="animate-spin rounded-full h-3 w-3 border-2 border-inverse border-t-transparent" />
-                                Publishing...
-                            </>
-                        ) : (
-                            <>
-                                {publishLabel}
-                            </>
+                    <div className="relative group">
+                        <button
+                            type="button"
+                            onClick={onPublish}
+                            disabled={publishing || !canPublish}
+                            className="cursor-pointer px-6 h-10 bg-inverse text-inverse text-xs font-bold uppercase tracking-widest hover:bg-border transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {publishing ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-inverse border-t-transparent" />
+                                    Publishing...
+                                </>
+                            ) : (
+                                publishLabel
+                            )}
+                        </button>
+                        {/* Tooltip shown when disabled and reason is provided */}
+                        {!canPublish && publishDisabledReason && (
+                            <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-64 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                                <div className="bg-surface border border-border p-3 text-left shadow-lg">
+                                    <p className="text-xs font-bold uppercase tracking-widest text-text-main mb-2 flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm text-amber-500">info</span>
+                                        To publish, complete:
+                                    </p>
+                                    <p className="text-xs text-muted leading-relaxed">{publishDisabledReason}</p>
+                                </div>
+                                {/* Arrow */}
+                                <div className="ml-auto mr-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-border" />
+                            </div>
                         )}
-                    </button>
+                    </div>
                 )}
             </div>
         </div>

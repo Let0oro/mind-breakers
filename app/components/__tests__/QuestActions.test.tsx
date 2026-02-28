@@ -1,6 +1,6 @@
 import { expect, test, describe, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { CourseActions } from '../features/CourseActions'
+import { QuestActions } from '../features/QuestActions'
 import { createClient } from '@/utils/supabase/client'
 
 // Mocks
@@ -15,7 +15,7 @@ vi.mock('next/navigation', () => ({
     })
 }))
 
-describe('CourseActions', () => {
+describe('QuestActions', () => {
     const mockSupabase = {
         from: vi.fn(() => ({
             delete: vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) })) })),
@@ -36,8 +36,8 @@ describe('CourseActions', () => {
     })
 
     test('toggles save state', async () => {
-        render(<CourseActions
-            courseId="c1"
+        render(<QuestActions
+            questId="c1"
             userId="u1"
             isSaved={false}
             isCompleted={false}
@@ -51,7 +51,7 @@ describe('CourseActions', () => {
         await waitFor(() => {
             expect(screen.getByText('Saved')).toBeInTheDocument()
             // Verify insert was called (since it was not saved)
-            expect(mockSupabase.from).toHaveBeenCalledWith('saved_courses')
+            expect(mockSupabase.from).toHaveBeenCalledWith('saved_quests')
         })
 
         // Click again to unsave
@@ -61,9 +61,9 @@ describe('CourseActions', () => {
         })
     })
 
-    test('completes a course', async () => {
-        render(<CourseActions
-            courseId="c1"
+    test('completes a quest', async () => {
+        render(<QuestActions
+            questId="c1"
             userId="u1"
             isSaved={false}
             isCompleted={false}
@@ -78,14 +78,14 @@ describe('CourseActions', () => {
             expect(mockRouterRefresh).toHaveBeenCalled()
             // Should show "Undo Complete" button now
             expect(screen.getByText('Undo Complete')).toBeInTheDocument()
-            expect(mockSupabase.from).toHaveBeenCalledWith('user_course_progress')
+            expect(mockSupabase.from).toHaveBeenCalledWith('user_quest_progress')
         })
     })
 
     test('reverts completion', async () => {
         // Need progressId to revert
-        render(<CourseActions
-            courseId="c1"
+        render(<QuestActions
+            questId="c1"
             userId="u1"
             isSaved={false}
             isCompleted={true}

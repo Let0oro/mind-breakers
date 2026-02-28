@@ -2,21 +2,21 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { PartyHallSidebar } from '@/components/features/PartyHallSidebar'
 import Link from 'next/link'
-import { CardCourse } from '@/components/ui/CardCourse'
-import { CardPath } from '@/components/ui/CardPath'
+import { CardQuest } from '@/components/ui/CardQuest'
+import { CardExpedition } from '@/components/ui/CardExpedition'
 import Recommendations from '@/components/features/Recommendations'
 import { getLevelProgress } from '@/lib/gamification'
 import {
   getUserProgressCached,
   getUserSavedQuestsCached,
-  getUserSavedPathsCached,
+  getUserSavedExpeditionsCached,
   getUserRecentActivityCached,
-  getUserSavedPathsWithCoursesCached,
-  getPublishedCoursesWithOrgsCached,
-  getSavedCoursesByIdsCached
+  getUserSavedExpeditionsWithQuestsCached,
+  getPublishedQuestsWithOrgsCached,
+  getSavedQuestsByIdsCached
 } from '@/lib/cache'
 
-interface DashboardCourse {
+interface DashboardQuest {
   id: string
   title: string
   organization?: string
@@ -28,25 +28,25 @@ interface DashboardCourse {
   status: string
 }
 
-interface DashboardLearningPath {
+interface DashboardExpedition {
   id: string
   title: string
-  completedCourses: number
-  totalCourses: number
-  nextCourse: string
-  nextCourseId?: string
+  completedQuests: number
+  totalQuests: number
+  nextQuest: string
+  nextQuestId?: string
   color: string
   summary?: string
 }
 
-interface DashboardSavedCourse {
+interface DashboardSavedQuest {
   id: string
   title: string
   xp_reward: number
   thumbnail_url?: string
 }
 
-interface DashboardSavedPath {
+interface DashboardSavedExpedition {
   id: string
   title: string
   xp_reward: number
@@ -65,41 +65,41 @@ export default async function DashboardPage() {
   const [
     profile,
     userProgress,
-    savedCourseIds,
-    savedPathIds,
+    savedQuestIds,
+    savedExpeditionIds,
     recentActivity,
-    savedDashboardPaths,
-    publishedCourses
+    savedDashboardExpeditions,
+    publishedQuests
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single().then(r => r.data),
     getUserProgressCached(supabase, user.id),
     getUserSavedQuestsCached(supabase, user.id),
-    getUserSavedPathsCached(supabase, user.id),
+    getUserSavedExpeditionsCached(supabase, user.id),
     getUserRecentActivityCached(supabase, user.id),
-    getUserSavedPathsWithCoursesCached(supabase, user.id, 5),
-    getPublishedCoursesWithOrgsCached(supabase, 3)
+    getUserSavedExpeditionsWithQuestsCached(supabase, user.id, 5),
+    getPublishedQuestsWithOrgsCached(supabase, 3)
   ])
 
-  const completedCourseIds = new Set(userProgress.filter(p => p.completed).map(p => p.course_id))
+  const completedQuestIds = new Set(userProgress.filter(p => p.completed).map(p => p.quest_id))
 
-  const lastCourse = recentActivity?.courses ? (Array.isArray(recentActivity.courses) ? recentActivity.courses[0] : recentActivity.courses) : null
+  const lastQuest = recentActivity?.quests ? (Array.isArray(recentActivity.quests) ? recentActivity.quests[0] : recentActivity.quests) : null
 
-  const learningPathsData = savedDashboardPaths?.map(p => Array.isArray(p.path) ? p.path[0] : p.path) || []
+  const learningExpeditionsData = savedDashboardExpeditions?.map(p => Array.isArray(p.expedition) ? p.expedition[0] : p.expedition) || []
 
-  const learningPathsList: DashboardLearningPath[] = learningPathsData?.map(path => {
-    const sortedCourses = [...(path.courses || [])].sort((a: { order_index: number }, b: { order_index: number }) => (a.order_index || 0) - (b.order_index || 0))
-    const totalCourses = sortedCourses.length
-    const completedCourses = sortedCourses.filter((c: { id: string }) => completedCourseIds.has(c.id)).length
-    const nextCourseData = sortedCourses.find((c: { id: string, title: string }) => !completedCourseIds.has(c.id))
+  const learningExpeditionsList: DashboardExpedition[] = learningExpeditionsData?.map(expedition => {
+    const sortedQuests = [...(expedition.quests || [])].sort((a: { order_index: number }, b: { order_index: number }) => (a.order_index || 0) - (b.order_index || 0))
+    const totalQuests = sortedQuests.length
+    const completedQuests = sortedQuests.filter((c: { id: string }) => completedQuestIds.has(c.id)).length
+    const nextQuestData = sortedQuests.find((c: { id: string, title: string }) => !completedQuestIds.has(c.id))
 
     return {
-      id: path.id,
-      title: path.title,
-      summary: path.summary,
-      completedCourses,
-      totalCourses,
-      nextCourse: nextCourseData?.title || (completedCourses === totalCourses ? '✓ Completed!' : 'Start Path'),
-      nextCourseId: nextCourseData?.id,
+      id: expedition.id,
+      title: expedition.title,
+      summary: expedition.summary,
+      completedQuests,
+      totalQuests,
+      nextQuest: nextQuestData?.title || (completedQuests === totalQuests ? '✓ Completed!' : 'Start Expedition'),
+      nextQuestId: nextQuestData?.id,
       color: 'primary',
     }
   }) || []
@@ -107,35 +107,35 @@ export default async function DashboardPage() {
   // --- Resume Logic ---
   let resumeTarget = null
 
-  if (lastCourse) {
+  if (lastQuest) {
     if (!recentActivity!.completed) {
       resumeTarget = {
-        href: `/guild-hall/quests/${lastCourse.id}`,
-        label: `Resume: ${lastCourse.title}`,
+        href: `/guild-hall/quests/${lastQuest.id}`,
+        label: `Resume: ${lastQuest.title}`,
       }
     } else {
-      const { data: courseWithPath } = await supabase
-        .from('courses')
-        .select('path_id, order_index')
-        .eq('id', lastCourse.id)
+      const { data: questWithExpedition } = await supabase
+        .from('quests')
+        .select('expedition_id, order_index')
+        .eq('id', lastQuest.id)
         .single()
 
-      if (courseWithPath?.path_id) {
-        const { data: nextCourseInPath } = await supabase
-          .from('courses')
+      if (questWithExpedition?.expedition_id) {
+        const { data: nextQuestInExpedition } = await supabase
+          .from('quests')
           .select('id, title')
-          .eq('path_id', courseWithPath.path_id)
-          .gt('order_index', courseWithPath.order_index)
+          .eq('expedition_id', questWithExpedition.expedition_id)
+          .gt('order_index', questWithExpedition.order_index)
           .order('order_index', { ascending: true })
           .limit(1)
           .maybeSingle()
 
-        if (nextCourseInPath) {
-          const isNextCompleted = completedCourseIds.has(nextCourseInPath.id)
+        if (nextQuestInExpedition) {
+          const isNextCompleted = completedQuestIds.has(nextQuestInExpedition.id)
           if (!isNextCompleted) {
             resumeTarget = {
-              href: `/guild-hall/quests/${nextCourseInPath.id}`,
-              label: `Start: ${nextCourseInPath.title}`,
+              href: `/guild-hall/quests/${nextQuestInExpedition.id}`,
+              label: `Start: ${nextQuestInExpedition.title}`,
             }
           }
         }
@@ -144,18 +144,18 @@ export default async function DashboardPage() {
   }
 
   if (!resumeTarget) {
-    const firstIncompletePath = learningPathsList.find(path => path.completedCourses < path.totalCourses && path.nextCourseId);
-    if (firstIncompletePath) {
+    const firstIncompleteExpedition = learningExpeditionsList.find(expedition => expedition.completedQuests < expedition.totalQuests && expedition.nextQuestId);
+    if (firstIncompleteExpedition) {
       resumeTarget = {
-        href: `/guild-hall/quests/${firstIncompletePath.nextCourseId}`,
-        label: `Continue: ${firstIncompletePath.title}`
+        href: `/guild-hall/quests/${firstIncompleteExpedition.nextQuestId}`,
+        label: `Continue: ${firstIncompleteExpedition.title}`
       }
     }
   }
 
-  // Combine progress with published courses
-  const progressMap = new Map(userProgress.map(p => [p.course_id, p]))
-  const enrolledCourses: DashboardCourse[] = publishedCourses?.map((course: {
+  // Combine progress with published quests
+  const progressMap = new Map(userProgress.map(p => [p.quest_id, p]))
+  const enrolledQuests: DashboardQuest[] = publishedQuests?.map((quest: {
     id: string
     title: string
     thumbnail_url?: string | null
@@ -163,39 +163,39 @@ export default async function DashboardPage() {
     status: string
     organizations: { name: string } | { name: string }[] | null
   }) => ({
-    id: course.id,
-    title: course.title,
-    thumbnail_url: course.thumbnail_url || undefined,
-    xp_reward: course.xp_reward || 100,
-    status: course.status,
-    progress: progressMap.get(course.id)?.completed ? 100 : 0,
+    id: quest.id,
+    title: quest.title,
+    thumbnail_url: quest.thumbnail_url || undefined,
+    xp_reward: quest.xp_reward || 100,
+    status: quest.status,
+    progress: progressMap.get(quest.id)?.completed ? 100 : 0,
     duration: '8h',
-    instructor: Array.isArray(course.organizations) ? course.organizations[0]?.name : course.organizations?.name || 'Unknown Organization',
+    instructor: Array.isArray(quest.organizations) ? quest.organizations[0]?.name : quest.organizations?.name || 'Unknown Organization',
   })) || []
 
-  // Fetch saved courses using cached function
-  const savedCoursesData = savedCourseIds.length > 0
-    ? await getSavedCoursesByIdsCached(supabase, savedCourseIds, 5)
+  // Fetch saved quests using cached function
+  const savedQuestsData = savedQuestIds.length > 0
+    ? await getSavedQuestsByIdsCached(supabase, savedQuestIds, 5)
     : []
 
-  const savedCourses: DashboardSavedCourse[] = savedCoursesData?.map((course) => ({
-    id: course.id,
-    title: course.title,
-    thumbnail_url: course.thumbnail_url || undefined,
-    xp_reward: course.xp_reward || 100,
+  const savedQuests: DashboardSavedQuest[] = savedQuestsData?.map((quest) => ({
+    id: quest.id,
+    title: quest.title,
+    thumbnail_url: quest.thumbnail_url || undefined,
+    xp_reward: quest.xp_reward || 100,
   })) || []
 
   const xpProgress = getLevelProgress(profile?.total_xp || 0, profile?.level || 1)
 
-  const savedPathsData = savedPathIds.length > 0
-    ? await getSavedCoursesByIdsCached(supabase, savedPathIds, 5)
+  const savedExpeditionsData = savedExpeditionIds.length > 0
+    ? await getSavedQuestsByIdsCached(supabase, savedExpeditionIds, 5)
     : []
 
-  const savedPaths: DashboardSavedPath[] = savedPathsData?.map((path) => ({
-    id: path.id,
-    title: path.title,
-    thumbnail_url: path.thumbnail_url || undefined,
-    xp_reward: path.xp_reward || 100,
+  const savedExpeditions: DashboardSavedExpedition[] = savedExpeditionsData?.map((expedition) => ({
+    id: expedition.id,
+    title: expedition.title,
+    thumbnail_url: expedition.thumbnail_url || undefined,
+    xp_reward: expedition.xp_reward || 100,
   })) || []
 
 
@@ -264,7 +264,7 @@ export default async function DashboardPage() {
         </div>
       </section> */}
 
-      {/* Ongoing Expeditions (Learning Paths) */}
+      {/* Ongoing Expeditions (Expeditions) */}
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6 border-b border-border pb-2">
           <div className="flex items-center gap-2">
@@ -274,16 +274,16 @@ export default async function DashboardPage() {
           <span className="text-[10px] uppercase tracking-[0.2em] text-muted">Logbook</span>
         </div>
 
-        {learningPathsList.length > 0 ? (
+        {learningExpeditionsList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {learningPathsList.map(path => (
-              <CardPath
-                key={path.id}
-                id={path.id}
-                title={path.title}
-                summary={path.summary}
-                totalCourses={path.totalCourses}
-                completedCourses={path.completedCourses}
+            {learningExpeditionsList.map(expedition => (
+              <CardExpedition
+                key={expedition.id}
+                id={expedition.id}
+                title={expedition.title}
+                summary={expedition.summary}
+                totalQuests={expedition.totalQuests}
+                completedQuests={expedition.completedQuests}
                 variant="card"
               />
             ))}
@@ -292,13 +292,13 @@ export default async function DashboardPage() {
           <div className="p-8 border border-dashed border-border text-center bg-background/30">
             <p className="text-muted italic mb-4">&quot;No expeditions currently charted in your logbook.&quot;</p>
             <Link href="/guild-hall/expeditions" className="text-gold hover:text-gold/80 text-xs font-bold uppercase tracking-widest border-b border-gold/30 hover:border-gold pb-0.5 transition-all">
-              Chart New Course →
+              Chart New Quest →
             </Link>
           </div>
         )}
       </section>
 
-      {/* Available Quests (Courses) */}
+      {/* Available Quests (Quests) */}
       <section className="mb-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-header text-foreground italic">Available Quests</h2>
@@ -309,18 +309,18 @@ export default async function DashboardPage() {
             View Quest Board →
           </Link>
         </div>
-        {enrolledCourses.length > 0 ? (
+        {enrolledQuests.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {enrolledCourses.map(course => (
-              <CardCourse
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                organizationName={course.instructor || 'Unknown Guild'}
-                progress={course.progress}
-                xp_reward={course.xp_reward}
-                thumbnail_url={course.thumbnail_url}
-                status={course.status}
+            {enrolledQuests.map(quest => (
+              <CardQuest
+                key={quest.id}
+                id={quest.id}
+                title={quest.title}
+                organizationName={quest.instructor || 'Unknown Guild'}
+                progress={quest.progress}
+                xp_reward={quest.xp_reward}
+                thumbnail_url={quest.thumbnail_url}
+                status={quest.status}
                 variant="grid"
               />
             ))}
@@ -339,7 +339,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* Saved Archives (Library) */}
-      {(savedCourses.length > 0 || savedPaths.length > 0) && (
+      {(savedQuests.length > 0 || savedExpeditions.length > 0) && (
         <section className="mb-10">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-header text-foreground italic">Saved Archives</h2>
@@ -352,26 +352,26 @@ export default async function DashboardPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Combine logic or separate, keeping separate for now but cleaner */}
-            {savedCourses.map(course => (
+            {savedQuests.map(quest => (
               <Link
-                key={course.id}
-                href={`/guild-hall/quests/${course.id}`}
+                key={quest.id}
+                href={`/guild-hall/quests/${quest.id}`}
                 className="border border-border p-4 bg-background hover:border-gold transition-all group relative overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-gold/20 group-hover:bg-gold transition-colors"></div>
                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Scroll</p>
-                <p className="text-sm font-bold text-foreground truncate group-hover:text-gold transition-colors font-header">{course.title}</p>
+                <p className="text-sm font-bold text-foreground truncate group-hover:text-gold transition-colors font-header">{quest.title}</p>
               </Link>
             ))}
-            {savedPaths.map(path => (
+            {savedExpeditions.map(expedition => (
               <Link
-                key={path.id}
-                href={`/guild-hall/expeditions/${path.id}`}
+                key={expedition.id}
+                href={`/guild-hall/expeditions/${expedition.id}`}
                 className="border border-border p-4 bg-background hover:border-forest transition-all group relative overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-1 bg-forest/20 group-hover:bg-forest transition-colors"></div>
                 <p className="text-xs font-bold text-muted uppercase tracking-wider mb-1">Map</p>
-                <p className="text-sm font-bold text-foreground truncate group-hover:text-forest transition-colors font-header">{path.title}</p>
+                <p className="text-sm font-bold text-foreground truncate group-hover:text-forest transition-colors font-header">{expedition.title}</p>
               </Link>
             ))}
           </div>

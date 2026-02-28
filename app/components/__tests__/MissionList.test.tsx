@@ -1,20 +1,20 @@
 import { expect, test, describe } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { ExerciseList } from '../features/ExerciseList'
+import { MissionList } from '../features/MissionList'
 
-describe('ExerciseList', () => {
+describe('MissionList', () => {
     test('renders empty state', () => {
-        render(<ExerciseList exercises={[]} />)
+        render(<MissionList missions={[]} />)
         expect(screen.getByText('No missions found')).toBeInTheDocument()
     })
 
-    test('renders exercises with correct status', () => {
-        const exercises = [
+    test('renders missions with correct status', () => {
+        const missions = [
             { id: '1', title: 'Ex 1', status: 'completed' as const, xp_reward: 10 },
             { id: '2', title: 'Ex 2', status: 'in_progress' as const },
         ]
 
-        render(<ExerciseList exercises={exercises} />)
+        render(<MissionList missions={missions} />)
 
         expect(screen.getByText('Ex 1')).toBeInTheDocument()
         expect(screen.getByText('Ex 2')).toBeInTheDocument()
@@ -25,10 +25,10 @@ describe('ExerciseList', () => {
     })
 
     test('links to correct submission page', () => {
-        const exercises = [
+        const missions = [
             { id: '1', title: 'Ex 1', status: 'not_started' as const },
         ]
-        render(<ExerciseList exercises={exercises} />)
+        render(<MissionList missions={missions} />)
 
         const link = screen.getByRole('link', { name: /Start Mission/i })
         expect(link).toHaveAttribute('href', '/guild-hall/missions/1/submit')

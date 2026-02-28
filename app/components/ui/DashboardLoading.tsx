@@ -2,7 +2,7 @@
 
 export default function DashboardLoading() {
     return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-gold-500">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-gold">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(197,160,89,0.05)_0%,transparent_70%)]" />
 

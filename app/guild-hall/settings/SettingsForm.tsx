@@ -46,17 +46,17 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
             if (avatarFile) {
                 const fileExt = avatarFile.name.split('.').pop()
                 const fileName = `${user.id}-${Math.random()}.${fileExt}`
-                const filePath = `${fileName}`
+                const fileExpedition = `${fileName}`
 
                 const { error: uploadError } = await supabase.storage
                     .from('avatars')
-                    .upload(filePath, avatarFile)
+                    .upload(fileExpedition, avatarFile)
 
                 if (uploadError) throw uploadError
 
                 const { data: { publicUrl } } = supabase.storage
                     .from('avatars')
-                    .getPublicUrl(filePath)
+                    .getPublicUrl(fileExpedition)
 
                 updates.avatar_url = publicUrl
             }

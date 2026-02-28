@@ -4,8 +4,8 @@ import { useState, useEffect, Activity } from 'react'
 import Image, { ImageProps } from 'next/image'
 
 const icons = {
-    course: 'assignment_late',
-    path: 'flag',
+    quest: 'assignment_late',
+    expedition: 'flag',
     user: 'person',
     default: 'image'
 }
@@ -13,7 +13,7 @@ const icons = {
 interface FallbackImageProps extends Omit<ImageProps, 'src'> {
     src: string
     as?: 'img' | 'next'
-    type?: 'course' | 'path' | 'user' | 'default'
+    type?: 'quest' | 'expedition' | 'user' | 'default'
 }
 
 export function FallbackImage({

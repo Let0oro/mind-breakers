@@ -29,10 +29,10 @@ export function Toast({ title, message, type, onClose, duration = 5000 }: ToastP
     const getIcon = () => {
         switch (type) {
             case 'exercise_approved':
-            case 'course_approved':
+            case 'quest_approved':
                 return '✅'
             case 'exercise_rejected':
-            case 'course_rejected':
+            case 'quest_rejected':
             case 'admin_request_rejected':
                 return '❌'
             case 'level_up':

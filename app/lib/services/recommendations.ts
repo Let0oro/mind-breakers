@@ -1,13 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
 import * as cheerio from 'cheerio'
 
-export interface RecommendedCourse {
+export interface RecommendedQuest {
     url: string
     title: string
     description?: string
     image?: string
-    sourcePathTitle: string // Nombre del path donde se encontró
-    sourcePathId: string
+    sourceExpeditionTitle: string // Nombre del expedition donde se encontró
+    sourceExpeditionId: string
 }
 
 /**
@@ -40,73 +40,73 @@ export async function getUrlMetadata(url: string) {
 }
 
 /**
- * Busca cursos recomendados de paths similares
- * Similitud = compartir al menos un enlace (Course.link_url)
+ * Busca cursos recomendados de expeditions similares
+ * Similitud = compartir al menos un enlace (Quest.link_url)
  */
-export async function getRecommendedCourses(pathId: string): Promise<RecommendedCourse[]> {
+export async function getRecommendedQuests(expeditionId: string): Promise<RecommendedQuest[]> {
     const supabase = await createClient()
 
-    // 1. Obtener los links del path actual
-    const { data: currentPathData } = await supabase
-        .from('courses')
+    // 1. Obtener los links del expedition actual
+    const { data: currentExpeditionData } = await supabase
+        .from('quests')
         .select('link_url')
-        .eq('path_id', pathId)
+        .eq('expedition_id', expeditionId)
         .not('link_url', 'is', null)
 
-    const currentLinks = currentPathData?.map(c => c.link_url).filter(Boolean) as string[] || []
+    const currentLinks = currentExpeditionData?.map(c => c.link_url).filter(Boolean) as string[] || []
 
     if (currentLinks.length === 0) return []
 
-    // 2. Encontrar otros paths que contengan cualquiera de estos links
+    // 2. Encontrar otros expeditions que contengan cualquiera de estos links
     // Nota: Esto podría ser costoso si hay muchísimos datos, pero para < 10k cursos está bien.
     // Idealmente se haría con una función RPC en Supabase, pero lo haremos en aplicación por ahora.
 
-    // Buscar cursos que tengan esos links pero NO sean del path actual
-    const { data: similarCoursesMatch } = await supabase
-        .from('courses')
-        .select('path_id, link_url')
+    // Buscar cursos que tengan esos links pero NO sean del expedition actual
+    const { data: similarQuestsMatch } = await supabase
+        .from('quests')
+        .select('expedition_id, link_url')
         .in('link_url', currentLinks)
-        .neq('path_id', pathId)
+        .neq('expedition_id', expeditionId)
 
-    if (!similarCoursesMatch || similarCoursesMatch.length === 0) return []
+    if (!similarQuestsMatch || similarQuestsMatch.length === 0) return []
 
-    // Extraer IDs de paths únicos
-    const similarPathIds = Array.from(new Set(similarCoursesMatch.map(c => c.path_id)))
+    // Extraer IDs de expeditions únicos
+    const similarExpeditionIds = Array.from(new Set(similarQuestsMatch.map(c => c.expedition_id)))
 
-    // 3. Obtener "otros" cursos de esos paths (cursos que NO están en el path actual)
+    // 3. Obtener "otros" cursos de esos expeditions (cursos que NO están en el expedition actual)
     const { data: recommendedRaw } = await supabase
-        .from('courses')
+        .from('quests')
         .select(`
       link_url,
       title,
-      learning_paths!inner (
+      expeditions!inner (
         id,
         title
       )
     `)
-        .in('path_id', similarPathIds)
+        .in('expedition_id', similarExpeditionIds)
         .not('link_url', 'in', `(${currentLinks.map(l => `"${l}"`).join(',')})`) // Excluir links que ya tenemos
         .limit(10) // Limitar recomendaciones
 
     if (!recommendedRaw) return []
 
     // 4. Enriquecer con metadatos y dedublicar por URL
-    const uniqueRecommendations = new Map<string, RecommendedCourse>()
+    const uniqueRecommendations = new Map<string, RecommendedQuest>()
 
     for (const item of recommendedRaw) {
         if (!item.link_url) continue
         if (uniqueRecommendations.has(item.link_url)) continue
 
         // Usar título del curso como fallback inicial
-        const learningPath = Array.isArray(item.learning_paths)
-            ? item.learning_paths[0]
-            : item.learning_paths as unknown as { id: string, title: string } | null
+        const learningExpedition = Array.isArray(item.expeditions)
+            ? item.expeditions[0]
+            : item.expeditions as unknown as { id: string, title: string } | null
 
-        const baseRec: RecommendedCourse = {
+        const baseRec: RecommendedQuest = {
             url: item.link_url,
             title: item.title,
-            sourcePathTitle: learningPath?.title || 'Unknown Expedition',
-            sourcePathId: learningPath?.id || '',
+            sourceExpeditionTitle: learningExpedition?.title || 'Unknown Expedition',
+            sourceExpeditionId: learningExpedition?.id || '',
         }
 
         uniqueRecommendations.set(item.link_url, baseRec)

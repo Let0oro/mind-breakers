@@ -9,7 +9,7 @@ vi.mock('next/navigation', () => ({
         prefetch: vi.fn(),
         back: vi.fn(),
     }),
-    usePathname: () => '/',
+    useExpeditionname: () => '/',
     useSearchParams: () => new URLSearchParams(),
     redirect: vi.fn(),
 }))

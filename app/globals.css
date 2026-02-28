@@ -25,6 +25,7 @@
     animation: scale 3s;
     animation-fill-mode: both;
 }
+
 /* 
 ::view-transition-group(img) {
     opacity: 0;
@@ -56,32 +57,94 @@
 }
 
 /* =================================================================
-   Root Variables
+   @theme inline — STATIC palette only (cannot respond to .dark)
+   Tailwind v4: these become CSS utility classes (bg-gold, text-midnight…)
+   Variables that change with theme MUST live in :root / .dark below.
+   ================================================================= */
+@theme inline {
+    /* ── Raw palette (never change with theme) ── */
+    --color-parchment: #E8E4D8;
+    --color-midnight: #1A1F2C;
+    --color-gold: #C5A059;
+    --color-forest: #3E5F3F;
+    --color-terracotta: #8B3A3A;
+    --color-slate: #4A607A;
+    --color-brand: #2525f4;
+
+    /* ── Semantic aliases — reference :root vars so .dark can override ── */
+    --color-background: var(--theme-background);
+    --color-foreground: var(--theme-foreground);
+    --color-main: var(--theme-main);
+    --color-main-alt: var(--theme-main-alt);
+    --color-surface: var(--theme-surface);
+    --color-surface-dark: rgba(26, 31, 44, 0.85);
+    /* always dark glass */
+    --color-sidebar: #1A1F2C;
+    /* always dark */
+    --color-text-main: var(--theme-text-main);
+    --color-muted: var(--theme-muted);
+    --color-border: var(--theme-border);
+    --color-ring: var(--color-gold);
+    --color-inverse: var(--theme-inverse);
+    --color-text-inverse: var(--theme-text-inverse);
+
+    /* Brand / semantic */
+    --color-primary: var(--theme-primary);
+    --color-primary-foreground: var(--theme-primary-foreground);
+    --color-secondary: var(--color-gold);
+    --color-secondary-foreground: var(--color-midnight);
+    --color-accent: var(--color-gold);
+    --color-accent-foreground: var(--color-midnight);
+    --color-destructive: var(--color-terracotta);
+    --color-destructive-foreground: var(--color-parchment);
+
+    /* Fonts */
+    --font-header: 'Cinzel', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-sans: var(--font-body);
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* Radius */
+    --radius: 0.5rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+}
+
+/* =================================================================
+   :root — Light theme (default)
+   These CSS custom properties CAN be overridden by .dark {}
    ================================================================= */
 :root {
-    /* Fondos con textura coherente */
+    /* Raw palette kept here for :root-level lookups */
     --color-parchment: #E8E4D8;
-    /* Fondo Light unificado */
     --color-midnight: #1A1F2C;
-    /* Fondo Dark unificado */
-
-    /* Acentos de marca estandarizados */
+    --color-gold: #C5A059;
     --accent-gold: #C5A059;
-    /* Rangos, títulos y elementos premium */
     --accent-forest: #3E5F3F;
-    /* Acciones primarias y éxito */
     --accent-terracotta: #8B3A3A;
-    /* Alertas y misiones activas */
     --accent-slate: #4A607A;
-    /* Líneas de mapa y texto de apoyo */
 
-    /* Interfaz y Bordes */
+    /* Semantic — light mode */
+    --theme-background: var(--color-parchment);
+    --theme-foreground: var(--color-midnight);
+    --theme-main: #ffffff;
+    --theme-main-alt: #f0ede5;
+    --theme-surface: rgba(255, 255, 255, 0.65);
+    --theme-text-main: var(--color-midnight);
+    --theme-muted: var(--color-slate);
+    --theme-border: rgba(197, 160, 89, 0.3);
+    --theme-inverse: var(--color-midnight);
+    --theme-text-inverse: var(--color-parchment);
+    --theme-primary: var(--color-midnight);
+    --theme-primary-foreground: var(--color-parchment);
+
+    /* Misc */
     --glass-panel: rgba(255, 255, 255, 0.03);
-    /* Paneles oscuros coherentes */
     --border-fine: 1px solid rgba(197, 160, 89, 0.3);
-    /* Borde dorado sutil */
 
-    /* View Transitions */
+    /* View Transitions easing */
     --expo-in: linear(0 0%, 0.0085 31.26%, 0.0167 40.94%,
             0.0289 48.86%, 0.0471 55.92%,
             0.0717 61.99%, 0.1038 67.32%,
@@ -101,73 +164,27 @@
 }
 
 /* =================================================================
-   Theme Variables - Fantasy RPG
+   .dark — Dark theme overrides
+   Only override --theme-* vars; @theme aliases pick them up automatically
    ================================================================= */
-@theme inline {
-    /* Core Colors */
-    --color-background: var(--color-parchment);
-    --color-foreground: var(--color-midnight);
-
-    /* RPG Palette References */
-    --color-parchment: #E8E4D8;
-    --color-midnight: #1A1F2C;
-    --color-gold: #C5A059;
-    --color-forest: #3E5F3F;
-    --color-terracotta: #8B3A3A;
-    --color-slate: #4A607A;
-
-    /* Semantic Mappings */
-    --color-primary: var(--color-midnight);
-    --color-primary-foreground: var(--color-parchment);
-    --color-secondary: var(--color-gold);
-    --color-secondary-foreground: var(--color-midnight);
-    --color-accent: var(--color-gold);
-    /* Used for premium elements */
-    --color-accent-foreground: var(--color-midnight);
-    --color-muted: var(--color-slate);
-    --color-muted-foreground: var(--color-parchment);
-    --color-destructive: var(--color-terracotta);
-    --color-destructive-foreground: var(--color-parchment);
-
-    /* Surfaces */
-    --color-surface: rgba(255, 255, 255, 0.5);
-    /* Glass-like effect on parchment */
-    --color-surface-dark: rgba(26, 31, 44, 0.8);
-    /* Dark glass for midnight */
-
-    /* Borders */
-    --color-border: rgba(197, 160, 89, 0.3);
-    /* Fine gold border */
-    --color-input: rgba(74, 96, 122, 0.2);
-    /* Slate input border */
-    --color-ring: var(--color-gold);
-
-    /* Fonts */
-    --font-header: 'Cinzel', serif;
-    --font-body: 'Inter', sans-serif;
-    --font-sans: var(--font-body);
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
-    /* Radius */
-    --radius: 0.5rem;
-    --radius-sm: 0.25rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
-}
-
-
-
 .dark {
-    --color-background: var(--color-midnight);
-    --color-foreground: var(--color-parchment);
-    --color-primary: var(--color-gold);
-    --color-primary-foreground: var(--color-midnight);
-    --color-muted: 215 20% 65%;
-    /* Light Slate */
+    --theme-background: var(--color-midnight);
+    --theme-foreground: var(--color-parchment);
+    --theme-main: #16162a;
+    --theme-main-alt: #1e1e32;
+    --theme-surface: rgba(36, 36, 58, 0.85);
+    --theme-text-main: var(--color-parchment);
+    --theme-muted: rgba(232, 228, 216, 0.55);
+    --theme-border: rgba(197, 160, 89, 0.2);
+    --theme-inverse: var(--color-parchment);
+    --theme-text-inverse: var(--color-midnight);
+    --theme-primary: var(--color-gold);
+    --theme-primary-foreground: var(--color-midnight);
 }
 
-/* Base Global Styles */
+/* =================================================================
+   Base Global Styles
+   ================================================================= */
 body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -181,8 +198,7 @@ h4,
 h5,
 h6 {
     font-family: var(--font-header);
-    color: var(--color-accent-gold);
-    /* Default headers to gold in dark mode or strong color */
+    color: var(--color-gold);
 }
 
 .dark h1,

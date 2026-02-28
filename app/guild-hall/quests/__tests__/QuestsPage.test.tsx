@@ -1,6 +1,6 @@
 import { expect, test, describe, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import CoursesPage from '../page'
+import QuestsPage from '../page'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -28,7 +28,7 @@ import {
     getQuestsByIdsCached
 } from '@/lib/cache'
 
-describe('CoursesPage', () => {
+describe('QuestsPage', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockSupabase: any
 
@@ -60,7 +60,7 @@ describe('CoursesPage', () => {
         mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
 
         try {
-            await CoursesPage({ searchParams: Promise.resolve({}) })
+            await QuestsPage({ searchParams: Promise.resolve({}) })
         } catch {
             // caught redirect
         }
@@ -68,13 +68,13 @@ describe('CoursesPage', () => {
         expect(redirect).toHaveBeenCalledWith('/login')
     })
 
-    test('renders courses list', async () => {
+    test('renders quests list', async () => {
         // Setup mock return values
         // 1. Created quests
         ; (getUserCreatedQuestIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(['c1'])
 
         // 2. Quest details
-        const mockCourses = [{
+        const mockQuests = [{
             id: 'c1',
             title: 'React Fundamentals',
             summary: 'Learn React',
@@ -83,14 +83,14 @@ describe('CoursesPage', () => {
             is_validated: true,
             created_by: 'u2',
             organizations: [{ name: 'Tech Org' }],
-            user_course_progress: [],
-            saved_courses: [],
+            user_quest_progress: [],
+            saved_quests: [],
             status: 'published'
         }]
 
-            ; (getQuestsByIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockCourses)
+            ; (getQuestsByIdsCached as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(mockQuests)
 
-        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
+        const jsx = await QuestsPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
         expect(screen.getByText('React Fundamentals')).toBeInTheDocument()
@@ -100,9 +100,9 @@ describe('CoursesPage', () => {
     test('renders empty state', async () => {
         // Default mocks return empty arrays
 
-        const jsx = await CoursesPage({ searchParams: Promise.resolve({}) })
+        const jsx = await QuestsPage({ searchParams: Promise.resolve({}) })
         render(jsx)
 
-        expect(screen.getByText(/No courses found/i)).toBeInTheDocument()
+        expect(screen.getByText(/No quests found/i)).toBeInTheDocument()
     })
 })

@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { FallbackImage } from '@/components/ui/FallbackImage'
 
-interface CardPathProps {
+interface CardExpeditionProps {
     id: string
     title: string
     summary?: string | null
-    completedCourses?: number
-    totalCourses?: number
-    nextCourse?: string
+    completedQuests?: number
+    totalQuests?: number
+    nextQuest?: string
     progressPercent?: number
     isSaved?: boolean
     isValidated?: boolean
@@ -24,13 +24,13 @@ interface CardPathProps {
     index?: number
 }
 
-export function CardPath({
+export function CardExpedition({
     id,
     title,
     summary,
-    completedCourses = 0,
-    totalCourses = 0,
-    nextCourse,
+    completedQuests = 0,
+    totalQuests = 0,
+    nextQuest,
     progressPercent = 0,
     isSaved,
     isValidated = true,
@@ -42,9 +42,9 @@ export function CardPath({
     thumbnailUrl,
     isOwner = false,
     index
-}: CardPathProps) {
+}: CardExpeditionProps) {
 
-    // VARIANT: HERO (Horizontal - Dashboard Learning Paths)
+    // VARIANT: HERO (Horizontal - Dashboard Expeditions)
     if (variant === 'hero') {
         return (
             <Link
@@ -69,24 +69,24 @@ export function CardPath({
                         {title}
                     </h4>
                     <p className="text-muted text-xs mt-1 uppercase tracking-wider">
-                        {completedCourses} of {totalCourses} quests completed
+                        {completedQuests} of {totalQuests} quests completed
                     </p>
 
                     {/* Progress Dots */}
                     <div className="flex items-center gap-2 mt-3">
                         <div className="flex gap-1">
                             {/* Filled dots for completed */}
-                            {[...Array(Math.min(completedCourses, 5))].map((_, i) => (
+                            {[...Array(Math.min(completedQuests, 5))].map((_, i) => (
                                 <div key={i} className="w-3 h-3 bg-inverse" />
                             ))}
                             {/* Empty dots for remaining */}
-                            {[...Array(Math.min(totalCourses - completedCourses, 5))].map((_, i) => (
+                            {[...Array(Math.min(totalQuests - completedQuests, 5))].map((_, i) => (
                                 <div key={`empty-${i}`} className="w-3 h-3 border border-border" />
                             ))}
                         </div>
-                        {nextCourse && (
+                        {nextQuest && (
                             <span className="text-[10px] text-muted uppercase tracking-wider ml-2">
-                                Next: {nextCourse}
+                                Next: {nextQuest}
                             </span>
                         )}
                     </div>
@@ -108,7 +108,7 @@ export function CardPath({
                         alt={title}
                         as="img"
                         className="w-full h-full object-cover"
-                        type="path"
+                        type="expedition"
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-inverse/10 pointer-events-none">
                         <span className="material-symbols-outlined text-4xl text-main-alt">flag</span>
@@ -138,7 +138,7 @@ export function CardPath({
         )
     }
 
-    // VARIANT: CARD (Vertical detailed - Paths List Page)
+    // VARIANT: CARD (Vertical detailed - Expeditions List Page)
     return (
         <Link
             href={href}
@@ -177,14 +177,14 @@ export function CardPath({
 
             {/* Stats */}
             <div className="flex items-center gap-4 text-xs text-muted mt-auto">
-                <span>{totalCourses} quests</span>
+                <span>{totalQuests} quests</span>
                 {progressPercent > 0 && (
-                    <span>{completedCourses} completed</span>
+                    <span>{completedQuests} completed</span>
                 )}
             </div>
 
             {/* Progress Bar */}
-            {totalCourses > 0 && (
+            {totalQuests > 0 && (
                 <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                         <span className="text-muted uppercase tracking-wider">Progress</span>

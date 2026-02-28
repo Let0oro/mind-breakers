@@ -163,7 +163,7 @@ export function FuzzyMatchSelect({
                                     }
                                     setIsOpen(false)
                                 }}
-                                className="w-full px-3 py-2 text-left hover:bg-sidebar-border/50 transition-colors flex items-center justify-between group"
+                                className="w-full px-3 py-2 text-left hover:bg-border/30 transition-colors flex items-center justify-between group"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm text-text-main dark:text-text-main">{item.name}</span>
@@ -171,7 +171,7 @@ export function FuzzyMatchSelect({
                                         ? 'bg-red-500/20 text-red-400'
                                         : item.score > 0.6
                                             ? 'bg-yellow-500/20 text-yellow-400'
-                                            : 'bg-sidebar-border text-muted dark:text-muted'
+                                            : 'bg-border text-muted dark:text-muted'
                                         }`}>
                                         {Math.round(item.score * 100)}% similar
                                     </span>

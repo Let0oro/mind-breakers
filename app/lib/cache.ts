@@ -5,11 +5,11 @@
 
 import { unstable_cache } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { PathListItem } from './types'
-import type { CourseListItem, OrganizationListItem, DraftItem } from './queries'
+import type { ExpeditionListItem } from './types'
+import type { QuestListItem, OrganizationListItem, DraftItem } from './queries'
 
 // Re-export types with Quest naming
-export type { CourseListItem as QuestListItem }
+export type { QuestListItem as QuestListItem }
 
 // Cache durations (in seconds)
 const CACHE_DURATION = {
@@ -23,8 +23,8 @@ const CACHE_DURATION = {
 // ============================================================================
 
 export const CACHE_TAGS = {
-    QUESTS: 'courses',
-    PATHS: 'paths',
+    QUESTS: 'quests',
+    PATHS: 'expeditions',
     ORGANIZATIONS: 'organizations',
     USER_PROGRESS: 'user-progress',
     USER_SAVED: 'user-saved',
@@ -44,7 +44,7 @@ export const getPublishedQuestsCached = (supabase: SupabaseClient, limit?: numbe
     unstable_cache(
         async () => {
             const query = supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -65,7 +65,7 @@ export const getPublishedQuestsCached = (supabase: SupabaseClient, limit?: numbe
             }
 
             const { data } = await query
-            return (data as unknown as CourseListItem[]) || []
+            return (data as unknown as QuestListItem[]) || []
         },
         [`published-quests-${limit || 'all'}`],
         {
@@ -81,11 +81,11 @@ export const getQuestCached = (supabase: SupabaseClient, questId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     *,
                     organizations (id, name),
-                    course_exercises (id, title, description)
+                    quest_exercises (id, title, description)
                 `)
                 .eq('id', questId)
                 .single()
@@ -106,12 +106,12 @@ export const getQuestDetailCached = (supabase: SupabaseClient, questId: string) 
     unstable_cache(
         async () => {
             const { data, error } = await supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     *,
-                    learning_paths (id, title),
+                    expeditions (id, title),
                     organizations (name, website_url),
-                    course_exercises (*)
+                    quest_exercises (*)
                 `)
                 .eq('id', questId)
                 .single()
@@ -126,29 +126,29 @@ export const getQuestDetailCached = (supabase: SupabaseClient, questId: string) 
     )()
 
 /**
- * Get user's course progress for a specific course (cached per user)
+ * Get user's quest progress for a specific quest (cached per user)
  */
-export const getUserCourseProgressCached = (supabase: SupabaseClient, userId: string, courseId: string) =>
+export const getUserQuestProgressCached = (supabase: SupabaseClient, userId: string, questId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('user_course_progress')
+                .from('user_quest_progress')
                 .select('id, completed, completed_at, xp_earned')
                 .eq('user_id', userId)
-                .eq('course_id', courseId)
+                .eq('quest_id', questId)
                 .single()
 
             return data
         },
-        [`user-course-progress-${userId}-${courseId}`],
+        [`user-quest-progress-${userId}-${questId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.USER_PROGRESS, `user-${userId}`, `quest-${courseId}`],
+            tags: [CACHE_TAGS.USER_PROGRESS, `user-${userId}`, `quest-${questId}`],
         }
     )()
 
 /**
- * Get user's exercise submissions for a course (cached per user)
+ * Get user's exercise submissions for a quest (cached per user)
  */
 export const getUserExerciseSubmissionsCached = (supabase: SupabaseClient, userId: string, exerciseIds: string[]) =>
     unstable_cache(
@@ -157,7 +157,7 @@ export const getUserExerciseSubmissionsCached = (supabase: SupabaseClient, userI
 
             const { data } = await supabase
                 .from('exercise_submissions')
-                .select('*, course_exercises (*)')
+                .select('*, quest_exercises (*)')
                 .eq('user_id', userId)
                 .in('exercise_id', exerciseIds)
 
@@ -171,24 +171,24 @@ export const getUserExerciseSubmissionsCached = (supabase: SupabaseClient, userI
     )()
 
 /**
- * Check if user has saved a course (cached per user)
+ * Check if user has saved a quest (cached per user)
  */
-export const isCourseSavedCached = (supabase: SupabaseClient, userId: string, courseId: string) =>
+export const isQuestSavedCached = (supabase: SupabaseClient, userId: string, questId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('saved_courses')
+                .from('saved_quests')
                 .select('id')
                 .eq('user_id', userId)
-                .eq('course_id', courseId)
+                .eq('quest_id', questId)
                 .single()
 
             return !!data
         },
-        [`course-saved-${userId}-${courseId}`],
+        [`quest-saved-${userId}-${questId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.USER_SAVED, `user-${userId}`, `quest-${courseId}`],
+            tags: [CACHE_TAGS.USER_SAVED, `user-${userId}`, `quest-${questId}`],
         }
     )()
 
@@ -199,7 +199,7 @@ export const getUserCreatedQuestIdsCached = (supabase: SupabaseClient, userId: s
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select('id')
                 .eq('created_by', userId)
 
@@ -215,13 +215,13 @@ export const getUserCreatedQuestIdsCached = (supabase: SupabaseClient, userId: s
 /**
  * Get quests by an array of IDs with full details (cached)
  */
-export const getQuestsByIdsCached = (supabase: SupabaseClient, questIds: string[]) =>
+export const getQuestsByIdsCached = (supabase: SupabaseClient, userId: string, questIds: string[]) =>
     unstable_cache(
         async () => {
             if (questIds.length === 0) return []
 
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -232,11 +232,11 @@ export const getQuestsByIdsCached = (supabase: SupabaseClient, questIds: string[
                     created_by,
                     status,
                     organizations (name),
-                    user_course_progress (
+                    user_quest_progress (
                         completed,
                         xp_earned
                     ),
-                    saved_courses (
+                    saved_quests (
                         user_id
                     )
                 `)
@@ -245,25 +245,25 @@ export const getQuestsByIdsCached = (supabase: SupabaseClient, questIds: string[
 
             return data || []
         },
-        [`quests-by-ids-${questIds.sort().join('-')}`],
+        [`quests-by-ids-${userId}-${questIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.QUESTS],
+            tags: [CACHE_TAGS.QUESTS, `user-${userId}`],
         }
     )()
 
 // ============================================================================
-// Cached Path Queries
+// Cached Expedition Queries
 // ============================================================================
 
 /**
- * Get validated paths (cached)
+ * Get validated expeditions (cached)
  */
-export const getValidatedPathsCached = (supabase: SupabaseClient, limit?: number) =>
+export const getValidatedExpeditionsCached = (supabase: SupabaseClient, limit?: number) =>
     unstable_cache(
         async () => {
             const query = supabase
-                .from('learning_paths')
+                .from('expeditions')
                 .select(`
                     id,
                     title,
@@ -273,7 +273,7 @@ export const getValidatedPathsCached = (supabase: SupabaseClient, limit?: number
                     created_by,
                     is_validated,
                     organizations (id, name),
-                    courses (id)
+                    quests (id)
                 `)
                 .eq('is_validated', true)
                 .order('created_at', { ascending: false })
@@ -283,9 +283,9 @@ export const getValidatedPathsCached = (supabase: SupabaseClient, limit?: number
             }
 
             const { data } = await query
-            return (data as PathListItem[]) || []
+            return (data as ExpeditionListItem[]) || []
         },
-        [`validated-paths-${limit || 'all'}`],
+        [`validated-expeditions-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
             tags: [CACHE_TAGS.PATHS],
@@ -293,17 +293,17 @@ export const getValidatedPathsCached = (supabase: SupabaseClient, limit?: number
     )()
 
 /**
- * Get a single path by ID (cached)
+ * Get a single expedition by ID (cached)
  */
-export const getPathCached = (supabase: SupabaseClient, pathId: string) =>
+export const getExpeditionCached = (supabase: SupabaseClient, expeditionId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('learning_paths')
+                .from('expeditions')
                 .select(`
                     *,
                     organizations (id, name),
-                    courses (
+                    quests (
                         id,
                         title,
                         summary,
@@ -314,109 +314,109 @@ export const getPathCached = (supabase: SupabaseClient, pathId: string) =>
                         is_validated  
                     )
                 `)
-                .eq('id', pathId)
+                .eq('id', expeditionId)
                 .single()
 
             return data
         },
-        [`path-${pathId}`],
+        [`expedition-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
-            tags: [CACHE_TAGS.PATHS, `path-${pathId}`],
+            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
         }
     )()
 
 /**
- * Get path detail with full course data for detail page (cached)
+ * Get expedition detail with full quest data for detail page (cached)
  * Note: User progress is fetched separately since it's user-specific
  */
-export const getPathDetailCached = (supabase: SupabaseClient, pathId: string) =>
+export const getExpeditionDetailCached = (supabase: SupabaseClient, expeditionId: string) =>
     unstable_cache(
         async () => {
             const { data, error } = await supabase
-                .from('learning_paths')
+                .from('expeditions')
                 .select(`
                     *,
                     organizations (name, website_url),
-                    courses (
+                    quests (
                         *,
                         organizations (name),
-                        course_exercises (id)
+                        quest_exercises (id)
                     )
                 `)
-                .eq('id', pathId)
-                .order('order_index', { foreignTable: 'courses', ascending: true })
+                .eq('id', expeditionId)
+                .order('order_index', { foreignTable: 'quests', ascending: true })
                 .single()
 
             return { data, error }
         },
-        [`path-detail-${pathId}`],
+        [`expedition-detail-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
-            tags: [CACHE_TAGS.PATHS, `path-${pathId}`],
+            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
         }
     )()
 
 /**
- * Get path resources (cached)
+ * Get expedition resources (cached)
  */
-export const getPathResourcesCached = (supabase: SupabaseClient, pathId: string) =>
+export const getExpeditionResourcesCached = (supabase: SupabaseClient, expeditionId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('path_resources')
+                .from('expedition_resources')
                 .select('*, profiles(username, avatar_url)')
-                .eq('path_id', pathId)
+                .eq('expedition_id', expeditionId)
                 .order('created_at', { ascending: false })
 
             return data || []
         },
-        [`path-resources-${pathId}`],
+        [`expedition-resources-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS, `path-${pathId}`],
+            tags: [CACHE_TAGS.PATHS, `expedition-${expeditionId}`],
         }
     )()
 
 /**
- * Check if user has saved a path (cached per user)
+ * Check if user has saved a expedition (cached per user)
  */
-export const isPathSavedCached = (supabase: SupabaseClient, userId: string, pathId: string) =>
+export const isExpeditionSavedCached = (supabase: SupabaseClient, userId: string, expeditionId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('saved_paths')
+                .from('saved_expeditions')
                 .select('id')
                 .eq('user_id', userId)
-                .eq('path_id', pathId)
+                .eq('expedition_id', expeditionId)
                 .single()
 
             return !!data
         },
-        [`path-saved-${userId}-${pathId}`],
+        [`expedition-saved-${userId}-${expeditionId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.USER_SAVED, `user-${userId}`, `path-${pathId}`],
+            tags: [CACHE_TAGS.USER_SAVED, `user-${userId}`, `expedition-${expeditionId}`],
         }
     )()
 
 /**
- * Get user's progress for multiple courses (cached per user)
+ * Get user's progress for multiple quests (cached per user)
  */
-export const getUserCoursesProgressCached = (supabase: SupabaseClient, userId: string, courseIds: string[]) =>
+export const getUserQuestsProgressCached = (supabase: SupabaseClient, userId: string, questIds: string[]) =>
     unstable_cache(
         async () => {
-            if (courseIds.length === 0) return []
+            if (questIds.length === 0) return []
 
             const { data } = await supabase
-                .from('user_course_progress')
-                .select('course_id, completed, xp_earned')
+                .from('user_quest_progress')
+                .select('quest_id, completed, xp_earned')
                 .eq('user_id', userId)
-                .in('course_id', courseIds)
+                .in('quest_id', questIds)
 
             return data || []
         },
-        [`user-courses-progress-${userId}-${courseIds.sort().join('-')}`],
+        [`user-quests-progress-${userId}-${questIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.USER_PROGRESS, `user-${userId}`],
@@ -424,15 +424,15 @@ export const getUserCoursesProgressCached = (supabase: SupabaseClient, userId: s
     )()
 
 /**
- * Get paths by an array of IDs (cached)
+ * Get expeditions by an array of IDs (cached)
  */
-export const getPathsByIdsCached = (supabase: SupabaseClient, pathIds: string[]) =>
+export const getExpeditionsByIdsCached = (supabase: SupabaseClient, userId: string, expeditionIds: string[]) =>
     unstable_cache(
         async () => {
-            if (pathIds.length === 0) return []
+            if (expeditionIds.length === 0) return []
 
             const { data } = await supabase
-                .from('learning_paths')
+                .from('expeditions')
                 .select(`
                     id,
                     title,
@@ -442,35 +442,15 @@ export const getPathsByIdsCached = (supabase: SupabaseClient, pathIds: string[])
                     is_validated,
                     created_by,
                     organizations (id, name),
-                    courses (id),
-                    saved_paths!saved_paths_path_id_fkey (user_id)
+                    quests (id),
+                    saved_expeditions!saved_expeditions_expedition_id_fkey (user_id)
                 `)
-                .in('id', pathIds)
+                .in('id', expeditionIds)
                 .order('created_at', { ascending: false })
 
-            return (data as PathListItem[]) || []
+            return (data as ExpeditionListItem[]) || []
         },
-        [`paths-by-ids-${pathIds.sort().join('-')}`],
-        {
-            revalidate: CACHE_DURATION.SHORT,
-            tags: [CACHE_TAGS.PATHS],
-        }
-    )()
-
-/**
- * Get IDs of paths created by user (cached per user)
- */
-export const getUserCreatedPathIdsCached = (supabase: SupabaseClient, userId: string) =>
-    unstable_cache(
-        async () => {
-            const { data } = await supabase
-                .from('learning_paths')
-                .select('id')
-                .eq('created_by', userId)
-
-            return data?.map(p => p.id) || []
-        },
-        [`user-created-paths-${userId}`],
+        [`expeditions-by-ids-${userId}-${expeditionIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.PATHS, `user-${userId}`],
@@ -478,21 +458,41 @@ export const getUserCreatedPathIdsCached = (supabase: SupabaseClient, userId: st
     )()
 
 /**
- * Get path IDs from user's course progress (cached per user)
+ * Get IDs of expeditions created by user (cached per user)
  */
-export const getPathIdsFromCourseProgressCached = (supabase: SupabaseClient, userId: string, courseIds: string[]) =>
+export const getUserCreatedExpeditionIdsCached = (supabase: SupabaseClient, userId: string) =>
     unstable_cache(
         async () => {
-            if (courseIds.length === 0) return []
+            const { data } = await supabase
+                .from('expeditions')
+                .select('id')
+                .eq('created_by', userId)
+
+            return data?.map(p => p.id) || []
+        },
+        [`user-created-expeditions-${userId}`],
+        {
+            revalidate: CACHE_DURATION.SHORT,
+            tags: [CACHE_TAGS.PATHS, `user-${userId}`],
+        }
+    )()
+
+/**
+ * Get expedition IDs from user's quest progress (cached per user)
+ */
+export const getExpeditionIdsFromQuestProgressCached = (supabase: SupabaseClient, userId: string, questIds: string[]) =>
+    unstable_cache(
+        async () => {
+            if (questIds.length === 0) return []
 
             const { data } = await supabase
-                .from('courses')
-                .select('path_id')
-                .in('id', courseIds)
+                .from('quests')
+                .select('expedition_id')
+                .in('id', questIds)
 
-            return [...new Set(data?.map(c => c.path_id).filter(Boolean) || [])]
+            return [...new Set(data?.map(c => c.expedition_id).filter(Boolean) || [])]
         },
-        [`path-ids-from-courses-${userId}-${courseIds.sort().join('-')}`],
+        [`expedition-ids-from-quests-${userId}-${questIds.sort().join('-')}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.PATHS, CACHE_TAGS.USER_PROGRESS, `user-${userId}`],
@@ -517,8 +517,8 @@ export const getOrganizationsCached = (supabase: SupabaseClient, limit?: number)
                     description,
                     website_url,
                     is_validated,
-                    learning_paths (id),
-                    courses (id)
+                    expeditions (id),
+                    quests (id)
                 `)
                 .eq('is_validated', true)
                 .order('name')
@@ -548,7 +548,7 @@ export const getUserDraftsCached = (supabase: SupabaseClient, userId: string, li
     unstable_cache(
         async () => {
             const query = supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -583,11 +583,11 @@ export const getUserSavedQuestsCached = (supabase: SupabaseClient, userId: strin
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('saved_courses')
-                .select('course_id')
+                .from('saved_quests')
+                .select('quest_id')
                 .eq('user_id', userId)
 
-            return data?.map(c => c.course_id) || []
+            return data?.map(c => c.quest_id) || []
         },
         [`user-saved-quests-${userId}`],
         {
@@ -597,19 +597,19 @@ export const getUserSavedQuestsCached = (supabase: SupabaseClient, userId: strin
     )()
 
 /**
- * Get user's saved path IDs (cached per user)
+ * Get user's saved expedition IDs (cached per user)
  */
-export const getUserSavedPathsCached = (supabase: SupabaseClient, userId: string) =>
+export const getUserSavedExpeditionsCached = (supabase: SupabaseClient, userId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('saved_paths')
-                .select('path_id')
+                .from('saved_expeditions')
+                .select('expedition_id')
                 .eq('user_id', userId)
 
-            return data?.map(p => p.path_id) || []
+            return data?.map(p => p.expedition_id) || []
         },
-        [`user-saved-paths-${userId}`],
+        [`user-saved-expeditions-${userId}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.USER_SAVED, `user-${userId}`],
@@ -623,8 +623,8 @@ export const getUserProgressCached = (supabase: SupabaseClient, userId: string) 
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('user_course_progress')
-                .select('course_id, completed, xp_earned')
+                .from('user_quest_progress')
+                .select('quest_id, completed, xp_earned')
                 .eq('user_id', userId)
 
             return data || []
@@ -643,8 +643,8 @@ export const getUserExerciseStatsCached = (supabase: SupabaseClient, userId: str
     unstable_cache(
         async () => {
             const { data: enrolledQuests } = await supabase
-                .from('user_course_progress')
-                .select('course_id')
+                .from('user_quest_progress')
+                .select('quest_id')
                 .eq('user_id', userId)
 
             if (!enrolledQuests || enrolledQuests.length === 0) {
@@ -652,9 +652,9 @@ export const getUserExerciseStatsCached = (supabase: SupabaseClient, userId: str
             }
 
             const { count: totalExercises } = await supabase
-                .from('course_exercises')
+                .from('quest_exercises')
                 .select('id', { count: 'exact' })
-                .in('course_id', enrolledQuests.map(c => c.course_id))
+                .in('quest_id', enrolledQuests.map(c => c.quest_id))
 
             const { data: submissions } = await supabase
                 .from('exercise_submissions')
@@ -674,18 +674,18 @@ export const getUserExerciseStatsCached = (supabase: SupabaseClient, userId: str
     )()
 
 /**
- * Get user's most recent course activity (cached per user)
+ * Get user's most recent quest activity (cached per user)
  */
 export const getUserRecentActivityCached = (supabase: SupabaseClient, userId: string) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('user_course_progress')
+                .from('user_quest_progress')
                 .select(`
-                    course_id,
+                    quest_id,
                     completed,
                     xp_earned,
-                    courses (
+                    quests (
                         id,
                         title
                     )
@@ -705,19 +705,19 @@ export const getUserRecentActivityCached = (supabase: SupabaseClient, userId: st
     )()
 
 /**
- * Get user's saved paths with course details for dashboard (cached per user)
+ * Get user's saved expeditions with quest details for dashboard (cached per user)
  */
-export const getUserSavedPathsWithCoursesCached = (supabase: SupabaseClient, userId: string, limit?: number) =>
+export const getUserSavedExpeditionsWithQuestsCached = (supabase: SupabaseClient, userId: string, limit?: number) =>
     unstable_cache(
         async () => {
             const query = supabase
-                .from('saved_paths')
+                .from('saved_expeditions')
                 .select(`
-                    path:learning_paths (
+                    expedition:expeditions (
                         id,
                         title,
                         summary,
-                        courses (id, title, order_index)
+                        quests (id, title, order_index)
                     )
                 `)
                 .eq('user_id', userId)
@@ -729,7 +729,7 @@ export const getUserSavedPathsWithCoursesCached = (supabase: SupabaseClient, use
             const { data } = await query
             return data || []
         },
-        [`user-saved-paths-with-courses-${userId}-${limit || 'all'}`],
+        [`user-saved-expeditions-with-quests-${userId}-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.USER_SAVED, CACHE_TAGS.PATHS, `user-${userId}`],
@@ -737,14 +737,14 @@ export const getUserSavedPathsWithCoursesCached = (supabase: SupabaseClient, use
     )()
 
 /**
- * Get published courses with optional user progress (cached)
+ * Get published quests with optional user progress (cached)
  * Note: User progress filtering happens on client side
  */
-export const getPublishedCoursesWithOrgsCached = (supabase: SupabaseClient, limit?: number) =>
+export const getPublishedQuestsWithOrgsCached = (supabase: SupabaseClient, limit?: number) =>
     unstable_cache(
         async () => {
             const query = supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -764,7 +764,7 @@ export const getPublishedCoursesWithOrgsCached = (supabase: SupabaseClient, limi
             const { data } = await query
             return data || []
         },
-        [`published-courses-with-orgs-${limit || 'all'}`],
+        [`published-quests-with-orgs-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.MEDIUM,
             tags: [CACHE_TAGS.QUESTS],
@@ -772,15 +772,15 @@ export const getPublishedCoursesWithOrgsCached = (supabase: SupabaseClient, limi
     )()
 
 /**
- * Get saved courses by IDs with details (cached per user)
+ * Get saved quests by IDs with details (cached per user)
  */
-export const getSavedCoursesByIdsCached = (supabase: SupabaseClient, courseIds: string[], limit?: number) =>
+export const getSavedQuestsByIdsCached = (supabase: SupabaseClient, questIds: string[], limit?: number) =>
     unstable_cache(
         async () => {
-            if (courseIds.length === 0) return []
+            if (questIds.length === 0) return []
 
             const query = supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -789,7 +789,7 @@ export const getSavedCoursesByIdsCached = (supabase: SupabaseClient, courseIds: 
                     status,
                     organizations (name)
                 `)
-                .in('id', courseIds)
+                .in('id', questIds)
 
             if (limit) {
                 query.limit(limit)
@@ -798,7 +798,7 @@ export const getSavedCoursesByIdsCached = (supabase: SupabaseClient, courseIds: 
             const { data } = await query
             return data || []
         },
-        [`saved-courses-${courseIds.sort().join('-')}-${limit || 'all'}`],
+        [`saved-quests-${questIds.sort().join('-')}-${limit || 'all'}`],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.QUESTS, CACHE_TAGS.USER_SAVED],
@@ -815,9 +815,9 @@ export const getSavedCoursesByIdsCached = (supabase: SupabaseClient, courseIds: 
 export const getPendingValidationsCached = (supabase: SupabaseClient) =>
     unstable_cache(
         async () => {
-            const [questsRes, orgsRes, pathsRes, editsRes] = await Promise.all([
+            const [questsRes, orgsRes, expeditionsRes, editsRes] = await Promise.all([
                 supabase
-                    .from('courses')
+                    .from('quests')
                     .select('id', { count: 'exact' })
                     .eq('is_validated', false)
                     .eq('status', 'published'),
@@ -826,7 +826,7 @@ export const getPendingValidationsCached = (supabase: SupabaseClient) =>
                     .select('id', { count: 'exact' })
                     .eq('is_validated', false),
                 supabase
-                    .from('learning_paths')
+                    .from('expeditions')
                     .select('id', { count: 'exact' })
                     .eq('is_validated', false),
                 supabase
@@ -838,9 +838,9 @@ export const getPendingValidationsCached = (supabase: SupabaseClient) =>
             return {
                 quests: questsRes.count || 0,
                 organizations: orgsRes.count || 0,
-                paths: pathsRes.count || 0,
+                expeditions: expeditionsRes.count || 0,
                 edits: editsRes.count || 0,
-                total: (questsRes.count || 0) + (orgsRes.count || 0) + (pathsRes.count || 0) + (editsRes.count || 0),
+                total: (questsRes.count || 0) + (orgsRes.count || 0) + (expeditionsRes.count || 0) + (editsRes.count || 0),
             }
         },
         ['pending-validations'],
@@ -897,7 +897,7 @@ export const getRecentPendingQuestsCached = (supabase: SupabaseClient, limit: nu
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select('id, title, created_at')
                 .eq('is_validated', false)
                 .eq('status', 'published')
@@ -924,7 +924,7 @@ export const getRecentPendingSubmissionsCached = (supabase: SupabaseClient, limi
                 .select(`
                     id,
                     submitted_at,
-                    course_exercises (title)
+                    quest_exercises (title)
                 `)
                 .eq('status', 'pending')
                 .order('submitted_at', { ascending: false })
@@ -976,7 +976,7 @@ export const getPendingQuestsListCached = (supabase: SupabaseClient) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -1006,7 +1006,7 @@ export const getQuestsWithDraftEditsCached = (supabase: SupabaseClient) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('courses')
+                .from('quests')
                 .select(`
                     id,
                     title,
@@ -1051,13 +1051,13 @@ export const getPendingOrgsListCached = (supabase: SupabaseClient) =>
     )()
 
 /**
- * Get pending paths for validation (cached)
+ * Get pending expeditions for validation (cached)
  */
-export const getPendingPathsListCached = (supabase: SupabaseClient) =>
+export const getPendingExpeditionsListCached = (supabase: SupabaseClient) =>
     unstable_cache(
         async () => {
             const { data } = await supabase
-                .from('learning_paths')
+                .from('expeditions')
                 .select(`
                     id,
                     title,
@@ -1071,7 +1071,7 @@ export const getPendingPathsListCached = (supabase: SupabaseClient) =>
 
             return data || []
         },
-        ['pending-paths-list'],
+        ['pending-expeditions-list'],
         {
             revalidate: CACHE_DURATION.SHORT,
             tags: [CACHE_TAGS.ADMIN, CACHE_TAGS.PATHS],
@@ -1110,9 +1110,9 @@ export const getSubmissionsListCached = (supabase: SupabaseClient) =>
                 .select(`
                     *,
                     profiles!exercise_submissions_user_id_fkey (username),
-                    course_exercises (
+                    quest_exercises (
                         title,
-                        courses (title, id)
+                        quests (title, id)
                     )
                 `)
                 .order('submitted_at', { ascending: false })

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'MindBreaker',
   },
-  description: 'Plataforma de seguimiento de cursos y learning paths con gamificación',
+  description: 'Plataforma de seguimiento de cursos y expeditions con gamificación',
   keywords: ['learning', 'courses', 'education', 'tracking', 'gamification'],
   formatDetection: {
     telephone: false,

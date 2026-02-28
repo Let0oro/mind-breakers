@@ -6,7 +6,7 @@ import { FuzzyMatchSelect } from '@/components/ui/FuzzyMatchSelect'
 
 import { EditRequest } from '@/lib/types'
 
-interface PendingCourse {
+interface PendingQuest {
     id: string
     title: string
     summary?: string
@@ -25,7 +25,7 @@ interface PendingOrganization {
     created_at: string
 }
 
-interface PendingPath {
+interface PendingExpedition {
     id: string
     title: string
     summary?: string
@@ -41,19 +41,19 @@ interface ExistingItem {
 
 interface ValidationPanelProps {
     pendingItems: {
-        courses: PendingCourse[]
+        quests: PendingQuest[]
         organizations: PendingOrganization[]
-        paths: PendingPath[]
+        expeditions: PendingExpedition[]
         edits: EditRequest[]
     }
     existingItems: {
         organizations: ExistingItem[]
-        courses: ExistingItem[]
-        paths: ExistingItem[]
+        quests: ExistingItem[]
+        expeditions: ExistingItem[]
     }
 }
 
-type TabType = 'organizations' | 'courses' | 'paths' | 'edits'
+type TabType = 'organizations' | 'quests' | 'expeditions' | 'edits'
 
 export function ValidationPanel({ pendingItems, existingItems }: ValidationPanelProps) {
     const [activeTab, setActiveTab] = useState<TabType>('organizations')
@@ -68,8 +68,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const router = useRouter()
 
     // Split courses: new quests vs draft edits  
-    const newQuestCourses = pendingItems.courses.filter(c => !c.draft_data)
-    const draftEditCourses = pendingItems.courses.filter(c => !!c.draft_data)
+    const newQuestCourses = pendingItems.quests.filter(c => !c.draft_data)
+    const draftEditCourses = pendingItems.quests.filter(c => !!c.draft_data)
 
     const getOrgName = (org: { id: string; name: string } | { id: string; name: string }[] | undefined): string | undefined => {
         if (!org) return undefined
@@ -79,8 +79,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const tabs: { key: TabType; label: string; count: number; icon: string }[] = [
         { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length, icon: 'corporate_fare' },
-        { key: 'courses', label: 'Courses', count: newQuestCourses.length, icon: 'school' },
-        { key: 'paths', label: 'Learning Paths', count: pendingItems.paths.length, icon: 'route' },
+        { key: 'quests', label: 'Quests', count: newQuestCourses.length, icon: 'school' },
+        { key: 'expeditions', label: 'Expeditions', count: pendingItems.expeditions.length, icon: 'route' },
         { key: 'edits', label: 'Edits', count: pendingItems.edits.length + draftEditCourses.length, icon: 'edit_note' },
     ]
 
@@ -92,7 +92,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const [rejectionReason, setRejectionReason] = useState('')
 
     // Draft-data preview modal
-    const [draftPreviewModal, setDraftPreviewModal] = useState<PendingCourse | null>(null)
+    const [draftPreviewModal, setDraftPreviewModal] = useState<PendingQuest | null>(null)
 
     const handleApprove = async (type: TabType | 'edits', id: string) => {
         setLoading(id)
@@ -309,105 +309,138 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         </div>
     )
 
-    const renderCourses = () => (
+    const renderQuests = () => (
         <div className="space-y-4">
             {newQuestCourses.length === 0 ? (
                 <div className="border border-border bg-main p-12 text-center">
                     <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
-                    <p className="text-muted text-sm uppercase tracking-widest">No pending courses</p>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending quests</p>
                 </div>
             ) : (
-                newQuestCourses.map((course) => (
-                    <div
-                        key={course.id}
-                        className="border border-border bg-main p-6 hover:border-text-main transition-colors"
-                    >
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="font-bold text-text-main truncate">{course.title}</h3>
-                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
-                                        New Quest
-                                    </span>
-                                </div>
-                                <p className="text-sm text-muted mb-2 line-clamp-2">{course.summary}</p>
+                newQuestCourses.map((quest) => {
+                    const isShadowDraft = !!quest.draft_data
+                    const draft = quest.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
 
-                                {getOrgName(course.organizations) && (
-                                    <p className="text-xs text-muted mt-1">
-                                        Organization: {getOrgName(course.organizations)}
+                    return (
+                        <div
+                            key={quest.id}
+                            className={`border bg-main p-6 transition-colors ${isShadowDraft
+                                ? 'border-purple-500/30 hover:border-purple-500/50'
+                                : 'border-border hover:border-text-main'
+                                }`}
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <h3 className="font-bold text-text-main truncate">
+                                            {isShadowDraft && draft?.title ? draft.title : quest.title}
+                                        </h3>
+                                        {isShadowDraft ? (
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
+                                                Pending Edit
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
+                                                New Quest
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-muted mb-2 line-clamp-2">
+                                        {isShadowDraft && draft?.summary ? draft.summary : quest.summary}
                                     </p>
-                                )}
-                                <p className="text-xs text-muted mt-2">
-                                    Updated: {new Date(course.created_at).toLocaleDateString()}
-                                </p>
-                            </div>
 
-                            <div className="flex gap-2 shrink-0">
-                                <button
-                                    onClick={() => openRejectionModal('courses', course.id)}
-                                    disabled={loading === course.id}
-                                    className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
-                                    title="Reject"
-                                >
-                                    <span className="material-symbols-outlined text-lg">close</span>
-                                </button>
+                                    {isShadowDraft && draft?.edit_reason && (
+                                        <div className="mt-2 text-sm bg-surface p-2 border border-border text-text-main">
+                                            <strong>Edit reason:</strong> {draft.edit_reason}
+                                        </div>
+                                    )}
 
-                                <button
-                                    onClick={() => handleApprove('courses', course.id)}
-                                    disabled={loading === course.id}
-                                    className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
-                                >
-                                    {loading === course.id ? '...' : 'Approve'}
-                                </button>
+                                    {getOrgName(quest.organizations) && (
+                                        <p className="text-xs text-muted mt-1">
+                                            Organization: {getOrgName(quest.organizations)}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-muted mt-2">
+                                        Updated: {new Date(quest.created_at).toLocaleDateString()}
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-2 shrink-0">
+                                    {isShadowDraft && (
+                                        <details className="text-xs">
+                                            <summary className="p-2 border border-border cursor-pointer hover:bg-surface">JSON</summary>
+                                            <pre className="absolute bg-inverse text-inverse p-4 z-10 max-w-sm overflow-auto text-xs">
+                                                {JSON.stringify(quest.draft_data, null, 2)}
+                                            </pre>
+                                        </details>
+                                    )}
+
+                                    <button
+                                        onClick={() => openRejectionModal('quests', quest.id)}
+                                        disabled={loading === quest.id}
+                                        className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                                        title="Reject"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">close</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleApprove('quests', quest.id)}
+                                        disabled={loading === quest.id}
+                                        className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
+                                    >
+                                        {loading === quest.id ? '...' : (isShadowDraft ? 'Approve Edit' : 'Approve')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))
+                    )
+                })
             )}
         </div>
     )
 
-    const renderPaths = () => (
+    const renderExpeditions = () => (
         <div className="space-y-4">
-            {pendingItems.paths.length === 0 ? (
+            {pendingItems.expeditions.length === 0 ? (
                 <div className="border border-border bg-main p-12 text-center">
                     <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
-                    <p className="text-muted text-sm uppercase tracking-widest">No pending learning paths</p>
+                    <p className="text-muted text-sm uppercase tracking-widest">No pending expeditions</p>
                 </div>
             ) : (
-                pendingItems.paths.map((path) => (
+                pendingItems.expeditions.map((expedition) => (
                     <div
-                        key={path.id}
+                        key={expedition.id}
                         className="border border-border bg-main p-6 hover:border-text-main transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <h3 className="font-bold text-text-main truncate">{path.title}</h3>
+                                    <h3 className="font-bold text-text-main truncate">{expedition.title}</h3>
                                     <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-500">
                                         Pending
                                     </span>
                                 </div>
-                                {path.summary && (
-                                    <p className="text-sm text-muted mb-2 line-clamp-2">{path.summary}</p>
+                                {expedition.summary && (
+                                    <p className="text-sm text-muted mb-2 line-clamp-2">{expedition.summary}</p>
                                 )}
-                                {getOrgName(path.organizations) && (
+                                {getOrgName(expedition.organizations) && (
                                     <p className="text-xs text-muted">
-                                        Organization: {getOrgName(path.organizations)}
+                                        Organization: {getOrgName(expedition.organizations)}
                                     </p>
                                 )}
                                 <p className="text-xs text-muted mt-2">
-                                    Created: {new Date(path.created_at).toLocaleDateString()}
+                                    Created: {new Date(expedition.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
                             <div className="flex gap-2 shrink-0">
                                 <button
                                     onClick={() => setEditingItem({
-                                        type: 'paths',
-                                        id: path.id,
-                                        name: path.title,
-                                        description: path.summary,
+                                        type: 'expeditions',
+                                        id: expedition.id,
+                                        name: expedition.title,
+                                        description: expedition.summary,
                                     })}
                                     className="p-2 border border-border text-muted hover:text-text-main hover:bg-surface transition-colors"
                                     title="Edit"
@@ -415,15 +448,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     <span className="material-symbols-outlined text-lg">edit</span>
                                 </button>
                                 <button
-                                    onClick={() => handleApprove('paths', path.id)}
-                                    disabled={loading === path.id}
+                                    onClick={() => handleApprove('expeditions', expedition.id)}
+                                    disabled={loading === expedition.id}
                                     className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
-                                    {loading === path.id ? '...' : 'Approve'}
+                                    {loading === expedition.id ? '...' : 'Approve'}
                                 </button>
                                 <button
-                                    onClick={() => handleDelete('paths', path.id)}
-                                    disabled={loading === path.id}
+                                    onClick={() => handleDelete('expeditions', expedition.id)}
+                                    disabled={loading === expedition.id}
                                     className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                                     title="Delete"
                                 >
@@ -433,9 +466,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                         </div>
 
                         <FuzzyMatchSuggestions
-                            value={path.title}
-                            existingItems={existingItems.paths}
-                            onMerge={(targetId) => handleMerge('paths', path.id, targetId)}
+                            value={expedition.title}
+                            existingItems={existingItems.expeditions}
+                            onMerge={(targetId) => handleMerge('expeditions', expedition.id, targetId)}
                         />
                     </div>
                 ))
@@ -494,7 +527,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 </button>
 
                                 <button
-                                    onClick={() => openRejectionModal('courses', course.id, true)}
+                                    onClick={() => openRejectionModal('quests', course.id, true)}
                                     disabled={loading === course.id}
                                     className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                                     title="Reject"
@@ -503,7 +536,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 </button>
 
                                 <button
-                                    onClick={() => handleApprove('courses', course.id)}
+                                    onClick={() => handleApprove('quests', course.id)}
                                     disabled={loading === course.id}
                                     className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
@@ -606,8 +639,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
             {/* Content */}
             {activeTab === 'organizations' && renderOrganizations()}
-            {activeTab === 'courses' && renderCourses()}
-            {activeTab === 'paths' && renderPaths()}
+            {activeTab === 'quests' && renderQuests()}
+            {activeTab === 'expeditions' && renderExpeditions()}
             {activeTab === 'edits' && renderEdits()}
 
             {/* Edit Modal */}
@@ -629,7 +662,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 label={editingItem.type === 'organizations' ? 'Name' : 'Title'}
                                 value={editingItem.name}
                                 onChange={(name) => setEditingItem({ ...editingItem, name })}
-                                existingItems={existingItems[editingItem.type as 'organizations' | 'courses' | 'paths']}
+                                existingItems={existingItems[editingItem.type as 'organizations' | 'quests' | 'expeditions']}
                                 placeholder="Item name..."
                             />
 
@@ -743,7 +776,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 // ─── CourseEditPreviewModal ───────────────────────────────────────────────────
 
 interface CourseEditPreviewModalProps {
-    course: PendingCourse
+    course: PendingQuest
     onClose: () => void
 }
 

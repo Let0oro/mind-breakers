@@ -15,7 +15,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, profile }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const pathname = usePathname()
+    const expeditionname = usePathname()
     const router = useRouter()
     const supabase = createClient()
 
@@ -24,18 +24,18 @@ export function Sidebar({ user, profile }: SidebarProps) {
         router.push('/login')
     }
 
-    const isActive = (path: string) => {
-        if (path === '/guild-hall') {
-            return pathname === '/guild-hall'
+    const isActive = (expedition: string) => {
+        if (expedition === '/guild-hall') {
+            return expeditionname === '/guild-hall'
         }
-        if (path.includes('armory') && pathname?.includes('settings')) {
+        if (expedition.includes('armory') && expeditionname?.includes('settings')) {
             return true
         }
-        return pathname?.startsWith(path)
+        return expeditionname?.startsWith(expedition)
     }
 
-    const getLinkClassName = (path: string) => {
-        const active = isActive(path)
+    const getLinkClassName = (expedition: string) => {
+        const active = isActive(expedition)
         return `group flex items-center gap-4 px-2 py-2 transition-all duration-300 ${active
             ? 'text-gold [&>span]:border-gold'
             : 'text-muted [&>span]:border-transparent'
@@ -104,15 +104,15 @@ export function Sidebar({ user, profile }: SidebarProps) {
                                 { name: 'archives', icon: 'local_library' },
                                 { name: 'quests', icon: 'assignment_late' },
                                 { name: 'expeditions', icon: 'flag' },
-                                { name: 'armory', icon: 'handyman' }].map((path) => (
+                                { name: 'armory', icon: 'handyman' }].map((expedition) => (
                                     <Link
-                                        key={path.name}
-                                        className={getLinkClassName(`${path.name == 'guild-hall' ? '/guild-hall' : '/guild-hall/' + path.name}`)}
-                                        href={`/guild-hall/${path.name == 'armory' ? 'settings' : path.name == 'guild-hall' ? '' : path.name}`}
+                                        key={expedition.name}
+                                        className={getLinkClassName(`${expedition.name == 'guild-hall' ? '/guild-hall' : '/guild-hall/' + expedition.name}`)}
+                                        href={`/guild-hall/${expedition.name == 'armory' ? 'settings' : expedition.name == 'guild-hall' ? '' : expedition.name}`}
                                         onClick={() => setIsOpen(false)}
                                     >
-                                        <span className={`material-symbols-outlined text-base transition-transform duration-300 scale-80 group-hover:scale-90`}>{path.icon}</span>
-                                        <span className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border-b border-transparent`}>{path.name}</span>
+                                        <span className={`material-symbols-outlined text-base transition-transform duration-300 scale-80 group-hover:scale-90`}>{expedition.icon}</span>
+                                        <span className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 border-b border-transparent`}>{expedition.name}</span>
                                     </Link>
                                 ))}
 

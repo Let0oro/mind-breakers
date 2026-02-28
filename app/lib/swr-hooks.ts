@@ -7,11 +7,11 @@
 
 import useSWR, { mutate as globalMutate } from 'swr'
 import { createClient } from '@/utils/supabase/client'
-import type { PathListItem } from './types'
-import type { CourseListItem, OrganizationListItem } from './queries'
+import type { ExpeditionListItem } from './types'
+import type { QuestListItem, OrganizationListItem } from './queries'
 
 // Re-export types with Quest naming
-export type { CourseListItem as QuestListItem }
+export type { QuestListItem as QuestListItem }
 
 // ============================================================================
 // SWR Configuration
@@ -30,10 +30,10 @@ const SWR_CONFIG = {
 
 export const SWR_KEYS = {
     QUESTS: '/api/quests',
-    PATHS: '/api/paths',
+    PATHS: '/api/expeditions',
     ORGANIZATIONS: '/api/organizations',
     USER_SAVED_QUESTS: (userId: string) => `/api/user/${userId}/saved-quests`,
-    USER_SAVED_PATHS: (userId: string) => `/api/user/${userId}/saved-paths`,
+    USER_SAVED_PATHS: (userId: string) => `/api/user/${userId}/saved-expeditions`,
     SEARCH: (query: string, tab: string) => `/api/search?q=${query}&tab=${tab}`,
 } as const
 
@@ -48,9 +48,9 @@ async function fetchQuests(options?: {
     validated?: boolean
     status?: 'published' | 'draft' | 'archived'
     limit?: number
-}): Promise<CourseListItem[]> {
+}): Promise<QuestListItem[]> {
     let dbQuery = supabase
-        .from('courses')
+        .from('quests')
         .select(`id, title, summary, thumbnail_url, xp_reward, status, organizations (name)`)
         .order('created_at', { ascending: false })
 
@@ -72,17 +72,17 @@ async function fetchQuests(options?: {
 
     const { data, error } = await dbQuery
     if (error) throw error
-    return (data as unknown as CourseListItem[]) || []
+    return (data as unknown as QuestListItem[]) || []
 }
 
-async function fetchPaths(options?: {
+async function fetchExpeditions(options?: {
     query?: string
     validated?: boolean
     limit?: number
-}): Promise<PathListItem[]> {
+}): Promise<ExpeditionListItem[]> {
     let dbQuery = supabase
-        .from('learning_paths')
-        .select(`id, title, summary, description, created_at, created_by, is_validated, organizations (id, name), courses (id)`)
+        .from('expeditions')
+        .select(`id, title, summary, description, created_at, created_by, is_validated, organizations (id, name), quests (id)`)
         .order('created_at', { ascending: false })
 
     if (options?.validated !== undefined) {
@@ -108,7 +108,7 @@ async function fetchOrganizations(options?: {
 }): Promise<OrganizationListItem[]> {
     let dbQuery = supabase
         .from('organizations')
-        .select(`id, name, description, is_validated, learning_paths (id), courses (id)`)
+        .select(`id, name, description, is_validated, expeditions (id), quests (id)`)
         .eq('is_validated', true)
         .order('name')
 
@@ -127,22 +127,22 @@ async function fetchOrganizations(options?: {
 
 async function fetchUserSavedQuests(userId: string): Promise<string[]> {
     const { data, error } = await supabase
-        .from('saved_courses')
-        .select('course_id')
+        .from('saved_quests')
+        .select('quest_id')
         .eq('user_id', userId)
 
     if (error) throw error
-    return data?.map(c => c.course_id) || []
+    return data?.map(c => c.quest_id) || []
 }
 
-async function fetchUserSavedPaths(userId: string): Promise<string[]> {
+async function fetchUserSavedExpeditions(userId: string): Promise<string[]> {
     const { data, error } = await supabase
-        .from('saved_paths')
-        .select('path_id')
+        .from('saved_expeditions')
+        .select('expedition_id')
         .eq('user_id', userId)
 
     if (error) throw error
-    return data?.map(p => p.path_id) || []
+    return data?.map(p => p.expedition_id) || []
 }
 
 // ============================================================================
@@ -170,9 +170,9 @@ export function useQuests(options?: {
 }
 
 /**
- * Hook to fetch and cache paths
+ * Hook to fetch and cache expeditions
  */
-export function usePaths(options?: {
+export function useExpeditions(options?: {
     query?: string
     validated?: boolean
     limit?: number
@@ -183,7 +183,7 @@ export function usePaths(options?: {
 
     return useSWR(
         key,
-        () => fetchPaths(options),
+        () => fetchExpeditions(options),
         SWR_CONFIG
     )
 }
@@ -218,12 +218,12 @@ export function useUserSavedQuests(userId: string | null) {
 }
 
 /**
- * Hook to fetch and cache user's saved paths
+ * Hook to fetch and cache user's saved expeditions
  */
-export function useUserSavedPaths(userId: string | null) {
+export function useUserSavedExpeditions(userId: string | null) {
     return useSWR(
         userId ? SWR_KEYS.USER_SAVED_PATHS(userId) : null,
-        () => userId ? fetchUserSavedPaths(userId) : [],
+        () => userId ? fetchUserSavedExpeditions(userId) : [],
         SWR_CONFIG
     )
 }
@@ -233,7 +233,7 @@ export function useUserSavedPaths(userId: string | null) {
  */
 export function useExploreSearch(options: {
     query: string
-    tab: 'all' | 'paths' | 'quests' | 'organizations'
+    tab: 'all' | 'expeditions' | 'quests' | 'organizations'
 }) {
     const key = SWR_KEYS.SEARCH(options.query, options.tab)
 
@@ -241,24 +241,24 @@ export function useExploreSearch(options: {
         key,
         async () => {
             const results: {
-                paths: PathListItem[]
-                quests: CourseListItem[]
+                expeditions: ExpeditionListItem[]
+                quests: QuestListItem[]
                 organizations: OrganizationListItem[]
             } = {
-                paths: [],
+                expeditions: [],
                 quests: [],
                 organizations: []
             }
 
             const promises: Promise<void>[] = []
 
-            if (options.tab === 'all' || options.tab === 'paths') {
+            if (options.tab === 'all' || options.tab === 'expeditions') {
                 promises.push(
-                    fetchPaths({
+                    fetchExpeditions({
                         query: options.query || undefined,
                         validated: true,
                         limit: 20
-                    }).then(data => { results.paths = data })
+                    }).then(data => { results.expeditions = data })
                 )
             }
 
@@ -308,9 +308,9 @@ export function invalidateQuests() {
 }
 
 /**
- * Invalidate all path-related caches
+ * Invalidate all expedition-related caches
  */
-export function invalidatePaths() {
+export function invalidateExpeditions() {
     globalMutate(
         key => typeof key === 'string' && key.startsWith(SWR_KEYS.PATHS),
         undefined,

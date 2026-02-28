@@ -3,17 +3,17 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
-import { Course, LearningPath, PathResource } from '@/lib/types'
-import { CardCourse } from '@/components/ui/CardCourse'
+import { Quest, Expedition, ExpeditionResource } from '@/lib/types'
+import { CardQuest } from '@/components/ui/CardQuest'
 
 interface RecommendationsProps {
     mode: 'social' | 'similar'
     contextId?: string
-    contextType?: 'course' | 'path'
+    contextType?: 'quest' | 'expedition'
     title?: string
 }
 
-type Item = Course & LearningPath & PathResource & { profiles?: { username: string; avatar_url: string } }
+type Item = Quest & Expedition & ExpeditionResource & { profiles?: { username: string; avatar_url: string } }
 
 export default function Recommendations({ mode, contextId, contextType, title }: RecommendationsProps) {
     const [items, setItems] = useState<Array<Item>>([])
@@ -37,17 +37,17 @@ export default function Recommendations({ mode, contextId, contextType, title }:
                 const followingIds = follows?.map(f => f.following_id) || []
 
                 if (followingIds.length > 0) {
-                    const { data: courses } = await supabase
-                        .from('courses')
+                    const { data: quests } = await supabase
+                        .from('quests')
                         .select('*, profiles:created_by(username, avatar_url)')
                         .in('created_by', followingIds)
                         .eq('status', 'published')
                         .limit(5)
 
-                    data = courses
+                    data = quests
                 }
             } else if (mode === 'similar' && contextId && contextType) {
-                const table = contextType === 'course' ? 'courses' : 'learning_paths'
+                const table = contextType === 'quest' ? 'quests' : 'expeditions'
                 const { data: currentItem } = await supabase
                     .from(table)
                     .select('uk, title')
@@ -86,7 +86,7 @@ export default function Recommendations({ mode, contextId, contextType, title }:
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item) => (
-                    <CardCourse
+                    <CardQuest
                         key={item.id}
                         id={item.id}
                         title={item.title}
@@ -95,7 +95,7 @@ export default function Recommendations({ mode, contextId, contextType, title }:
                         xp_reward={item.xp_reward}
                         instructor={item.profiles?.username}
                         variant="recommendation"
-                        href={`/guild-hall/${contextType === 'path' || (!contextType && !item.path_id) ? 'expeditions' : 'quests'}/${item.id}`}
+                        href={`/guild-hall/${contextType === 'expedition' || (!contextType && !item.expedition_id) ? 'expeditions' : 'quests'}/${item.id}`}
                     />
                 ))}
             </div>

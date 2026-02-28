@@ -3,12 +3,12 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-interface SortableCourseItemProps {
+interface SortableQuestItemProps {
     id: string
     children: React.ReactNode
 }
 
-export function SortableCourseItem({ id, children }: SortableCourseItemProps) {
+export function SortableQuestItem({ id, children }: SortableQuestItemProps) {
     const {
         attributes,
         listeners,

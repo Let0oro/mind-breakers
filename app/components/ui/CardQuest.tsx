@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FallbackImage } from '@/components/ui/FallbackImage'
 
-interface CardCourseProps {
+interface CardQuestProps {
     id: string
     title: string
     thumbnail_url?: string | null
@@ -23,7 +23,7 @@ interface CardCourseProps {
     isLast?: boolean
 }
 
-export function CardCourse({
+export function CardQuest({
     id,
     title,
     thumbnail_url,
@@ -41,7 +41,7 @@ export function CardCourse({
     exercisesCount,
     organizationName,
     isLast = false
-}: CardCourseProps) {
+}: CardQuestProps) {
 
     // VARIANT: BOARD (Quest Board - Pinned Note)
     if (variant === 'board') {
@@ -104,7 +104,7 @@ export function CardCourse({
 
 
 
-    // VARIANT: TIMELINE (Path Detail Page - Figma design)
+    // VARIANT: TIMELINE (Expedition Detail Page - Figma design)
     if (variant === 'timeline') {
         const isCompleted = progress === 100
         const isActive = progress !== undefined && progress > 0 && progress < 100
@@ -208,7 +208,7 @@ export function CardCourse({
         )
     }
 
-    // VARIANT: LIST (Horizontal card - Path Detail Page legacy)
+    // VARIANT: LIST (Horizontal card - Expedition Detail Page legacy)
     if (variant === 'list') {
         const isCompleted = progress === 100
 
@@ -283,7 +283,7 @@ export function CardCourse({
         )
     }
 
-    // VARIANT: COMPACT (Small tile - Saved Courses)
+    // VARIANT: COMPACT (Small tile - Saved Quests)
     if (variant === 'compact') {
         return (
             <Link
@@ -296,7 +296,7 @@ export function CardCourse({
                         alt={title}
                         as="img"
                         className="object-cover w-full h-full"
-                        type="course"
+                        type="quest"
                     />
                 </div>
                 <p className="text-xs font-bold uppercase tracking-wide text-text-main truncate text-left">
@@ -322,7 +322,7 @@ export function CardCourse({
                         alt={title}
                         as="img"
                         className="w-full h-full object-cover"
-                        type="course"
+                        type="quest"
                     />
                     <div className="absolute top-2 right-2">
                         <span className="bg-inverse text-main-alt px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
@@ -361,7 +361,7 @@ export function CardCourse({
                     alt={title}
                     as="img"
                     className="object-cover w-full h-full"
-                    type={variant === 'draft' ? 'default' : 'course'}
+                    type={variant === 'draft' ? 'default' : 'quest'}
                 />
 
                 {/* Right Top Badges */}

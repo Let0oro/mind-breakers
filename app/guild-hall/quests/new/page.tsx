@@ -6,11 +6,14 @@ import { createClient } from '@/utils/supabase/client'
 import { FormLayout, FormField, FormActions, FormError, FormSection, FormDivider } from '@/components/ui/Form'
 import SimilarItemsList from '@/components/features/SimilarItemsList'
 import { fetchUrlMetadata, calculateXPFromDuration } from '@/utils/fetch-metadata'
-import { Course } from '@/lib/types'
+import { Quest } from '@/lib/types'
+import Link from 'next/link'
+import { afterQuestChange } from '@/lib/cache-actions'
 
-interface LearningPath {
+interface Expedition {
   id: string
   title: string
+  created_by: string
 }
 
 interface Organization {
@@ -25,10 +28,10 @@ interface Exercise {
   requirements: string
 }
 
-export default function NewCoursePage() {
+export default function NewQuestPage() {
   const [loading, setLoading] = useState({ draft: false, published: false })
   const [error, setError] = useState<string | null>(null)
-  const [paths, setPaths] = useState<LearningPath[]>([])
+  const [expeditions, setExpeditions] = useState<Expedition[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -47,8 +50,8 @@ export default function NewCoursePage() {
   const [xpNeedsAttention, setXpNeedsAttention] = useState(false)
   const xpTooltipTimeout = useRef<NodeJS.Timeout | null>(null)
   const [orderIndex, setOrderIndex] = useState(0)
-  const [pathId, setPathId] = useState('')
-  const [organizationId, setOrganizationId] = useState('')
+  const [expeditionId, setExpeditionId] = useState(searchParams.get('expeditionId') || '')
+  const [organizationId, setOrganizationId] = useState(searchParams.get('orgId') || '')
   const [originUk, setOriginUk] = useState<string | null>(null)
   const [exercises, setExercises] = useState<Exercise[]>([])
 
@@ -110,19 +113,12 @@ export default function NewCoursePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const [pathsRes, orgsRes] = await Promise.all([
-        supabase.from('learning_paths').select('id, title').eq('created_by', user.id).order('title'),
+      const [expeditionsRes, orgsRes] = await Promise.all([
+        supabase.from('expeditions').select('id, title, created_by').eq('created_by', user.id).order('title'),
         supabase.from('organizations').select('id, name').order('name'),
       ])
 
-      if (pathsRes.data) {
-        setPaths(pathsRes.data)
-        // Pre-select expedition from URL param (e.g. coming from expedition detail page)
-        const paramPathId = searchParams.get('pathId')
-        if (paramPathId && pathsRes.data.some((p) => p.id === paramPathId)) {
-          setPathId(paramPathId)
-        }
-      }
+      if (expeditionsRes.data) setExpeditions(expeditionsRes.data)
       if (orgsRes.data) setOrganizations(orgsRes.data)
     }
     fetchData()
@@ -132,24 +128,24 @@ export default function NewCoursePage() {
     if (error) window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [error])
 
-  const handleAdapt = async (course: Course) => {
-    if (confirm('Adapt this course? This will replace your current form data.')) {
-      setTitle(course.title)
-      setSummary(course.summary || '')
-      setDescription(course.description || '')
-      setThumbnailUrl(course.thumbnail_url || '')
-      setLinkUrl(course.link_url || '')
-      setXpReward(course.xp_reward || 100)
-      setOriginUk(course.uk)
+  const handleAdapt = async (quest: Quest) => {
+    if (confirm('Adapt this quest? This will replace your current form data.')) {
+      setTitle(quest.title)
+      setSummary(quest.summary || '')
+      setDescription(quest.description || '')
+      setThumbnailUrl(quest.thumbnail_url || '')
+      setLinkUrl(quest.link_url || '')
+      setXpReward(quest.xp_reward || 100)
+      setOriginUk(quest.uk)
 
-      const { data: courseExercises } = await supabase
-        .from('course_exercises')
+      const { data: questExercises } = await supabase
+        .from('quest_exercises')
         .select('*')
-        .eq('course_id', course.id)
+        .eq('quest_id', quest.id)
 
-      if (courseExercises) {
+      if (questExercises) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setExercises(courseExercises.map((ex: any) => ({
+        setExercises(questExercises.map((ex: any) => ({
           id: crypto.randomUUID(),
           title: ex.title,
           description: ex.description || '',
@@ -160,12 +156,26 @@ export default function NewCoursePage() {
   }
 
   const isFormValidForDraft = () => !!(title.trim() || linkUrl.trim())
-  const isFormValidForPublish = () => !!(title.trim() && summary.trim() && description.trim() && thumbnailUrl.trim() && xpReward > 0 && pathId)
+  const isFormValidForPublish = () => !!(title.trim() && summary.trim() && description.trim() && thumbnailUrl.trim() && xpReward > 0 && expeditionId && organizationId)
+
+  // Build a human-readable list of what's missing for publish
+  const getPublishDisabledReason = (): string | undefined => {
+    if (isFormValidForPublish()) return undefined
+    const missing: string[] = []
+    if (!title.trim()) missing.push('Title')
+    if (!summary.trim()) missing.push('Summary')
+    if (!description.trim()) missing.push('Description')
+    if (!thumbnailUrl.trim()) missing.push('Thumbnail URL')
+    if (!(xpReward > 0)) missing.push('XP Reward (must be > 0)')
+    if (!expeditionId) missing.push('Expedition (expedition)')
+    if (!organizationId) missing.push('Organization')
+    return missing.join(' · ')
+  }
 
   const handleSaveClick = (targetStatus: 'draft' | 'published') => {
     setError(null)
     if (targetStatus === 'published' && !isFormValidForPublish()) {
-      setError("To publish, all fields must be filled, a path selected, and XP > 0.")
+      setError("To publish, all fields must be filled, a expedition selected, and XP > 0.")
       return
     }
     if (targetStatus === 'draft' && !isFormValidForDraft()) {
@@ -186,15 +196,29 @@ export default function NewCoursePage() {
       return
     }
 
-    if (!pathId) {
-      setError("Please select a learning path")
+    if (!expeditionId) {
+      setError("Please select a expedition")
       setLoading(p => ({ ...p, [targetStatus]: false }))
       return
     }
 
+    // Check if user qualifies for auto-validation:
+    // - admins always get validated content
+    // - the owner of the selected expedition gets their quests validated
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = !!profile?.is_admin
+    const selectedExpedition = expeditions.find(p => p.id === expeditionId)
+    const isExpeditionOwner = selectedExpedition?.created_by === user.id
+    const autoValidate = isAdmin || isExpeditionOwner
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const coursePayload: any = {
-      path_id: pathId,
+    const questPayload: any = {
+      expedition_id: expeditionId,
       title,
       summary,
       description,
@@ -205,14 +229,14 @@ export default function NewCoursePage() {
       order_index: orderIndex,
       status: targetStatus,
       created_by: user.id,
-      is_validated: false
+      is_validated: autoValidate  // Admins & expedition owners skip the validation queue
     }
 
-    if (originUk) coursePayload.uk = originUk
+    if (originUk) questPayload.uk = originUk
 
-    const { data: courseData, error: insertError } = await supabase
-      .from('courses')
-      .insert(coursePayload)
+    const { data: questData, error: insertError } = await supabase
+      .from('quests')
+      .insert(questPayload)
       .select()
       .single()
 
@@ -226,17 +250,20 @@ export default function NewCoursePage() {
       const validExercises = exercises.filter(ex => ex.title.trim())
       if (validExercises.length > 0) {
         const exercisesToInsert = validExercises.map(ex => ({
-          course_id: courseData.id,
+          quest_id: questData.id,
           title: ex.title.trim(),
           description: ex.description.trim() || null,
           requirements: ex.requirements.trim() || null,
         }))
 
-        await supabase.from('course_exercises').insert(exercisesToInsert)
+        await supabase.from('quest_exercises').insert(exercisesToInsert)
       }
     }
 
-    router.push(`/guild-hall/quests/${courseData.id}`)
+    // Invalidate unstable_cache so admin panel sees the new quest immediately
+    await afterQuestChange(questData.id)
+
+    router.push(`/guild-hall/quests/${questData.id}`)
   }
 
   return (
@@ -277,22 +304,44 @@ export default function NewCoursePage() {
                   )}
                 </button>
               </div>
-              <SimilarItemsList type="courses" query={linkUrl} onAdapt={handleAdapt} />
+              <SimilarItemsList type="quests" query={linkUrl} onAdapt={handleAdapt} />
             </div>
 
             <FormField
-              label="Learning Path"
-              name="path_id"
+              label="Expedition"
+              name="expedition_id"
               type="select"
-              value={pathId}
-              onChange={setPathId}
+              value={expeditionId}
+              onChange={setExpeditionId}
               required
             >
-              <option value="">Select a learning path</option>
-              {paths.map((path) => (
-                <option key={path.id} value={path.id}>{path.title}</option>
+              <option value="">Select a expedition</option>
+              {expeditions.map((expedition) => (
+                <option key={expedition.id} value={expedition.id}>{expedition.title}</option>
               ))}
             </FormField>
+            {expeditions.length === 0 && (
+              <p className="text-xs text-muted -mt-1">
+                No expeditions yet.{' '}
+                <Link
+                  href="/guild-hall/expeditions/new?from=quest"
+                  className="text-text-main underline hover:no-underline"
+                >
+                  Create a new expedition →
+                </Link>
+              </p>
+            )}
+            {expeditions.length > 0 && !expeditionId && (
+              <p className="text-xs text-muted -mt-1">
+                Don&apos;t see yours?{' '}
+                <Link
+                  href="/guild-hall/expeditions/new?from=quest"
+                  className="text-text-main underline hover:no-underline"
+                >
+                  Create a new expedition →
+                </Link>
+              </p>
+            )}
 
             <FormField
               label="Title"
@@ -304,7 +353,7 @@ export default function NewCoursePage() {
               autoFilled={metadataFetched && !!title}
             />
 
-            <SimilarItemsList type="courses" query={title} onAdapt={handleAdapt} />
+            <SimilarItemsList type="quests" query={title} onAdapt={handleAdapt} />
 
             <FormField
               label="Summary"
@@ -352,18 +401,30 @@ export default function NewCoursePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                label="Organization"
-                name="organization_id"
-                type="select"
-                value={organizationId}
-                onChange={setOrganizationId}
-              >
-                <option value="">None</option>
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>{org.name}</option>
-                ))}
-              </FormField>
+              <div className="space-y-2">
+                <FormField
+                  label="Organization"
+                  name="organization_id"
+                  type="select"
+                  value={organizationId}
+                  onChange={setOrganizationId}
+                  required
+                >
+                  <option value="">Select an organization</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </FormField>
+                {/* Wizard escape hatch: create new org carrying context */}
+                <p className="text-xs text-muted">
+                  <Link
+                    href={`/guild-hall/organizations/new?from=quest${expeditionId ? `&expeditionId=${expeditionId}` : ''}`}
+                    className="text-text-main underline hover:no-underline"
+                  >
+                    + Create new organization
+                  </Link>
+                </p>
+              </div>
 
               <div className="space-y-2 relative">
                 <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-text-main">
@@ -417,7 +478,7 @@ export default function NewCoursePage() {
             </div>
 
             <FormField
-              label="Order in Path"
+              label="Order in Expedition"
               name="order_index"
               type="number"
               value={orderIndex}
@@ -496,6 +557,7 @@ export default function NewCoursePage() {
               canSave={isFormValidForDraft()}
               canPublish={isFormValidForPublish()}
               publishLabel="Publish Quest"
+              publishDisabledReason={getPublishDisabledReason()}
             />
           </form>
         </FormLayout>
