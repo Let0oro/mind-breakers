@@ -30,13 +30,16 @@
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
+    "clsx": "^2.1.1",
     "material-symbols": "^0.40.2",
     "next": "16.1.6",
     "next-pwa": "^5.6.0",
     "postcss": "^8.5.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "swr": "^2.4.0"
+    "swr": "^2.4.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.1",
@@ -53,8 +56,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "dotenv": "^17.2.4",
     "@vitejs/plugin-react": "^5.1.4",
+    "dotenv": "^17.2.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "husky": "^9.1.7",

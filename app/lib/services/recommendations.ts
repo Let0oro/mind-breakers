@@ -6,7 +6,7 @@ export interface RecommendedQuest {
     title: string
     description?: string
     image?: string
-    sourceExpeditionTitle: string // Nombre del expedition donde se encontró
+    sourceExpeditionTitle: string
     sourceExpeditionId: string
 }
 
@@ -40,13 +40,13 @@ export async function getUrlMetadata(url: string) {
 }
 
 /**
- * Busca cursos recomendados de expeditions similares
+ * Busca misiones (quests) recomendadas de expediciones similares
  * Similitud = compartir al menos un enlace (Quest.link_url)
  */
 export async function getRecommendedQuests(expeditionId: string): Promise<RecommendedQuest[]> {
     const supabase = await createClient()
 
-    // 1. Obtener los links del expedition actual
+    // 1. Obtener los links de la expedición actual
     const { data: currentExpeditionData } = await supabase
         .from('quests')
         .select('link_url')
@@ -57,11 +57,7 @@ export async function getRecommendedQuests(expeditionId: string): Promise<Recomm
 
     if (currentLinks.length === 0) return []
 
-    // 2. Encontrar otros expeditions que contengan cualquiera de estos links
-    // Nota: Esto podría ser costoso si hay muchísimos datos, pero para < 10k cursos está bien.
-    // Idealmente se haría con una función RPC en Supabase, pero lo haremos en aplicación por ahora.
-
-    // Buscar cursos que tengan esos links pero NO sean del expedition actual
+    // 2. Encontrar otras expediciones que contengan cualquiera de estos links
     const { data: similarQuestsMatch } = await supabase
         .from('quests')
         .select('expedition_id, link_url')
@@ -70,10 +66,10 @@ export async function getRecommendedQuests(expeditionId: string): Promise<Recomm
 
     if (!similarQuestsMatch || similarQuestsMatch.length === 0) return []
 
-    // Extraer IDs de expeditions únicos
+    // Extraer IDs de expediciones únicos
     const similarExpeditionIds = Array.from(new Set(similarQuestsMatch.map(c => c.expedition_id)))
 
-    // 3. Obtener "otros" cursos de esos expeditions (cursos que NO están en el expedition actual)
+    // 3. Obtener "otras" misiones de esas expediciones
     const { data: recommendedRaw } = await supabase
         .from('quests')
         .select(`
@@ -85,38 +81,39 @@ export async function getRecommendedQuests(expeditionId: string): Promise<Recomm
       )
     `)
         .in('expedition_id', similarExpeditionIds)
-        .not('link_url', 'in', `(${currentLinks.map(l => `"${l}"`).join(',')})`) // Excluir links que ya tenemos
-        .limit(10) // Limitar recomendaciones
+        .not('link_url', 'in', `(${currentLinks.map(l => `"${l}"`).join(',')})`)
+        .limit(10)
 
     if (!recommendedRaw) return []
 
-    // 4. Enriquecer con metadatos y dedublicar por URL
+    // 4. Enriquecer con metadatos y deduplicar por URL
     const uniqueRecommendations = new Map<string, RecommendedQuest>()
 
     for (const item of recommendedRaw) {
         if (!item.link_url) continue
         if (uniqueRecommendations.has(item.link_url)) continue
 
-        // Usar título del curso como fallback inicial
-        const learningExpedition = Array.isArray(item.expeditions)
+        const expedition = Array.isArray(item.expeditions)
             ? item.expeditions[0]
             : item.expeditions as unknown as { id: string, title: string } | null
 
         const baseRec: RecommendedQuest = {
             url: item.link_url,
             title: item.title,
-            sourceExpeditionTitle: learningExpedition?.title || 'Unknown Expedition',
-            sourceExpeditionId: learningExpedition?.id || '',
+            sourceExpeditionTitle: expedition?.title || 'Unknown Expedition',
+            sourceExpeditionId: expedition?.id || '',
         }
 
         uniqueRecommendations.set(item.link_url, baseRec)
     }
 
     // Fetch metadata en paralelo
-    const recommendations = Array.from(uniqueRecommendations.values())
+    const allRecommendations = Array.from(uniqueRecommendations.values())
+    // Shuffle and pick 3 random items
+    const shuffledRecommendations = allRecommendations.sort(() => 0.5 - Math.random()).slice(0, 3)
 
     await Promise.all(
-        recommendations.map(async (rec) => {
+        shuffledRecommendations.map(async (rec) => {
             const meta = await getUrlMetadata(rec.url)
             if (meta) {
                 if (meta.title) rec.title = meta.title
@@ -126,5 +123,5 @@ export async function getRecommendedQuests(expeditionId: string): Promise<Recomm
         })
     )
 
-    return recommendations
+    return shuffledRecommendations
 }

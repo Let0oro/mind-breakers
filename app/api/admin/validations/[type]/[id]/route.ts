@@ -54,22 +54,22 @@ export async function PATCH(
     const { action, name, description, website_url } = body
 
     if (action === 'approve') {
-        if (validationType === 'courses') {
-            // Check if this course has a pending draft edit
-            const { data: course } = await supabase
-                .from('courses')
+        if (validationType === 'quests') {
+            // Check if this quest has a pending draft edit
+            const { data: quest } = await supabase
+                .from('quests')
                 .select('draft_data, is_validated')
                 .eq('id', id)
                 .single()
 
-            if (course?.draft_data) {
-                // It's a shadow draft: merge draft fields into the main course, clear draft_data.
+            if (quest?.draft_data) {
+                // It's a shadow draft: merge draft fields into the main quest, clear draft_data.
                 // IMPORTANT: exclude Supabase-managed / meta columns from the update.
                 const EXCLUDED_FIELDS = new Set([
                     'id', 'created_at', 'updated_at', 'edit_reason',
                     'is_validated', 'status', 'author_id', 'draft_data'
                 ])
-                const draft = course.draft_data as Record<string, unknown>
+                const draft = quest.draft_data as Record<string, unknown>
                 const mergeData: Record<string, unknown> = { draft_data: null }
                 for (const [key, value] of Object.entries(draft)) {
                     if (!EXCLUDED_FIELDS.has(key) && value !== undefined) {
@@ -78,7 +78,7 @@ export async function PATCH(
                 }
 
                 const { error } = await supabase
-                    .from('courses')
+                    .from('quests')
                     .update(mergeData)
                     .eq('id', id)
 
@@ -106,7 +106,7 @@ export async function PATCH(
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
         revalidateTag(CACHE_TAGS.QUESTS, 'max')
-        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
         revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
         revalidatePath('/guild-hall/admin/validations')
         revalidatePath('/guild-hall/admin')
@@ -139,7 +139,7 @@ export async function PATCH(
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
         revalidateTag(CACHE_TAGS.QUESTS, 'max')
-        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
         revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
         revalidatePath('/guild-hall/admin/validations')
         revalidatePath('/guild-hall/admin')
@@ -333,7 +333,7 @@ export async function POST(
 
     revalidateTag(CACHE_TAGS.ADMIN, 'max')
     revalidateTag(CACHE_TAGS.QUESTS, 'max')
-    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
 
     return NextResponse.json({ success: true })
@@ -382,7 +382,7 @@ export async function DELETE(
 
     revalidateTag(CACHE_TAGS.ADMIN, 'max')
     revalidateTag(CACHE_TAGS.QUESTS, 'max')
-    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
 
     return NextResponse.json({ success: true })

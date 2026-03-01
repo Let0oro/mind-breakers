@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { Metadata } from 'next'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { YouTubePlayer } from '@/components/ui/YouTubePlayer'
@@ -12,6 +13,24 @@ import {
   getUserExerciseSubmissionsCached,
   isQuestSavedCached
 } from '@/lib/cache'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: quest } = await getQuestDetailCached(supabase, id)
+
+  if (!quest) return { title: 'Quest Not Found | Mind Breaker' }
+
+  return {
+    title: `${quest.title} | Mind Breaker`,
+    description: quest.summary || `Embark on the quest: ${quest.title}`,
+    openGraph: {
+      title: quest.title,
+      description: quest.summary || undefined,
+      images: quest.thumbnail_url ? [quest.thumbnail_url] : [],
+    },
+  }
+}
 
 export default async function QuestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()

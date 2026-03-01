@@ -1,6 +1,28 @@
+import { Metadata } from 'next'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params
+    const supabase = await createClient()
+    const { data: org } = await supabase
+        .from('organizations')
+        .select('name, description')
+        .eq('id', id)
+        .single()
+
+    if (!org) return { title: 'Organization Not Found | Mind Breaker' }
+
+    return {
+        title: `${org.name} | Mind Breaker`,
+        description: org.description || `Learn about ${org.name} on Mind Breaker.`,
+        openGraph: {
+            title: org.name,
+            description: org.description || undefined,
+        },
+    }
+}
 
 
 export default async function OrganizationDetailPage({ params }: { params: Promise<{ id: string }> }) {

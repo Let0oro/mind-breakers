@@ -67,9 +67,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     const [loading, setLoading] = useState<string | null>(null)
     const router = useRouter()
 
-    // Split courses: new quests vs draft edits  
-    const newQuestCourses = pendingItems.quests.filter(c => !c.draft_data)
-    const draftEditCourses = pendingItems.quests.filter(c => !!c.draft_data)
+    // Split quests: new quests vs draft edits  
+    const newQuests = pendingItems.quests.filter(c => !c.draft_data)
+    const draftEditQuests = pendingItems.quests.filter(c => !!c.draft_data)
 
     const getOrgName = (org: { id: string; name: string } | { id: string; name: string }[] | undefined): string | undefined => {
         if (!org) return undefined
@@ -79,15 +79,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const tabs: { key: TabType; label: string; count: number; icon: string }[] = [
         { key: 'organizations', label: 'Organizations', count: pendingItems.organizations.length, icon: 'corporate_fare' },
-        { key: 'quests', label: 'Quests', count: newQuestCourses.length, icon: 'school' },
+        { key: 'quests', label: 'Quests', count: newQuests.length, icon: 'school' },
         { key: 'expeditions', label: 'Expeditions', count: pendingItems.expeditions.length, icon: 'route' },
-        { key: 'edits', label: 'Edits', count: pendingItems.edits.length + draftEditCourses.length, icon: 'edit_note' },
+        { key: 'edits', label: 'Edits', count: pendingItems.edits.length + draftEditQuests.length, icon: 'edit_note' },
     ]
 
     const [rejectionModal, setRejectionModal] = useState<{
         type: TabType | 'edits'
         id: string
-        isCourseEdit?: boolean
+        isQuestEdit?: boolean
     } | null>(null)
     const [rejectionReason, setRejectionReason] = useState('')
 
@@ -115,8 +115,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
         }
     }
 
-    const openRejectionModal = (type: TabType | 'edits', id: string, isCourseEdit?: boolean) => {
-        setRejectionModal({ type, id, isCourseEdit })
+    const openRejectionModal = (type: TabType | 'edits', id: string, isQuestEdit?: boolean) => {
+        setRejectionModal({ type, id, isQuestEdit })
         setRejectionReason('')
     }
 
@@ -152,9 +152,9 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
         setLoading(rejectionModal.id)
         try {
-            const { type, id, isCourseEdit } = rejectionModal
-            // Course draft edits and regular edits both use courses endpoint for rejection
-            const endpoint = (type === 'edits' && !isCourseEdit)
+            const { type, id, isQuestEdit } = rejectionModal
+            // Quest draft edits and regular edits both use quests endpoint for rejection
+            const endpoint = (type === 'edits' && !isQuestEdit)
                 ? `/api/admin/validations/edits/${id}`
                 : `/api/admin/validations/${type}/${id}`
 
@@ -311,13 +311,13 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const renderQuests = () => (
         <div className="space-y-4">
-            {newQuestCourses.length === 0 ? (
+            {newQuests.length === 0 ? (
                 <div className="border border-border bg-main p-12 text-center">
                     <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
                     <p className="text-muted text-sm uppercase tracking-widest">No pending quests</p>
                 </div>
             ) : (
-                newQuestCourses.map((quest) => {
+                newQuests.map((quest) => {
                     const isShadowDraft = !!quest.draft_data
                     const draft = quest.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
 
@@ -478,26 +478,26 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
     const renderEdits = () => (
         <div className="space-y-4">
-            {/* Draft-edit courses (validated courses with pending draft_data) */}
-            {draftEditCourses.map((course) => {
-                const draft = course.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
+            {/* Draft-edit quests (validated quests with pending draft_data) */}
+            {draftEditQuests.map((quest) => {
+                const draft = quest.draft_data as { title?: string; summary?: string; edit_reason?: string } | undefined
                 return (
                     <div
-                        key={course.id}
+                        key={quest.id}
                         className="border border-purple-500/30 bg-main p-6 hover:border-purple-500/50 transition-colors"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="font-bold text-text-main truncate">
-                                        {draft?.title || course.title}
+                                        {draft?.title || quest.title}
                                     </h3>
                                     <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-purple-500/20 text-purple-500">
                                         Pending Edit
                                     </span>
                                 </div>
                                 <p className="text-sm text-muted mb-2 line-clamp-2">
-                                    {draft?.summary || course.summary}
+                                    {draft?.summary || quest.summary}
                                 </p>
 
                                 {draft?.edit_reason && (
@@ -506,19 +506,19 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                     </div>
                                 )}
 
-                                {getOrgName(course.organizations) && (
+                                {getOrgName(quest.organizations) && (
                                     <p className="text-xs text-muted mt-1">
-                                        Organization: {getOrgName(course.organizations)}
+                                        Organization: {getOrgName(quest.organizations)}
                                     </p>
                                 )}
                                 <p className="text-xs text-muted mt-2">
-                                    Updated: {new Date(course.created_at).toLocaleDateString()}
+                                    Updated: {new Date(quest.created_at).toLocaleDateString()}
                                 </p>
                             </div>
 
                             <div className="flex gap-2 shrink-0">
                                 <button
-                                    onClick={() => setDraftPreviewModal(course)}
+                                    onClick={() => setDraftPreviewModal(quest)}
                                     className="px-3 py-2 border border-purple-500/30 text-purple-400 text-xs font-bold uppercase tracking-widest hover:bg-purple-500/10 transition-colors flex items-center gap-1.5"
                                     title="Preview changes"
                                 >
@@ -527,8 +527,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 </button>
 
                                 <button
-                                    onClick={() => openRejectionModal('quests', course.id, true)}
-                                    disabled={loading === course.id}
+                                    onClick={() => openRejectionModal('quests', quest.id, true)}
+                                    disabled={loading === quest.id}
                                     className="p-2 border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                                     title="Reject"
                                 >
@@ -536,11 +536,11 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                                 </button>
 
                                 <button
-                                    onClick={() => handleApprove('quests', course.id)}
-                                    disabled={loading === course.id}
+                                    onClick={() => handleApprove('quests', quest.id)}
+                                    disabled={loading === quest.id}
                                     className="px-4 py-2 border border-green-500/30 text-green-500 text-xs font-bold uppercase tracking-widest hover:bg-green-500/10 disabled:opacity-50 transition-colors"
                                 >
-                                    {loading === course.id ? '...' : 'Approve Edit'}
+                                    {loading === quest.id ? '...' : 'Approve Edit'}
                                 </button>
                             </div>
                         </div>
@@ -601,7 +601,7 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
                 </div>
             ))}
 
-            {draftEditCourses.length === 0 && pendingItems.edits.length === 0 && (
+            {draftEditQuests.length === 0 && pendingItems.edits.length === 0 && (
                 <div className="border border-border bg-main p-12 text-center">
                     <span className="material-symbols-outlined text-4xl text-muted mb-2 block">check_circle</span>
                     <p className="text-muted text-sm uppercase tracking-widest">No pending edits</p>
@@ -764,8 +764,8 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
 
             {/* Draft Preview Modal */}
             {draftPreviewModal && (
-                <CourseEditPreviewModal
-                    course={draftPreviewModal}
+                <QuestEditPreviewModal
+                    quest={draftPreviewModal}
                     onClose={() => setDraftPreviewModal(null)}
                 />
             )}
@@ -773,15 +773,15 @@ export function ValidationPanel({ pendingItems, existingItems }: ValidationPanel
     )
 }
 
-// ─── CourseEditPreviewModal ───────────────────────────────────────────────────
+// ─── QuestEditPreviewModal ───────────────────────────────────────────────────
 
-interface CourseEditPreviewModalProps {
-    course: PendingQuest
+interface QuestEditPreviewModalProps {
+    quest: PendingQuest
     onClose: () => void
 }
 
-function CourseEditPreviewModal({ course, onClose }: CourseEditPreviewModalProps) {
-    const draft = course.draft_data as Record<string, unknown> | undefined
+function QuestEditPreviewModal({ quest, onClose }: QuestEditPreviewModalProps) {
+    const draft = quest.draft_data as Record<string, unknown> | undefined
     if (!draft) return null
 
     // Fields to show in the preview
@@ -794,11 +794,11 @@ function CourseEditPreviewModal({ course, onClose }: CourseEditPreviewModalProps
     ]
 
     const currentValues: Record<string, unknown> = {
-        title: course.title,
-        summary: course.summary,
-        description: (course as unknown as Record<string, unknown>).description,
-        thumbnail_url: (course as unknown as Record<string, unknown>).thumbnail_url,
-        xp_reward: (course as unknown as Record<string, unknown>).xp_reward,
+        title: quest.title,
+        summary: quest.summary,
+        description: (quest as unknown as Record<string, unknown>).description,
+        thumbnail_url: (quest as unknown as Record<string, unknown>).thumbnail_url,
+        xp_reward: (quest as unknown as Record<string, unknown>).xp_reward,
     }
 
     // Get changed fields only (ignore meta fields like edit_reason)
@@ -821,7 +821,7 @@ function CourseEditPreviewModal({ course, onClose }: CourseEditPreviewModalProps
                         <h2 className="text-lg font-bold uppercase tracking-widest text-text-main">
                             Edit Preview
                         </h2>
-                        <p className="text-xs text-muted mt-0.5">{course.title}</p>
+                        <p className="text-xs text-muted mt-0.5">{quest.title}</p>
                     </div>
                     <button
                         onClick={onClose}

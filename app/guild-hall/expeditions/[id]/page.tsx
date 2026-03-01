@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { Metadata } from 'next'
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
@@ -18,6 +19,24 @@ import {
   getUserQuestsProgressCached
 } from '@/lib/cache'
 import { afterProgressChange } from '@/lib/cache-actions'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: expedition } = await getExpeditionDetailCached(supabase, id)
+
+  if (!expedition) return { title: 'Expedition Not Found | Mind Breaker' }
+
+  return {
+    title: `${expedition.title} | Mind Breaker`,
+    description: expedition.summary || `Explore the expedition: ${expedition.title}`,
+    openGraph: {
+      title: expedition.title,
+      description: expedition.summary || undefined,
+      images: expedition.thumbnail_url ? [expedition.thumbnail_url] : [],
+    },
+  }
+}
 
 export default async function ExpeditionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()

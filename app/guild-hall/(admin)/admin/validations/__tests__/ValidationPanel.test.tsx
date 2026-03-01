@@ -106,8 +106,8 @@ describe('ValidationPanel', () => {
     })
 })
 
-describe('Edits tab — draft_data courses', () => {
-    const draftCourse = {
+describe('Edits tab — draft_data quests', () => {
+    const draftQuest = {
         id: 'c2',
         title: 'Original Title',
         summary: 'Original summary',
@@ -122,27 +122,27 @@ describe('Edits tab — draft_data courses', () => {
     }
 
     const mockPendingItems = {
-        quests: [draftCourse],
+        quests: [draftQuest],
         organizations: [],
         expeditions: [],
         edits: []
     }
 
-    it('shows draft-edit courses in Edits tab, NOT Courses tab', () => {
+    it('shows draft-edit quests in Edits tab, NOT Quests tab', () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
 
         // Quests tab should show "No pending quests"
         fireEvent.click(screen.getByRole('button', { name: /quests/i }))
         expect(screen.getByText('No pending quests')).toBeInTheDocument()
 
-        // Edits tab should show the draft course
+        // Edits tab should show the draft quest
         const editsTabBtn = screen.getByRole('button', { name: /edits/i })
         fireEvent.click(editsTabBtn)
         expect(screen.getByText('Updated Title')).toBeInTheDocument()
         expect(screen.getByText('Pending Edit')).toBeInTheDocument()
     })
 
-    it('shows the edits tab count reflecting draft-edit courses', () => {
+    it('shows the edits tab count reflecting draft-edit quests', () => {
         render(<ValidationPanel pendingItems={mockPendingItems} existingItems={mockExistingItems} />)
         const editsTab = screen.getByRole('button', { name: /edits/i })
         // Count badge of "1" should be in the edits tab

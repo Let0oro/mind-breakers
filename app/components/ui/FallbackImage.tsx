@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, Activity } from 'react'
+import { useState, useEffect } from 'react'
 import Image, { ImageProps } from 'next/image'
+import { cn } from '@/lib/utils'
 
 const icons = {
     quest: 'assignment_late',
@@ -36,34 +37,41 @@ export function FallbackImage({
         }
     }
 
-    const throwImage = !hasError && imgSrc && src;
     const transitionName = `img-${src.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30)}`
 
-    return (<>
-        <Activity mode={!throwImage ? 'visible' : 'hidden'} >
-            <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-                <span className={`material-symbols-outlined text-4xl text-text-main/80`}>{iconFallback}</span>
-            </div>
-        </Activity>
+    return (
+        <div className={cn("relative overflow-hidden", className)}>
+            {/* Fallback Icon */}
+            {(!imgSrc || hasError) && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none z-0">
+                    <span className="material-symbols-outlined text-4xl text-text-main/80">{iconFallback}</span>
+                </div>
+            )}
 
-        <Activity mode={throwImage ? 'visible' : 'hidden'} >
-            {as !== 'next' ? <img
-                src={imgSrc || undefined}
-                alt={alt}
-                className={className}
-                onError={handleError}
-                style={{ viewTransitionName: transitionName } as React.CSSProperties}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                {...props as any} // Cast because ImageProps has Next.js specific props
-            /> : (imgSrc ? <img
-                src={imgSrc}
-                alt={alt}
-                className={className}
-                onError={handleError}
-                style={{ viewTransitionName: transitionName } as React.CSSProperties}
-                {...props}
-            /> : null)}
-        </Activity>
-    </>
+            {/* Main Image */}
+            {!hasError && imgSrc && (
+                as === 'next' ? (
+                    <Image
+                        src={imgSrc}
+                        alt={alt}
+                        className={cn("w-full h-full object-cover", className)}
+                        onError={handleError}
+                        style={{ viewTransitionName: transitionName } as React.CSSProperties}
+                        width={props.width || 500}
+                        height={props.height || 500}
+                        {...props}
+                    />
+                ) : (
+                    <img
+                        src={imgSrc}
+                        alt={alt}
+                        className={cn("w-full h-full object-cover", className)}
+                        onError={handleError}
+                        style={{ viewTransitionName: transitionName } as React.CSSProperties}
+                        {...(props as unknown as React.ImgHTMLAttributes<HTMLImageElement>)}
+                    />
+                )
+            )}
+        </div>
     )
 }
