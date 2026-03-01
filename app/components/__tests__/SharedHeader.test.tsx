@@ -3,6 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import SharedHeader from '../shared-header'
 import * as navigation from 'next/navigation'
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+    usePathname: vi.fn(),
+}))
+
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
     writable: true,
@@ -74,8 +79,8 @@ describe('SharedHeader', () => {
         fireEvent.click(toggleButton)
 
         // Should appear now
-        expect(screen.getByText('World Map')).toBeInTheDocument()
-        expect(screen.getByText('Quests')).toBeInTheDocument()
+        expect(screen.getByText('world-map')).toBeInTheDocument()
+        expect(screen.getByText('archives')).toBeInTheDocument()
 
         // Click to close
         fireEvent.click(toggleButton)
