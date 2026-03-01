@@ -12,7 +12,7 @@ module.exports = {
                 'http://localhost:3000/guild-hall',
                 'http://localhost:3000/guild-hall/quests',
                 'http://localhost:3000/guild-hall/leaderboard',
-                'http://localhost:3000/guild-hall/settings',
+                'http://localhost:3000/guild-hall/armory',
                 'http://localhost:3000/guild-hall/world-map',
                 'http://localhost:3000/guild-hall/archives',
                 'http://localhost:3000/guild-hall/expeditions',
