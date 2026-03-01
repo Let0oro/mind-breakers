@@ -1,52 +1,52 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import type { PathListItem } from '@/lib/types'
-import { CardPath } from '@/components/ui/CardPath'
+import type { ExpeditionListItem, UserQuestProgress } from '@/lib/types'
+import { CardExpedition } from '@/components/ui/CardExpedition'
 import {
-  getUserSavedPathsCached,
+  getUserSavedExpeditionsCached,
   getUserProgressCached,
-  getUserCreatedPathIdsCached,
-  getPathIdsFromCourseProgressCached,
-  getPathsByIdsCached
+  getUserCreatedExpeditionIdsCached,
+  getExpeditionIdsFromQuestProgressCached,
+  getExpeditionsByIdsCached
 } from '@/lib/cache'
 
 export const metadata = {
-  title: 'Learning Paths - MindBreaker',
-  description: 'Browse and explore learning paths',
+  title: 'Expeditions - MindBreaker',
+  description: 'Browse and explore expeditions',
 }
 
-export default async function PathsListPage() {
+export default async function ExpeditionsListPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   // Use cached queries for all user data
-  const [savedPathIds, userProgress, createdPathIds] = await Promise.all([
-    getUserSavedPathsCached(supabase, user.id),
+  const [savedExpeditionIds, userProgress, createdExpeditionIds] = await Promise.all([
+    getUserSavedExpeditionsCached(supabase, user.id),
     getUserProgressCached(supabase, user.id),
-    getUserCreatedPathIdsCached(supabase, user.id)
+    getUserCreatedExpeditionIdsCached(supabase, user.id)
   ])
 
-  const completedCourseIds = new Set(
-    userProgress.filter(p => p.completed).map(p => p.course_id)
+  const completedQuestIds = new Set(
+    userProgress.filter((p: Pick<UserQuestProgress, 'completed' | 'quest_id'>) => p.completed).map((p: Pick<UserQuestProgress, 'quest_id'>) => p.quest_id)
   )
-  const savedSet = new Set(savedPathIds)
+  const savedSet = new Set(savedExpeditionIds)
 
-  // Get path IDs from user's course progress (cached)
-  const progressCourseIds = userProgress.map(p => p.course_id).filter(Boolean)
-  const progressPathIds = await getPathIdsFromCourseProgressCached(supabase, user.id, progressCourseIds)
+  // Get expedition IDs from user's quest progress (cached)
+  const progressQuestIds = userProgress.map((p: Pick<UserQuestProgress, 'quest_id'>) => p.quest_id).filter(Boolean)
+  const progressExpeditionIds = await getExpeditionIdsFromQuestProgressCached(supabase, user.id, progressQuestIds)
 
-  // Combine all path IDs
-  const pathIds = [...new Set([
-    ...createdPathIds,
-    ...progressPathIds,
-    ...savedPathIds
+  // Combine all expedition IDs
+  const expeditionIds = [...new Set([
+    ...createdExpeditionIds,
+    ...progressExpeditionIds,
+    ...savedExpeditionIds
   ])]
 
-  // Fetch paths by IDs (cached)
-  const paths = await getPathsByIdsCached(supabase, pathIds)
+  // Fetch expeditions by IDs (cached)
+  const expeditions = await getExpeditionsByIdsCached(supabase, user.id, expeditionIds)
 
   return (
     <>
@@ -55,12 +55,12 @@ export default async function PathsListPage() {
           <div className="flex flex-col gap-1">
             <h1 className="text-5xl font-header text-foreground tracking-tight">expeditions</h1>
             <p className="text-muted text-sm">
-              {paths.length} expeditions in your journey
+              {expeditions.length} expeditions in your journey
             </p>
           </div>
           <div className="flex gap-2">
             <Link
-              href="/guild-hall/world-map?tab=paths"
+              href="/guild-hall/world-map?tab=expeditions"
               className="flex items-center gap-2 px-4 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:border-text-main hover:text-text-main transition-all"
             >
               <span className="material-symbols-outlined text-lg">search</span>
@@ -78,29 +78,29 @@ export default async function PathsListPage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paths.length > 0 ? (
-          paths.map((path: PathListItem) => {
-            const courseCount = path.courses?.length || 0
-            const completedCount = path.courses?.filter((c) =>
-              completedCourseIds.has(c.id)
+        {expeditions.length > 0 ? (
+          expeditions.map((expedition: ExpeditionListItem) => {
+            const questCount = expedition.quests?.length || 0
+            const completedCount = expedition.quests?.filter((c) =>
+              completedQuestIds.has(c.id)
             ).length || 0
-            const progressPercent = courseCount > 0 ? (completedCount / courseCount) * 100 : 0
-            const isSaved = savedSet.has(path.id)
-            const isOwner = path.created_by === user.id
+            const progressPercent = questCount > 0 ? (completedCount / questCount) * 100 : 0
+            const isSaved = savedSet.has(expedition.id)
+            const isOwner = expedition.created_by === user.id
 
-            const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
+            const org = Array.isArray(expedition.organizations) ? expedition.organizations[0] : expedition.organizations
 
             return (
-              <CardPath
-                key={path.id}
-                id={path.id}
-                title={path.title}
-                summary={path.summary}
-                completedCourses={completedCount}
-                totalCourses={courseCount}
+              <CardExpedition
+                key={expedition.id}
+                id={expedition.id}
+                title={expedition.title}
+                summary={expedition.summary}
+                completedQuests={completedCount}
+                totalQuests={questCount}
                 progressPercent={progressPercent}
                 isSaved={isSaved}
-                isValidated={path.is_validated}
+                isValidated={expedition.is_validated}
                 isOwner={isOwner}
                 organizationName={org?.name}
                 variant="card"
@@ -113,7 +113,7 @@ export default async function PathsListPage() {
             <p className="text-muted text-sm mb-1">No Expeditions</p>
             <p className="text-muted text-xs mb-6">Start your journey by finding an expedition</p>
             <Link
-              href="/guild-hall/world-map?tab=paths"
+              href="/guild-hall/world-map?tab=expeditions"
               className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
             >
               Explore Expeditions

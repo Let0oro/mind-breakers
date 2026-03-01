@@ -1,21 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import type { Course, PathListItem } from '@/lib/types'
-import { CardCourse } from '@/components/ui/CardCourse'
-import { CardPath } from '@/components/ui/CardPath'
+import type { Quest, ExpeditionListItem } from '@/lib/types'
+import { CardQuest } from '@/components/ui/CardQuest'
+import { CardExpedition } from '@/components/ui/CardExpedition'
 
 interface ProfileTabsProps {
-    courses: Course[] | null
-    paths: PathListItem[] | null
+    quests: Quest[] | null
+    expeditions: ExpeditionListItem[] | null
 }
 
-export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
-    const [activeTab, setActiveTab] = useState<'courses' | 'paths' | 'achievements'>('courses')
+export default function ProfileTabs({ quests, expeditions }: ProfileTabsProps) {
+    const [activeTab, setActiveTab] = useState<'quests' | 'expeditions' | 'achievements'>('quests')
 
     const tabs = [
-        { key: 'courses', label: 'Created Courses', icon: 'school' },
-        { key: 'paths', label: 'Learning Paths', icon: 'map' },
+        { key: 'quests', label: 'Created Quests', icon: 'school' },
+        { key: 'expeditions', label: 'Expeditions', icon: 'map' },
         { key: 'achievements', label: 'Achievements', icon: 'emoji_events' },
     ] as const
 
@@ -40,17 +40,17 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
 
             {/* Content */}
             <div>
-                {activeTab === 'courses' && (
+                {activeTab === 'quests' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {courses && courses.length > 0 ? (
-                            courses.map((course) => (
-                                <CardCourse
-                                    key={course.id}
-                                    id={course.id}
-                                    title={course.title}
-                                    thumbnail_url={course.thumbnail_url}
-                                    xp_reward={course.xp_reward}
-                                    summary={course.summary || undefined}
+                        {quests && quests.length > 0 ? (
+                            quests.map((quest) => (
+                                <CardQuest
+                                    key={quest.id}
+                                    id={quest.id}
+                                    title={quest.title}
+                                    thumbnail_url={quest.thumbnail_url}
+                                    xp_reward={quest.xp_reward}
+                                    summary={quest.summary || undefined}
                                     variant="profile"
                                 />
                             ))
@@ -63,17 +63,17 @@ export default function ProfileTabs({ courses, paths }: ProfileTabsProps) {
                     </div>
                 )}
 
-                {activeTab === 'paths' && (
+                {activeTab === 'expeditions' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {paths && paths.length > 0 ? (
-                            paths.map((path: PathListItem) => (
-                                <CardPath
-                                    key={path.id}
-                                    id={path.id}
-                                    title={path.title}
-                                    summary={path.summary}
-                                    thumbnailUrl={(path.courses && path.courses.length > 0) ? (path.courses[0] as Course).thumbnail_url : null}
-                                    createdAt={path.created_at}
+                        {expeditions && expeditions.length > 0 ? (
+                            expeditions.map((expedition: ExpeditionListItem) => (
+                                <CardExpedition
+                                    key={expedition.id}
+                                    id={expedition.id}
+                                    title={expedition.title}
+                                    summary={expedition.summary}
+                                    thumbnailUrl={(expedition.quests && expedition.quests.length > 0) ? (expedition.quests[0] as Quest).thumbnail_url : null}
+                                    createdAt={expedition.created_at}
                                     variant="profile"
                                 />
                             ))

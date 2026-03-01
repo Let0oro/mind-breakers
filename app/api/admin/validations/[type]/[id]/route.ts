@@ -3,18 +3,18 @@ import { createClient } from '@/utils/supabase/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import { CACHE_TAGS } from '@/lib/cache'
 
-type ValidationType = 'organizations' | 'courses' | 'paths'
+type ValidationType = 'organizations' | 'quests' | 'expeditions'
 
 const tableMap: Record<ValidationType, string> = {
     organizations: 'organizations',
-    courses: 'courses',
-    paths: 'learning_paths',
+    quests: 'quests',
+    expeditions: 'expeditions',
 }
 
 const nameFieldMap: Record<ValidationType, string> = {
     organizations: 'name',
-    courses: 'title',
-    paths: 'title',
+    quests: 'title',
+    expeditions: 'title',
 }
 
 // PATCH - Update or approve item
@@ -42,7 +42,7 @@ export async function PATCH(
     }
 
     // Validate type
-    if (!['organizations', 'courses', 'paths'].includes(type)) {
+    if (!['organizations', 'quests', 'expeditions'].includes(type)) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
 
@@ -54,22 +54,22 @@ export async function PATCH(
     const { action, name, description, website_url } = body
 
     if (action === 'approve') {
-        if (validationType === 'courses') {
-            // Check if this course has a pending draft edit
-            const { data: course } = await supabase
-                .from('courses')
+        if (validationType === 'quests') {
+            // Check if this quest has a pending draft edit
+            const { data: quest } = await supabase
+                .from('quests')
                 .select('draft_data, is_validated')
                 .eq('id', id)
                 .single()
 
-            if (course?.draft_data) {
-                // It's a shadow draft: merge draft fields into the main course, clear draft_data.
+            if (quest?.draft_data) {
+                // It's a shadow draft: merge draft fields into the main quest, clear draft_data.
                 // IMPORTANT: exclude Supabase-managed / meta columns from the update.
                 const EXCLUDED_FIELDS = new Set([
                     'id', 'created_at', 'updated_at', 'edit_reason',
                     'is_validated', 'status', 'author_id', 'draft_data'
                 ])
-                const draft = course.draft_data as Record<string, unknown>
+                const draft = quest.draft_data as Record<string, unknown>
                 const mergeData: Record<string, unknown> = { draft_data: null }
                 for (const [key, value] of Object.entries(draft)) {
                     if (!EXCLUDED_FIELDS.has(key) && value !== undefined) {
@@ -78,7 +78,7 @@ export async function PATCH(
                 }
 
                 const { error } = await supabase
-                    .from('courses')
+                    .from('quests')
                     .update(mergeData)
                     .eq('id', id)
 
@@ -106,7 +106,7 @@ export async function PATCH(
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
         revalidateTag(CACHE_TAGS.QUESTS, 'max')
-        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
         revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
         revalidatePath('/guild-hall/admin/validations')
         revalidatePath('/guild-hall/admin')
@@ -139,7 +139,7 @@ export async function PATCH(
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
         revalidateTag(CACHE_TAGS.QUESTS, 'max')
-        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
         revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
         revalidatePath('/guild-hall/admin/validations')
         revalidatePath('/guild-hall/admin')
@@ -154,22 +154,22 @@ export async function PATCH(
             return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 })
         }
 
-        if (validationType === 'courses') {
-            // Check if it's a Shadow Draft or New Course
-            const { data: course } = await supabase
-                .from('courses')
+        if (validationType === 'quests') {
+            // Check if it's a Shadow Draft or New Quest
+            const { data: quest } = await supabase
+                .from('quests')
                 .select('draft_data, is_validated')
                 .eq('id', id)
                 .single()
 
-            if (!course) {
-                return NextResponse.json({ error: 'Course not found' }, { status: 404 })
+            if (!quest) {
+                return NextResponse.json({ error: 'Quest not found' }, { status: 404 })
             }
 
-            if (course.draft_data) {
+            if (quest.draft_data) {
                 // It's a Shadow Draft: Clear draft_data and set reason
                 const { error } = await supabase
-                    .from('courses')
+                    .from('quests')
                     .update({
                         draft_data: null,
                         rejection_reason: rejection_reason
@@ -178,9 +178,9 @@ export async function PATCH(
 
                 if (error) return NextResponse.json({ error: error.message }, { status: 500 })
             } else {
-                // It's a New Course: Archive and set reason
+                // It's a New Quest: Archive and set reason
                 const { error } = await supabase
-                    .from('courses')
+                    .from('quests')
                     .update({
                         status: 'archived',
                         rejection_reason: rejection_reason,
@@ -194,13 +194,13 @@ export async function PATCH(
             // For other types, just delete? Or maybe just ignore for now as not requested.
             // But we can fallback to DELETE logic or just error.
             // Let's implement Soft Delete (Archiving) if possible, or Hard Delete if no archive column.
-            // Or just Hard Delete as before for non-courses.
-            // But ValidationPanel calls DELETE for non-courses (via handleDelete).
-            // So if I call PATCH with reject, it's specific to my new Modal which is mainly for Courses.
+            // Or just Hard Delete as before for non-quests.
+            // But ValidationPanel calls DELETE for non-quests (via handleDelete).
+            // So if I call PATCH with reject, it's specific to my new Modal which is mainly for Quests.
             // If I opened the modal for an Organization, it would fail here.
             // I should probably support it or return error.
-            // Given the schema only added rejection_reason to Courses, I will return error for others.
-            return NextResponse.json({ error: 'Rejection with reason is only supported for Courses' }, { status: 400 })
+            // Given the schema only added rejection_reason to Quests, I will return error for others.
+            return NextResponse.json({ error: 'Rejection with reason is only supported for Quests' }, { status: 400 })
         }
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
@@ -238,7 +238,7 @@ export async function POST(
     }
 
     // Validate type
-    if (!['organizations', 'courses', 'paths'].includes(type)) {
+    if (!['organizations', 'quests', 'expeditions'].includes(type)) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
 
@@ -252,15 +252,15 @@ export async function POST(
 
     // For organizations, update all references then delete
     if (validationType === 'organizations') {
-        // Update courses that reference this org
+        // Update quests that reference this org
         await supabase
-            .from('courses')
+            .from('quests')
             .update({ organization_id: targetId })
             .eq('organization_id', id)
 
-        // Update learning_paths that reference this org
+        // Update expeditions that reference this org
         await supabase
-            .from('learning_paths')
+            .from('expeditions')
             .update({ organization_id: targetId })
             .eq('organization_id', id)
 
@@ -275,29 +275,29 @@ export async function POST(
         }
     }
 
-    // For courses, update references then delete
-    if (validationType === 'courses') {
-        // Update user_course_progress
+    // For quests, update references then delete
+    if (validationType === 'quests') {
+        // Update user_quest_progress
         await supabase
-            .from('user_course_progress')
-            .update({ course_id: targetId })
-            .eq('course_id', id)
+            .from('user_quest_progress')
+            .update({ quest_id: targetId })
+            .eq('quest_id', id)
 
-        // Update saved_courses
+        // Update saved_quests
         await supabase
-            .from('saved_courses')
-            .update({ course_id: targetId })
-            .eq('course_id', id)
+            .from('saved_quests')
+            .update({ quest_id: targetId })
+            .eq('quest_id', id)
 
-        // Update course_exercises
+        // Update quest_exercises
         await supabase
-            .from('course_exercises')
-            .update({ course_id: targetId })
-            .eq('course_id', id)
+            .from('quest_exercises')
+            .update({ quest_id: targetId })
+            .eq('quest_id', id)
 
-        // Delete the duplicate course
+        // Delete the duplicate quest
         const { error } = await supabase
-            .from('courses')
+            .from('quests')
             .delete()
             .eq('id', id)
 
@@ -306,23 +306,23 @@ export async function POST(
         }
     }
 
-    // For paths, update references then delete
-    if (validationType === 'paths') {
-        // Update courses that belong to this path
+    // For expeditions, update references then delete
+    if (validationType === 'expeditions') {
+        // Update quests that belong to this expedition
         await supabase
-            .from('courses')
-            .update({ path_id: targetId })
-            .eq('path_id', id)
+            .from('quests')
+            .update({ expedition_id: targetId })
+            .eq('expedition_id', id)
 
-        // Update saved_paths
+        // Update saved_expeditions
         await supabase
-            .from('saved_paths')
-            .update({ path_id: targetId })
-            .eq('path_id', id)
+            .from('saved_expeditions')
+            .update({ expedition_id: targetId })
+            .eq('expedition_id', id)
 
-        // Delete the duplicate path
+        // Delete the duplicate expedition
         const { error } = await supabase
-            .from('learning_paths')
+            .from('expeditions')
             .delete()
             .eq('id', id)
 
@@ -333,7 +333,7 @@ export async function POST(
 
     revalidateTag(CACHE_TAGS.ADMIN, 'max')
     revalidateTag(CACHE_TAGS.QUESTS, 'max')
-    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
 
     return NextResponse.json({ success: true })
@@ -364,7 +364,7 @@ export async function DELETE(
     }
 
     // Validate type
-    if (!['organizations', 'courses', 'paths'].includes(type)) {
+    if (!['organizations', 'quests', 'expeditions'].includes(type)) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
 
@@ -382,7 +382,7 @@ export async function DELETE(
 
     revalidateTag(CACHE_TAGS.ADMIN, 'max')
     revalidateTag(CACHE_TAGS.QUESTS, 'max')
-    revalidateTag(CACHE_TAGS.PATHS, 'max')
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
 
     return NextResponse.json({ success: true })

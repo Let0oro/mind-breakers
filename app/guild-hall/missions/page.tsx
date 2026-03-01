@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
-import { ExerciseList } from '@/components/features/ExerciseList'
+import { MissionList } from '@/components/features/MissionList'
 
 export const metadata = {
-    title: 'My Exercises - MindBreaker',
-    description: 'Track your exercise progress and submissions',
+    title: 'My Missions - MindBreaker',
+    description: 'Track your mission progress and submissions',
 }
 
 interface PageProps {
@@ -13,7 +13,7 @@ interface PageProps {
     }>
 }
 
-export default async function ExercisesPage({ searchParams }: PageProps) {
+export default async function MissionsPage({ searchParams }: PageProps) {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -22,42 +22,42 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
     const resolvedSearchParams = await searchParams
     const filter = resolvedSearchParams?.filter || 'all'
 
-    // Fetch exercises relevant to the user
-    const { data: enrolledCourses } = await supabase
-        .from('user_course_progress')
-        .select('course_id')
+    // Fetch missions relevant to the user
+    const { data: enrolledQuests } = await supabase
+        .from('user_quest_progress')
+        .select('quest_id')
         .eq('user_id', user.id)
 
-    const { data: createdCourses } = await supabase
-        .from('courses')
+    const { data: createdQuests } = await supabase
+        .from('quests')
         .select('id')
         .eq('created_by', user.id)
 
-    const relevantCourseIds = new Set([
-        ...(enrolledCourses?.map(c => c.course_id) || []),
-        ...(createdCourses?.map(c => c.id) || [])
+    const relevantQuestIds = new Set([
+        ...(enrolledQuests?.map(c => c.quest_id) || []),
+        ...(createdQuests?.map(c => c.id) || [])
     ])
 
-    const exercisesQuery = supabase
-        .from('course_exercises')
+    const missionsQuery = supabase
+        .from('quest_missions')
         .select(`
             id,
             title,
             description,
-            courses (id, title)
+            quests (id, title)
         `)
-        .in('course_id', Array.from(relevantCourseIds))
+        .in('quest_id', Array.from(relevantQuestIds))
 
-    const { data: exercises } = await exercisesQuery
+    const { data: missions } = await missionsQuery
 
     const { data: submissions } = await supabase
-        .from('exercise_submissions')
-        .select('exercise_id, status, created_at')
+        .from('mission_submissions')
+        .select('mission_id, status, created_at')
         .eq('user_id', user.id)
 
-    const submissionMap = new Map(submissions?.map(s => [s.exercise_id, s]) || [])
+    const submissionMap = new Map(submissions?.map(s => [s.mission_id, s]) || [])
 
-    const exerciseList = exercises?.map(ex => {
+    const missionList = missions?.map(ex => {
         const submission = submissionMap.get(ex.id)
         let status: 'completed' | 'in_progress' | 'pending_review' | 'not_started' = 'not_started'
 
@@ -73,13 +73,13 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
             description: ex.description,
             status,
             xp_reward: 50,
-            course_title: Array.isArray(ex.courses) ? ex.courses[0]?.title : (ex.courses as { title: string })?.title,
-            course_id: Array.isArray(ex.courses) ? ex.courses[0]?.id : (ex.courses as { id: string })?.id,
+            quest_title: Array.isArray(ex.quests) ? ex.quests[0]?.title : (ex.quests as { title: string })?.title,
+            quest_id: Array.isArray(ex.quests) ? ex.quests[0]?.id : (ex.quests as { id: string })?.id,
             submitted_at: submission?.created_at
         }
     }) || []
 
-    const filteredExercises = exerciseList.filter(ex => {
+    const filteredMissions = missionList.filter(ex => {
         if (filter === 'all') return true
         if (filter === 'completed') return ex.status === 'completed'
         if (filter === 'pending_review') return ex.status === 'pending_review'
@@ -87,7 +87,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
         return true
     })
 
-    filteredExercises.sort((a, b) => {
+    filteredMissions.sort((a, b) => {
         const score = (status: string) => {
             if (status === 'pending_review') return 0
             if (status === 'not_started') return 1
@@ -131,7 +131,7 @@ export default async function ExercisesPage({ searchParams }: PageProps) {
                 ))}
             </div>
 
-            <ExerciseList exercises={filteredExercises} />
+            <MissionList missions={filteredMissions} />
         </>
     )
 }

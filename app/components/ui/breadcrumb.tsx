@@ -25,7 +25,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 }
 
 export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbProps) {
-    const pathname = usePathname()
+    const expeditionname = usePathname()
 
     // Si se proporcionan items personalizados, usarlos
     if (items && items.length > 0) {
@@ -33,12 +33,12 @@ export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbPro
     }
 
     // Auto-generar breadcrumbs desde la ruta actual
-    if (autoGenerate && pathname) {
-        const segments = pathname.split('/').filter(Boolean)
+    if (autoGenerate && expeditionname) {
+        const segments = expeditionname.split('/').filter(Boolean)
         const breadcrumbItems: BreadcrumbItem[] = []
 
         segments.forEach((segment, index) => {
-            const path = '/' + segments.slice(0, index + 1).join('/')
+            const expedition = '/' + segments.slice(0, index + 1).join('/')
 
             // Intentar obtener label del mapeo o usar el segmento capitalizado
             let label = SEGMENT_LABELS[segment] || segment
@@ -67,7 +67,7 @@ export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbPro
 
             breadcrumbItems.push({
                 label,
-                href: path,
+                href: expedition,
             })
         })
 

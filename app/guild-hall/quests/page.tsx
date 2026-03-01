@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { CardCourse } from '@/components/ui/CardCourse'
+import { CardQuest } from '@/components/ui/CardQuest'
 import {
     getUserSavedQuestsCached,
     getUserProgressCached,
@@ -10,8 +10,8 @@ import {
 } from '@/lib/cache'
 
 export const metadata = {
-    title: 'Courses - MindBreaker',
-    description: 'Browse and enroll in courses',
+    title: 'Quests - MindBreaker',
+    description: 'Browse and enroll in quests',
 }
 
 interface QuestItem {
@@ -24,11 +24,11 @@ interface QuestItem {
     created_by: string
     status: 'draft' | 'published' | 'archived'
     organizations: { name: string }[] | null
-    user_course_progress: { completed: boolean, xp_earned: number }[]
-    saved_courses: { user_id: string }[]
+    user_quest_progress: { completed: boolean, xp_earned: number }[]
+    saved_quests: { user_id: string }[]
 }
 
-export default async function CoursesPage({
+export default async function QuestsPage({
     searchParams,
 }: {
     searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
@@ -41,36 +41,36 @@ export default async function CoursesPage({
     if (authError || !user) redirect('/login')
 
     // Use all cached queries for user data
-    const [savedCourseIds, userProgress, createdCourseIds] = await Promise.all([
+    const [savedQuestIds, userProgress, createdQuestIds] = await Promise.all([
         getUserSavedQuestsCached(supabase, user.id),
         getUserProgressCached(supabase, user.id),
         getUserCreatedQuestIdsCached(supabase, user.id)
     ])
 
-    const progressCourseIds = userProgress.map(c => c.course_id)
+    const progressQuestIds = userProgress.map(c => c.quest_id)
 
-    // Combine all course IDs
-    const courseIds = [...new Set([
-        ...createdCourseIds,
-        ...progressCourseIds,
-        ...savedCourseIds
+    // Combine all quest IDs
+    const questIds = [...new Set([
+        ...createdQuestIds,
+        ...progressQuestIds,
+        ...savedQuestIds
     ])]
 
-    // Fetch courses by IDs (cached)
-    let courses = (await getQuestsByIdsCached(supabase, courseIds)) as QuestItem[]
+    // Fetch quests by IDs (cached)
+    let quests = (await getQuestsByIdsCached(supabase, user.id, questIds)) as QuestItem[]
 
-    const allCoursesCount = courses.length
+    const allQuestsCount = quests.length
     if (filter !== 'all') {
-        courses = courses.filter(course => {
-            if (filter === 'pending') return course.is_validated === false && course.status !== 'draft'
-            if (filter === 'published') return course.status === 'published' && course.is_validated === true
-            if (filter === 'draft') return course.status === 'draft'
-            if (filter === 'archived') return course.status === 'archived'
+        quests = quests.filter(quest => {
+            if (filter === 'pending') return quest.is_validated === false && quest.status !== 'draft'
+            if (filter === 'published') return quest.status === 'published' && quest.is_validated === true
+            if (filter === 'draft') return quest.status === 'draft'
+            if (filter === 'archived') return quest.status === 'archived'
             return true
         })
     }
 
-    const creatorIds = Array.from(new Set(courses.map(c => c.created_by).filter(Boolean)))
+    const creatorIds = Array.from(new Set(quests.map(c => c.created_by).filter(Boolean)))
     let creatorMap = new Map<string, string>()
 
     if (creatorIds.length > 0) {
@@ -84,8 +84,8 @@ export default async function CoursesPage({
         }
     }
 
-    const progressMap = new Map(userProgress.map(p => [p.course_id, p.completed]))
-    const savedSet = new Set(savedCourseIds)
+    const progressMap = new Map(userProgress.map(p => [p.quest_id, p.completed]))
+    const savedSet = new Set(savedQuestIds)
 
     const tabs = [
         { key: 'all', label: 'ALL', href: '/guild-hall/quests' },
@@ -103,7 +103,7 @@ export default async function CoursesPage({
                     <div className="flex flex-col gap-1">
                         <h1 className="text-5xl font-header text-foreground tracking-tight">QUESTS</h1>
                         <p className="text-muted text-sm">
-                            {courses.length} / {allCoursesCount} quests displayed
+                            {quests.length} / {allQuestsCount} quests displayed
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -141,29 +141,29 @@ export default async function CoursesPage({
                 </div>
             </header>
 
-            {/* Courses Grid */}
+            {/* Quests Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {courses.length > 0 ? (
-                    courses.map((course) => {
-                        const isCompleted = progressMap.get(course.id) || false
-                        const isEnrolled = progressMap.has(course.id)
-                        const isSaved = savedSet.has(course.id)
+                {quests.length > 0 ? (
+                    quests.map((quest) => {
+                        const isCompleted = progressMap.get(quest.id) || false
+                        const isEnrolled = progressMap.has(quest.id)
+                        const isSaved = savedSet.has(quest.id)
 
-                        const isPublished = course.status === 'published'
-                        const isPending = isPublished && !course.is_validated
+                        const isPublished = quest.status === 'published'
+                        const isPending = isPublished && !quest.is_validated
 
                         return (
-                            <CardCourse
-                                key={course.id}
-                                id={course.id}
-                                title={course.title}
-                                thumbnail_url={course.thumbnail_url}
-                                xp_reward={course.xp_reward}
-                                summary={course.summary}
-                                status={isPending ? 'pending' : course.status}
+                            <CardQuest
+                                key={quest.id}
+                                id={quest.id}
+                                title={quest.title}
+                                thumbnail_url={quest.thumbnail_url}
+                                xp_reward={quest.xp_reward}
+                                summary={quest.summary}
+                                status={isPending ? 'pending' : quest.status}
                                 progress={isEnrolled ? (isCompleted ? 100 : 10) : 0}
                                 isSaved={isSaved}
-                                instructor={course.organizations && course.organizations.length > 0 ? course.organizations[0].name : (creatorMap.get(course.created_by) ? `by ${creatorMap.get(course.created_by)}` : undefined)}
+                                instructor={quest.organizations && quest.organizations.length > 0 ? quest.organizations[0].name : (creatorMap.get(quest.created_by) ? `by ${creatorMap.get(quest.created_by)}` : undefined)}
                                 variant="grid"
                             />
                         )
@@ -171,15 +171,15 @@ export default async function CoursesPage({
                 ) : (
                     <div className="col-span-full border border-border p-12 text-center">
                         <span className="material-symbols-outlined text-5xl text-muted mb-4 block">assignment_late</span>
-                        <p className="text-muted text-sm mb-1">No courses found</p>
+                        <p className="text-muted text-sm mb-1">No quests found</p>
                         <p className="text-muted text-xs mb-6">
-                            {filter !== 'all' ? `No ${filter} courses.` : "Start by exploring or creating a course."}
+                            {filter !== 'all' ? `No ${filter} quests.` : "Start by exploring or creating a quest."}
                         </p>
                         <Link
                             href="/guild-hall/world-map"
                             className="inline-block px-4 py-2 border border-text-main text-text-main text-xs font-bold uppercase tracking-widest hover:bg-inverse hover:text-main-alt transition-all"
                         >
-                            Explore Courses
+                            Explore Quests
                         </Link>
                     </div>
                 )}

@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { CardCourse } from '@/components/ui/CardCourse'
+import { CardQuest } from '@/components/ui/CardQuest'
 
 export const metadata = {
     title: 'My Drafts - MindBreaker',
-    description: 'Manage your course drafts',
+    description: 'Manage your quest drafts',
 }
 
 export default async function DraftsPage() {
@@ -15,7 +15,7 @@ export default async function DraftsPage() {
     if (authError || !user) redirect('/login')
 
     const { data: drafts } = await supabase
-        .from('courses')
+        .from('quests')
         .select(`
             id,
             title,
@@ -47,17 +47,17 @@ export default async function DraftsPage() {
             {/* Drafts Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {drafts && drafts.length > 0 ? (
-                    drafts.map((course) => (
-                        <CardCourse
-                            key={course.id}
-                            id={course.id}
-                            title={course.title}
-                            thumbnail_url={course.thumbnail_url}
-                            xp_reward={course.xp_reward}
-                            summary={course.summary || undefined}
-                            status={course.status}
+                    drafts.map((quest) => (
+                        <CardQuest
+                            key={quest.id}
+                            id={quest.id}
+                            title={quest.title}
+                            thumbnail_url={quest.thumbnail_url}
+                            xp_reward={quest.xp_reward}
+                            summary={quest.summary || undefined}
+                            status={quest.status}
                             variant="draft"
-                            href={`/guild-hall/drafts/${course.id}/edit`}
+                            href={`/guild-hall/drafts/${quest.id}/edit`}
                         />
                     ))
                 ) : (

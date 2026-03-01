@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client'
 import type { Profile } from '@/lib/types'
 
 interface ManageCoOwnersProps {
-    pathId: string
+    expeditionId: string
     createdBy: string
 }
 
@@ -15,7 +15,7 @@ interface CoOwner {
     profile: Profile
 }
 
-export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
+export function ManageCoOwners({ expeditionId, createdBy }: ManageCoOwnersProps) {
     const [coOwners, setCoOwners] = useState<CoOwner[]>([])
     const [newOwnerUsername, setNewOwnerUsername] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -34,17 +34,17 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
             }
         }
         fetchUserAndOwners()
-    }, [pathId, createdBy, supabase])
+    }, [expeditionId, createdBy, supabase])
 
     const fetchCoOwners = async () => {
         const { data } = await supabase
-            .from('path_owners')
+            .from('expedition_owners')
             .select(`
                 id,
                 user_id,
                 profile:profiles(*)
             `)
-            .eq('path_id', pathId)
+            .eq('expedition_id', expeditionId)
 
         if (data) {
             setCoOwners(data as unknown as CoOwner[])
@@ -69,14 +69,14 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
             }
 
             if (userProfile.id === createdBy) {
-                throw new Error('Ya eres el creador de este path')
+                throw new Error('Ya eres el creador de este expedition')
             }
 
-            // 2. Add to path_owners
+            // 2. Add to expedition_owners
             const { error: insertError } = await supabase
-                .from('path_owners')
+                .from('expedition_owners')
                 .insert({
-                    path_id: pathId,
+                    expedition_id: expeditionId,
                     user_id: userProfile.id
                 })
 
@@ -103,9 +103,9 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
 
         try {
             const { error } = await supabase
-                .from('path_owners')
+                .from('expedition_owners')
                 .delete()
-                .eq('path_id', pathId)
+                .eq('expedition_id', expeditionId)
                 .eq('user_id', userId)
 
             if (error) throw error
@@ -154,7 +154,7 @@ export function ManageCoOwners({ pathId, createdBy }: ManageCoOwnersProps) {
                         coOwners.map((owner) => (
                             <div key={owner.id} className="flex items-center justify-between p-2 bg-main dark:bg-surface rounded border border-border dark:border-border">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-main-dark dark:bg-gray-700 overflow-hidden">
+                                    <div className="w-6 h-6 rounded-full bg-midnight dark:bg-gray-700 overflow-hidden">
                                         {owner.profile?.avatar_url ? (
                                             <img src={owner.profile.avatar_url} alt={owner.profile.username} className="w-full h-full object-cover" />
                                         ) : (

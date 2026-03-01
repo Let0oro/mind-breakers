@@ -8,15 +8,15 @@ interface Submission {
   user_id: string
   exercise_id: string
   submission_type: string
-  file_path: string | null
+  file_expedition: string | null
   drive_url: string | null
   github_repo_url: string | null
   submitted_at: string
   status: string
   profiles: { username: string | null }
-  course_exercises: {
+  quest_exercises: {
     title: string
-    courses: { title: string; id: string }
+    quests: { title: string; id: string }
   }
 }
 
@@ -62,7 +62,7 @@ export default async function AdminSubmissionsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-bold text-text-main">
-                        {sub.course_exercises.title}
+                        {sub.quest_exercises.title}
                       </h3>
                       <span
                         className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${sub.status === 'pending'
@@ -79,7 +79,7 @@ export default async function AdminSubmissionsPage() {
                     </div>
 
                     <p className="text-sm text-muted mb-2">
-                      Quest: {sub.course_exercises.courses.title}
+                      Quest: {sub.quest_exercises.quests.title}
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-muted">
@@ -98,9 +98,9 @@ export default async function AdminSubmissionsPage() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {sub.file_path && (
+                      {sub.file_expedition && (
                         <a
-                          href={sub.file_path}
+                          href={sub.file_expedition}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-3 py-2 border border-border text-xs font-bold uppercase tracking-widest text-text-main hover:bg-surface transition-colors"
@@ -134,7 +134,7 @@ export default async function AdminSubmissionsPage() {
                         </a>
                       )}
                       <Link
-                        href={`/guild-hall/quests/${sub.course_exercises.courses.id}`}
+                        href={`/guild-hall/quests/${sub.quest_exercises.quests.id}`}
                         className="inline-flex items-center gap-2 px-3 py-2 border border-border text-xs font-bold uppercase tracking-widest text-muted hover:text-text-main hover:bg-surface transition-colors"
                       >
                         View Quest

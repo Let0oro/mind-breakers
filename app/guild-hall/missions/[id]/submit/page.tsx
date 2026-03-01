@@ -11,10 +11,10 @@ interface Exercise {
   title: string
   description?: string
   requirements?: string
-  courses: {
+  quests: {
     id: string
     title: string
-    learning_paths: {
+    expeditions: {
       id: string
     }
   }
@@ -39,8 +39,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
   useEffect(() => {
     const loadExercise = async () => {
       const { data } = await supabase
-        .from('course_exercises')
-        .select('*, courses (id, title, learning_paths (id))')
+        .from('quest_exercises')
+        .select('*, quests (id, title, expeditions (id))')
         .eq('id', id)
         .single()
 
@@ -67,7 +67,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
       const fileName = `submissions/${Date.now()}-${Math.random().toString(36).substring(2)}.txt`
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('course-assets')
+        .from('quest-assets')
         .upload(fileName, blob)
 
       if (uploadError) {
@@ -77,8 +77,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('course-assets')
-        .getPublicUrl(uploadData.path)
+        .from('quest-assets')
+        .getPublicUrl(uploadData!.path)
 
       finalFileUrl = publicUrl
     }
@@ -89,7 +89,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
         user_id: user.id,
         exercise_id: id,
         submission_type: submissionType,
-        file_path: (submissionType === 'text' || submissionType === 'zip') ? finalFileUrl : null,
+        file_expedition: (submissionType === 'text' || submissionType === 'zip') ? finalFileUrl : null,
         drive_url: submissionType === 'drive' ? driveUrl : null,
         github_repo_url: submissionType === 'github' ? githubRepoUrl : null,
         status: 'pending',
@@ -104,7 +104,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
     await fetch('/api/streak/update', { method: 'POST' })
 
     if (exercise) {
-      router.push(`/guild-hall/quests/${exercise.courses.id}`)
+      router.push(`/guild-hall/quests/${exercise.quests.id}`)
     }
   }
 
@@ -266,8 +266,8 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
                   </div>
                 ) : (
                   <FileUpload
-                    bucket="course-assets"
-                    path="submissions/"
+                    bucket="quest-assets"
+                    expedition="submissions/"
                     accept=".zip"
                     onUploadComplete={setFileUrl}
                     maxSizeMB={50}
@@ -328,7 +328,7 @@ export default function SubmitExercisePage({ params }: { params: Promise<{ id: s
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-sidebar-border/50 transition-colors"
+                className="flex-1 rounded-lg border border-border dark:border-border px-4 py-2 text-sm font-medium text-muted dark:text-muted hover:bg-surface dark:hover:bg-border/30 transition-colors"
               >
                 Cancel
               </button>

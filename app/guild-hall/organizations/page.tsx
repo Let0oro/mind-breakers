@@ -27,8 +27,8 @@ export default async function OrganizationsPage() {
             website_url,
             is_validated,
             created_by,
-            learning_paths (id),
-            courses (id)
+            expeditions (id),
+            quests (id)
         `)
         .eq('created_by', user.id)
         .eq('is_validated', false)
@@ -66,8 +66,8 @@ export default async function OrganizationsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {organizations && organizations.length > 0 ? (
                     organizations.map((org) => {
-                        const pathCount = org.learning_paths?.length || 0
-                        const courseCount = org.courses?.length || 0
+                        const expeditionCount = org.expeditions?.length || 0
+                        const questCount = org.quests?.length || 0
 
                         return (
                             <div
@@ -115,19 +115,19 @@ export default async function OrganizationsPage() {
                                 <div className="flex gap-6 pt-4 border-t border-border">
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined w-4 h-4 text-muted">flag</span>
-                                        <span className="text-text-main text-sm font-bold">{pathCount}</span>
+                                        <span className="text-text-main text-sm font-bold">{expeditionCount}</span>
                                         <span className="text-muted text-xs">expeditions</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="material-symbols-outlined w-4 h-4 text-muted">assignment_late</span>
-                                        <span className="text-text-main text-sm font-bold">{courseCount}</span>
+                                        <span className="text-text-main text-sm font-bold">{questCount}</span>
                                         <span className="text-muted text-xs">quests</span>
                                     </div>
                                 </div>
 
                                 {/* Actions */}
                                 <Link
-                                    href={`/guild-hall/paths?org=${org.id}`}
+                                    href={`/guild-hall/expeditions?org=${org.id}`}
                                     className="mt-auto w-full text-center border border-border hover:border-text-main hover:bg-surface text-text-main px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors"
                                 >
                                     View Expeditions

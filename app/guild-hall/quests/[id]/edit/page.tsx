@@ -1,6 +1,6 @@
-import { EditCourseForm } from './EditCourseForm'
+import { EditQuestForm } from './EditQuestForm'
 
-export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditQuestPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    return <EditCourseForm courseId={id} />
+    return <EditQuestForm questId={id} />
 }

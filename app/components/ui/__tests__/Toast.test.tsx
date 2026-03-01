@@ -26,12 +26,12 @@ describe('Toast Component', () => {
     })
 
     it('renders the correct icon for success type', () => {
-        render(<Toast {...defaultProps} type="course_approved" />)
+        render(<Toast {...defaultProps} type="quest_approved" />)
         expect(screen.getByText('✅')).toBeInTheDocument()
     })
 
     it('renders the correct icon for error type', () => {
-        render(<Toast {...defaultProps} type="course_rejected" />)
+        render(<Toast {...defaultProps} type="quest_rejected" />)
         expect(screen.getByText('❌')).toBeInTheDocument()
     })
 

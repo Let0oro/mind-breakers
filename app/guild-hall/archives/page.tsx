@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { CardCourse } from '@/components/ui/CardCourse'
-import { CardPath } from '@/components/ui/CardPath'
+import { CardQuest } from '@/components/ui/CardQuest'
+import { CardExpedition } from '@/components/ui/CardExpedition'
 import { getUserLibraryData } from '@/lib/queries'
 
 export const metadata = {
@@ -78,13 +78,13 @@ export default async function LibraryPage() {
 
     // Fetch all library data using centralized query function
     const libraryData = await getUserLibraryData(supabase, user.id, {
-        drafts: 4,
-        courses: 4,
-        paths: 4,
-        organizations: 6
+        drafts: 100,
+        quests: 100,
+        expeditions: 100,
+        organizations: 12
     })
 
-    const { drafts, courses, paths, organizations, savedPathIds, exerciseStats } = libraryData
+    const { drafts, quests, expeditions, organizations, savedExpeditionIds, exerciseStats } = libraryData
 
     return (
         <>
@@ -101,11 +101,11 @@ export default async function LibraryPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                 <div className="border border-border bg-main p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Quests</p>
-                    <p className="text-3xl font-black text-text-main">{courses.length}</p>
+                    <p className="text-3xl font-black text-text-main">{quests.length}</p>
                 </div>
                 <div className="border border-border bg-main p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">expeditions</p>
-                    <p className="text-3xl font-black text-text-main">{paths.length}</p>
+                    <p className="text-3xl font-black text-text-main">{expeditions.length}</p>
                 </div>
                 <div className="border border-border bg-main p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Drafts</p>
@@ -123,11 +123,11 @@ export default async function LibraryPage() {
                 icon="edit_note"
                 href="/guild-hall/drafts"
                 count={drafts.length}
-                emptyMessage="No drafts. Start creating a course!"
+                emptyMessage="No drafts. Start creating a quest!"
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {drafts.map((draft) => (
-                        <CardCourse
+                        <CardQuest
                             key={draft.id}
                             id={draft.id}
                             title={draft.title}
@@ -142,60 +142,67 @@ export default async function LibraryPage() {
                 </div>
             </Section>
 
-            {/* Courses Section */}
+            {/* Quests Section */}
             <Section
                 title="My Quests"
                 icon="school"
                 href="/guild-hall/quests"
-                count={courses.length}
+                count={quests.length}
                 createHref="/guild-hall/quests/new"
                 createLabel="New"
-                emptyMessage="No courses yet. Explore and enroll in some!"
+                emptyMessage="No quests yet. Explore and enroll in some!"
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {courses.map((course) => (
-                        <CardCourse
-                            key={course.id}
-                            id={course.id}
-                            title={course.title}
-                            thumbnail_url={course.thumbnail_url}
-                            xp_reward={course.xp_reward}
-                            summary={course.summary}
-                            status={course.status}
-                            instructor={course.organizations?.[0]?.name}
+                    {quests.map((quest) => (
+                        <CardQuest
+                            key={quest.id}
+                            id={quest.id}
+                            title={quest.title}
+                            thumbnail_url={quest.thumbnail_url}
+                            xp_reward={quest.xp_reward}
+                            summary={quest.summary}
+                            status={quest.status}
+                            instructor={quest.organizations?.[0]?.name}
                             variant="grid"
                         />
                     ))}
                 </div>
             </Section>
 
-            {/* Paths Section */}
+            {/* Expeditions Section */}
             <Section
                 title="My expeditions"
                 icon="route"
                 href="/guild-hall/expeditions"
-                count={paths.length}
-                emptyMessage="No expeditions saved. Discover learning paths!"
+                count={expeditions.length}
+                emptyMessage="No expeditions saved. Discover expeditions!"
                 createHref="/guild-hall/expeditions/new"
                 createLabel="New"
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {paths.map((path) => {
-                        const courseCount = path.courses?.length || 0
-                        const org = Array.isArray(path.organizations) ? path.organizations[0] : path.organizations
+                    {expeditions.map((expedition) => {
+                        const questCount = expedition.quests?.length || 0
+                        const expeditionQuestIds = new Set(expedition.quests?.map(q => q.id) || [])
+                        const completedQuestsCount = quests.filter(q =>
+                            expeditionQuestIds.has(q.id) &&
+                            q.user_quest_progress?.[0]?.completed
+                        ).length
+
+                        const progressPercent = questCount > 0 ? (completedQuestsCount / questCount) * 100 : 0
+                        const org = Array.isArray(expedition.organizations) ? expedition.organizations[0] : expedition.organizations
 
                         return (
-                            <CardPath
-                                key={path.id}
-                                id={path.id}
-                                title={path.title}
-                                summary={path.summary}
-                                completedCourses={0}
-                                totalCourses={courseCount}
-                                progressPercent={0}
-                                isSaved={savedPathIds.has(path.id)}
-                                isValidated={path.is_validated}
-                                isOwner={path.created_by === user.id}
+                            <CardExpedition
+                                key={expedition.id}
+                                id={expedition.id}
+                                title={expedition.title}
+                                summary={expedition.summary}
+                                completedQuests={completedQuestsCount}
+                                totalQuests={questCount}
+                                progressPercent={progressPercent}
+                                isSaved={savedExpeditionIds.has(expedition.id)}
+                                isValidated={expedition.is_validated}
+                                isOwner={expedition.created_by === user.id}
                                 organizationName={org?.name}
                                 variant="card"
                             />
@@ -218,7 +225,7 @@ export default async function LibraryPage() {
                     {organizations.map((org) => (
                         <Link
                             key={org.id}
-                            href={`/guild-hall/paths?org=${org.id}`}
+                            href={`/guild-hall/expeditions?org=${org.id}`}
                             className="border border-border bg-main p-4 hover:border-text-main transition-colors group"
                         >
                             <div className="w-10 h-10 border border-border flex items-center justify-center mb-3">

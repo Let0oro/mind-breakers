@@ -7,7 +7,7 @@ import {
     getPendingQuestsListCached,
     getQuestsWithDraftEditsCached,
     getPendingOrgsListCached,
-    getPendingPathsListCached,
+    getPendingExpeditionsListCached,
     getPendingEditRequestsCached
 } from '@/lib/cache'
 
@@ -32,41 +32,40 @@ export default async function AdminValidationsPage() {
         redirect('/guild-hall')
     }
 
-    // Use cached queries
-    const [pendingCourses, draftCourses, pendingOrgs, pendingPaths, editRequests] = await Promise.all([
+    const [pendingQuests, draftQuests, pendingOrgs, pendingExpeditions, editRequests] = await Promise.all([
         getPendingQuestsListCached(supabase),
         getQuestsWithDraftEditsCached(supabase),
         getPendingOrgsListCached(supabase),
-        getPendingPathsListCached(supabase),
+        getPendingExpeditionsListCached(supabase),
         getPendingEditRequestsCached(supabase)
     ])
 
-    const allPendingCourses = [...pendingCourses, ...draftCourses]
+    const allPendingQuests = [...pendingQuests, ...draftQuests]
 
-    // Fetch existing validated items for duplicates check (still needs real-time data)
-    const [existingOrgsRes, existingCoursesRes, existingPathsRes] = await Promise.all([
+    // Fetch existing validated items for duplicates check
+    const [existingOrgsRes, existingQuestsRes, existingExpeditionsRes] = await Promise.all([
         supabase.from('organizations').select('id, name').eq('is_validated', true),
-        supabase.from('courses').select('id, title').eq('is_validated', true),
-        supabase.from('learning_paths').select('id, title').eq('is_validated', true),
+        supabase.from('quests').select('id, title').eq('is_validated', true),
+        supabase.from('expeditions').select('id, title').eq('is_validated', true),
     ])
 
     const pendingItems = {
-        courses: allPendingCourses,
+        quests: allPendingQuests,
         organizations: pendingOrgs,
-        paths: pendingPaths,
+        expeditions: pendingExpeditions,
         edits: editRequests as EditRequest[],
     }
 
     const existingItems = {
         organizations: existingOrgsRes.data?.map(o => ({ id: o.id, name: o.name })) || [],
-        courses: existingCoursesRes.data?.map(c => ({ id: c.id, name: c.title })) || [],
-        paths: existingPathsRes.data?.map(p => ({ id: p.id, name: p.title })) || [],
+        quests: existingQuestsRes.data?.map(c => ({ id: c.id, name: c.title })) || [],
+        expeditions: existingExpeditionsRes.data?.map(p => ({ id: p.id, name: p.title })) || [],
     }
 
     const totalPending =
-        pendingItems.courses.length +
+        pendingItems.quests.length +
         pendingItems.organizations.length +
-        pendingItems.paths.length +
+        pendingItems.expeditions.length +
         pendingItems.edits.length
 
     return (

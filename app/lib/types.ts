@@ -17,9 +17,9 @@ export interface Profile {
   // featured_content?: any[] 
 }
 
-export interface PathOwner {
+export interface ExpeditionOwner {
   id: string
-  path_id: string
+  expedition_id: string
   user_id: string
   created_at: string
 }
@@ -39,9 +39,9 @@ export interface Organization {
 }
 
 // Tipos de curso y ejercicios
-export interface CourseExercise {
+export interface QuestExercise {
   id: string
-  course_id: string
+  quest_id: string
   title: string
   description?: string
   requirements?: string
@@ -49,18 +49,18 @@ export interface CourseExercise {
   uk: string
 }
 
-export interface UserCourseProgress {
+export interface UserQuestProgress {
   id: string
   user_id: string
-  course_id: string
+  quest_id: string
   completed: boolean
   completed_at?: string
   xp_earned: number
 }
 
-export interface Course {
+export interface Quest {
   id: string
-  path_id: string
+  expedition_id: string
   title: string
   summary?: string
   description?: string
@@ -78,12 +78,12 @@ export interface Course {
   archived_at?: string | null
   status?: 'draft' | 'published' | 'archived'
   organizations?: Organization
-  course_exercises?: CourseExercise[]
-  user_course_progress?: UserCourseProgress[]
+  quest_exercises?: QuestExercise[]
+  user_quest_progress?: UserQuestProgress[]
   uk: string
 }
 
-export interface LearningPath {
+export interface Expedition {
   id: string
   title: string
   summary?: string
@@ -93,14 +93,14 @@ export interface LearningPath {
   created_at: string
   is_validated?: boolean
   organizations?: Organization
-  courses?: Course[]
+  quests?: Quest[]
   uk: string
 }
 
 // Edit Request Type for Admin Validations
 export interface EditRequest {
   id: string
-  resource_type: 'courses' | 'learning_paths' | 'organizations'
+  resource_type: 'quests' | 'expeditions' | 'organizations'
   resource_id: string
   data: Record<string, unknown>
   reason: string | null
@@ -111,9 +111,9 @@ export interface EditRequest {
 }
 
 // Tipos específicos para queries con relaciones - CORREGIDOS
-export interface SavedPathItem {
-  path_id: string
-  learning_paths: {
+export interface SavedExpeditionItem {
+  expedition_id: string
+  expeditions: {
     id: string
     title: string
     summary?: string
@@ -127,13 +127,13 @@ export interface SavedPathItem {
 export interface RecentProgressItem {
   id: string
   user_id: string
-  course_id: string
+  quest_id: string
   completed: boolean
   completed_at?: string
   xp_earned: number
-  courses: {
+  quests: {
     title: string
-    learning_paths: {
+    expeditions: {
       title: string
     } | null
   }
@@ -144,22 +144,22 @@ export interface ExerciseSubmission {
   user_id: string
   exercise_id: string
   submission_type: string
-  file_path?: string
+  file_expedition?: string
   drive_url?: string
   github_repo_url?: string
   submitted_at: string
   status: string
-  course_exercises: {
+  quest_exercises: {
     id: string
     title: string
   }
 }
 
-export interface PathWithCourses extends LearningPath {
-  courses: Course[]
+export interface ExpeditionWithQuests extends Expedition {
+  quests: Quest[]
 }
 
-export interface PathListItem {
+export interface ExpeditionListItem {
   id: string
   title: string
   summary?: string
@@ -174,12 +174,12 @@ export interface PathListItem {
     id: string
     name: string
   }> | null
-  courses?: Array<{ id: string }>
-  saved_paths?: Array<{ user_id: string }>
+  quests?: Array<{ id: string }>
+  saved_expeditions?: Array<{ user_id: string }>
 }
 
 // Alias para compatibilidad con código anterior
-export type SavedPath = SavedPathItem
+export type SavedExpedition = SavedExpeditionItem
 export type RecentProgress = RecentProgressItem
 
 // Tipos para breadcrumbs
@@ -219,9 +219,9 @@ export interface Notification {
   expires_at: string
 }
 
-export interface PathResource {
+export interface ExpeditionResource {
   id: string
-  path_id: string
+  expedition_id: string
   user_id: string | null
   title: string
   type: 'link' | 'text'

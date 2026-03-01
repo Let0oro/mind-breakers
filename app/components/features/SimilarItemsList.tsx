@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 interface SimilarItemsListProps {
-    type: 'courses' | 'learning_paths' | 'organizations'
+    type: 'quests' | 'expeditions' | 'organizations'
     query: string
     currentId?: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,7 +76,7 @@ export default function SimilarItemsList({ type, query, currentId, onAdapt }: Si
                             </p>
                         )}
 
-                        {onAdapt && type === 'courses' && (
+                        {onAdapt && type === 'quests' && (
                             <button
                                 type="button"
                                 onClick={() => onAdapt(item)}
@@ -87,9 +87,9 @@ export default function SimilarItemsList({ type, query, currentId, onAdapt }: Si
                             </button>
                         )}
 
-                        {type !== 'courses' && (
+                        {type !== 'quests' && (
                             <div className="mt-2 text-xs text-amber-600 dark:text-amber-500">
-                                consider using this existing {type === 'learning_paths' ? 'path' : 'organization'}
+                                consider using this existing {type === 'expeditions' ? 'expedition' : 'organization'}
                             </div>
                         )}
                     </div>

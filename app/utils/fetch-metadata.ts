@@ -17,7 +17,7 @@ export interface FetchMetadataResult {
 }
 
 /**
- * XP tiers based on course duration
+ * XP tiers based on quest duration
  */
 const XP_TIERS = [
     { maxHours: 2, xp: 25 },
@@ -29,7 +29,7 @@ const XP_TIERS = [
 ]
 
 /**
- * Calculate XP reward based on course duration in hours
+ * Calculate XP reward based on quest duration in hours
  * Returns 0 if duration is not available (user should set manually)
  */
 export function calculateXPFromDuration(durationHours?: number): number {

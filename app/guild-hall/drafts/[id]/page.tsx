@@ -9,21 +9,21 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    // Fetch the draft course
-    const { data: course, error } = await supabase
-        .from('courses')
+    // Fetch the draft quest
+    const { data: quest, error } = await supabase
+        .from('quests')
         .select(`
             *,
-            learning_paths (id, title),
+            expeditions (id, title),
             organizations (name, website_url),
-            course_exercises (*)
+            quest_exercises (*)
         `)
         .eq('id', id)
         .eq('created_by', user.id)
         .eq('status', 'draft')
         .single()
 
-    if (error || !course) notFound()
+    if (error || !quest) notFound()
 
     return (
         <>
@@ -39,7 +39,7 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                     </div>
                 </div>
                 <Link
-                    href={`/guild-hall/drafts/${course.id}/edit`}
+                    href={`/guild-hall/drafts/${quest.id}/edit`}
                     className="px-4 py-2 rounded-lg bg-yellow-500 text-text-main font-bold hover:bg-yellow-600 transition-colors flex items-center gap-2"
                 >
                     <span className="material-symbols-outlined text-sm">edit</span>
@@ -60,30 +60,30 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                 <div className="flex lg:items-end text-center sm:text-left lg:justify-between mt-2 lg:gap-4 flex-wrap-reverse justify-center items-center gap-8">
                     <div className="flex-1">
                         <h1 className="text-3xl font-bold text-text-main dark:text-text-main flex items-center gap-3">
-                            {course.title}
+                            {quest.title}
                             <span className="inline-flex items-center rounded-md bg-yellow-50 dark:bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-800 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/20">
                                 Draft
                             </span>
                         </h1>
-                        {course.summary && (
+                        {quest.summary && (
                             <p className="mt-2 text-lg text-muted dark:text-muted">
-                                {course.summary}
+                                {quest.summary}
                             </p>
                         )}
                         <div className="mt-3 flex items-center gap-4 text-sm text-muted dark:text-muted">
-                            {course.organizations && (
-                                <span>📚 {course.organizations.name}</span>
+                            {quest.organizations && (
+                                <span>📚 {quest.organizations.name}</span>
                             )}
-                            <span className="text-brand">⚡ {course.xp_reward} XP</span>
-                            {course.course_exercises?.length > 0 && (
-                                <span>✍️ {course.course_exercises.length} mission(s)</span>
+                            <span className="text-brand">⚡ {quest.xp_reward} XP</span>
+                            {quest.quest_exercises?.length > 0 && (
+                                <span>✍️ {quest.quest_exercises.length} mission(s)</span>
                             )}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Link
-                            href={`/guild-hall/drafts/${course.id}/edit`}
+                            href={`/guild-hall/drafts/${quest.id}/edit`}
                             className="rounded-lg bg-brand px-6 py-3 text-text-main font-bold hover:bg-brand/90 transition-colors flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-sm">edit</span>
@@ -101,9 +101,9 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                         <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
                             Description
                         </h2>
-                        {course.description ? (
+                        {quest.description ? (
                             <div className="prose prose-sm prose-invert max-w-none text-muted dark:text-muted">
-                                <p className="whitespace-pre-wrap">{course.description}</p>
+                                <p className="whitespace-pre-wrap">{quest.description}</p>
                             </div>
                         ) : (
                             <p className="text-sm text-muted dark:text-muted/70 italic">
@@ -113,13 +113,13 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                     </div>
 
                     {/* Exercises Preview */}
-                    {course.course_exercises && course.course_exercises.length > 0 && (
+                    {quest.quest_exercises && quest.quest_exercises.length > 0 && (
                         <div className="rounded-xl bg-main dark:bg-surface p-6 border border-border dark:border-border">
                             <h2 className="text-lg font-semibold text-text-main dark:text-text-main mb-4">
-                                Missions ({course.course_exercises.length})
+                                Missions ({quest.quest_exercises.length})
                             </h2>
                             <div className="space-y-3">
-                                {course.course_exercises.map((ex: { id: string; title: string }, i: number) => (
+                                {quest.quest_exercises.map((ex: { id: string; title: string }, i: number) => (
                                     <div key={ex.id} className="p-3 rounded-lg bg-surface dark:bg-sidebar border border-border dark:border-border">
                                         <span className="text-sm font-medium text-text-main dark:text-text-main">
                                             {i + 1}. {ex.title || 'Sin título'}
@@ -138,18 +138,18 @@ export default async function DraftDetailPage({ params }: { params: Promise<{ id
                             Draft Information
                         </h3>
                         <dl className="space-y-3 text-sm">
-                            {course.learning_paths && (
+                            {quest.expeditions && (
                                 <div>
                                     <dt className="text-muted dark:text-muted">Expedition</dt>
                                     <dd className="mt-1 font-medium text-text-main dark:text-text-main">
-                                        {course.learning_paths.title}
+                                        {quest.expeditions.title}
                                     </dd>
                                 </div>
                             )}
                             <div>
                                 <dt className="text-muted dark:text-muted">XP Reward</dt>
                                 <dd className="mt-1 font-medium text-brand">
-                                    {course.xp_reward} XP
+                                    {quest.xp_reward} XP
                                 </dd>
                             </div>
                             <div>

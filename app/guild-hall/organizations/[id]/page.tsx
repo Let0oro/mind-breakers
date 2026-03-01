@@ -1,6 +1,28 @@
+import { Metadata } from 'next'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params
+    const supabase = await createClient()
+    const { data: org } = await supabase
+        .from('organizations')
+        .select('name, description')
+        .eq('id', id)
+        .single()
+
+    if (!org) return { title: 'Organization Not Found | Mind Breaker' }
+
+    return {
+        title: `${org.name} | Mind Breaker`,
+        description: org.description || `Learn about ${org.name} on Mind Breaker.`,
+        openGraph: {
+            title: org.name,
+            description: org.description || undefined,
+        },
+    }
+}
 
 
 export default async function OrganizationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,13 +37,13 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
         .from('organizations')
         .select(`
       *,
-      learning_paths (
+      expeditions (
         id,
         title,
         summary,
-        courses (id)
+        quests (id)
       ),
-      courses (
+      quests (
         id,
         title,
         summary,
@@ -84,24 +106,24 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         </div>
                     </section>
 
-                    {/* Learning Paths */}
-                    {org.learning_paths && org.learning_paths.length > 0 && (
+                    {/* Expeditions */}
+                    {org.expeditions && org.expeditions.length > 0 && (
                         <section>
-                            <h2 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Learning Paths</h2>
+                            <h2 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Expeditions</h2>
                             <div className="grid gap-4">
-                                {org.learning_paths.map((path: { id: string, title: string, summary: string, courses: { id: string }[] }) => (
+                                {org.expeditions.map((expedition: { id: string, title: string, summary: string, quests: { id: string }[] }) => (
                                     <Link
-                                        key={path.id}
-                                        href={`/guild-hall/paths/${path.id}`}
+                                        key={expedition.id}
+                                        href={`/guild-hall/expeditions/${expedition.id}`}
                                         className="flex items-center justify-between p-4 bg-main dark:bg-surface rounded-xl border border-border dark:border-border hover:border-brand/50 transition-all group"
                                     >
                                         <div>
-                                            <h3 className="font-bold text-text-main dark:text-text-main group-hover:text-brand transition-colors">{path.title}</h3>
-                                            <p className="text-sm text-muted dark:text-muted mt-1 line-clamp-1">{path.summary}</p>
+                                            <h3 className="font-bold text-text-main dark:text-text-main group-hover:text-brand transition-colors">{expedition.title}</h3>
+                                            <p className="text-sm text-muted dark:text-muted mt-1 line-clamp-1">{expedition.summary}</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-xs text-muted">
                                             <span className="material-symbols-outlined text-base">assignment_late</span>
-                                            <span>{path.courses?.length || 0} quests</span>
+                                            <span>{expedition.quests?.length || 0} quests</span>
                                             <span className="material-symbols-outlined text-base ml-2">chevron_right</span>
                                         </div>
                                     </Link>
@@ -110,32 +132,32 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         </section>
                     )}
 
-                    {/* Courses */}
-                    {org.courses && org.courses.length > 0 && (
+                    {/* Quests */}
+                    {org.quests && org.quests.length > 0 && (
                         <section>
                             <h2 className="text-xl font-bold text-text-main dark:text-text-main mb-4">Individual Quests</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {org.courses.map((course: { id: string, title: string, summary: string, thumbnail_url: string | null, xp_reward: number }) => (
+                                {org.quests.map((quest: { id: string, title: string, summary: string, thumbnail_url: string | null, xp_reward: number }) => (
                                     <Link
-                                        key={course.id}
-                                        href={`/guild-hall/quests/${course.id}`}
+                                        key={quest.id}
+                                        href={`/guild-hall/quests/${quest.id}`}
                                         className="group flex flex-col bg-main dark:bg-surface rounded-xl border border-border dark:border-border hover:border-brand/50 transition-all overflow-hidden"
                                     >
                                         <div className="h-32 bg-surface dark:bg-surface-dark relative">
-                                            {course.thumbnail_url ? (
-                                                <img src={course.thumbnail_url} alt={course.title} className="object-cover" />
+                                            {quest.thumbnail_url ? (
+                                                <img src={quest.thumbnail_url} alt={quest.title} className="object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-muted">
                                                     <span className="material-symbols-outlined text-4xl">assignment_late</span>
                                                 </div>
                                             )}
                                             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur text-text-main text-xs px-2 py-1 rounded font-bold">
-                                                {course.xp_reward} XP
+                                                {quest.xp_reward} XP
                                             </div>
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col">
-                                            <h3 className="font-bold text-text-main dark:text-text-main group-hover:text-brand transition-colors line-clamp-2 mb-2">{course.title}</h3>
-                                            {course.summary && <p className="text-xs text-muted dark:text-muted line-clamp-2 mt-auto">{course.summary}</p>}
+                                            <h3 className="font-bold text-text-main dark:text-text-main group-hover:text-brand transition-colors line-clamp-2 mb-2">{quest.title}</h3>
+                                            {quest.summary && <p className="text-xs text-muted dark:text-muted line-clamp-2 mt-auto">{quest.summary}</p>}
                                         </div>
                                     </Link>
                                 ))}
@@ -151,11 +173,11 @@ export default async function OrganizationDetailPage({ params }: { params: Promi
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-muted dark:text-muted text-sm">Expeditions Created</span>
-                                <span className="font-bold text-text-main dark:text-text-main">{org.learning_paths?.length || 0}</span>
+                                <span className="font-bold text-text-main dark:text-text-main">{org.expeditions?.length || 0}</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-muted dark:text-muted text-sm">Quests Created</span>
-                                <span className="font-bold text-text-main dark:text-text-main">{org.courses?.length || 0}</span>
+                                <span className="font-bold text-text-main dark:text-text-main">{org.quests?.length || 0}</span>
                             </div>
                         </div>
                     </div>

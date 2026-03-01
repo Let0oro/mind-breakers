@@ -48,10 +48,10 @@ export async function PATCH(
         const editData = editRequest.data as Record<string, unknown>
 
         let table: string
-        if (resourceType === 'course') {
-            table = 'courses'
-        } else if (resourceType === 'path') {
-            table = 'learning_paths'
+        if (resourceType === 'quest') {
+            table = 'quests'
+        } else if (resourceType === 'expedition') {
+            table = 'expeditions'
         } else if (resourceType === 'organization') {
             table = 'organizations'
         } else {
@@ -80,7 +80,7 @@ export async function PATCH(
 
         revalidateTag(CACHE_TAGS.ADMIN, 'max')
         revalidateTag(CACHE_TAGS.QUESTS, 'max')
-        revalidateTag(CACHE_TAGS.PATHS, 'max')
+        revalidateTag(CACHE_TAGS.EXPEDITIONS, 'max')
         revalidateTag(CACHE_TAGS.ORGANIZATIONS, 'max')
         revalidatePath('/guild-hall/admin/validations')
         revalidatePath('/guild-hall/admin')

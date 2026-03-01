@@ -80,7 +80,6 @@ export async function updateSession(request: NextRequest) {
   // Refresh session if expired
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Protect admin routes
   if (request.nextUrl.pathname.startsWith('/guild-hall/admin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))

@@ -187,7 +187,7 @@ export default function RegisterPage() {
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-main-dark dark:bg-gray-700'
+                    className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-midnight dark:bg-gray-700'
                       }`}
                   />
                 ))}

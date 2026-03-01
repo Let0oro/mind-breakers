@@ -30,7 +30,7 @@ export default function DashboardPage() {
                     </div>
                     <p className="text-muted font-bold text-sm">2,450 / 3,000 XP</p>
                   </div>
-                  <div className="w-full h-4 bg-main-dark rounded-full border dark:border-white/5 border-surface-dark/50 p-1">
+                  <div className="w-full h-4 bg-midnight rounded-full border dark:border-white/5 border-surface-dark/50 p-1">
                     <div className="h-full dark:bg-white/40 bg-midnight/40 rounded-full neon-glow w-4/5"></div>
                   </div>
                 </div>
@@ -42,7 +42,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
-        <footer className="bg-main-dark border-t border-white/10 px-6 lg:px-20 py-10">
+        <footer className="bg-midnight border-t border-white/10 px-6 lg:px-20 py-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-8">
               <div className="flex flex-col gap-4">

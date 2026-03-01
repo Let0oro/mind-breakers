@@ -34,18 +34,18 @@ export async function invalidateQuestCache(questId: string) {
 }
 
 /**
- * Invalidate all path caches
+ * Invalidate all expedition caches
  */
-export async function invalidatePathsCache() {
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+export async function invalidateExpeditionsCache() {
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
 }
 
 /**
- * Invalidate a specific path cache
+ * Invalidate a specific expedition cache
  */
-export async function invalidatePathCache(pathId: string) {
-    revalidateTag(`path-${pathId}`, REVALIDATE_PROFILE)
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+export async function invalidateExpeditionCache(expeditionId: string) {
+    revalidateTag(`expedition-${expeditionId}`, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
 }
 
 /**
@@ -86,7 +86,7 @@ export async function invalidateAdminCache() {
 }
 
 // ============================================================================
-// Path-based Invalidation (for specific routes)
+// Expedition-based Invalidation (for specific routes)
 // ============================================================================
 
 /**
@@ -139,17 +139,17 @@ export async function afterQuestChange(questId?: string) {
 }
 
 /**
- * Call after creating/updating a path
+ * Call after creating/updating a expedition
  */
-export async function afterPathChange(pathId?: string) {
-    if (pathId) {
-        revalidateTag(`path-${pathId}`, REVALIDATE_PROFILE)
+export async function afterExpeditionChange(expeditionId?: string) {
+    if (expeditionId) {
+        revalidateTag(`expedition-${expeditionId}`, REVALIDATE_PROFILE)
     }
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall')
     revalidatePath('/guild-hall/library')
-    revalidatePath('/guild-hall/paths')
+    revalidatePath('/guild-hall/expeditions')
 }
 
 /**
@@ -171,9 +171,9 @@ export async function afterSaveQuestChange(userId: string) {
 }
 
 /**
- * Call after saving/unsaving a path
+ * Call after saving/unsaving a expedition
  */
-export async function afterSavePathChange(userId: string) {
+export async function afterSaveExpeditionChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_SAVED, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall/library')
@@ -185,6 +185,8 @@ export async function afterSavePathChange(userId: string) {
 export async function afterProgressChange(userId: string) {
     revalidateTag(`user-${userId}`, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.USER_PROGRESS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall')
     revalidatePath('/guild-hall/library')
 }
@@ -207,7 +209,7 @@ export async function afterExerciseSubmission(userId: string) {
 export async function afterAdminValidation() {
     revalidateTag(CACHE_TAGS.ADMIN, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.QUESTS, REVALIDATE_PROFILE)
-    revalidateTag(CACHE_TAGS.PATHS, REVALIDATE_PROFILE)
+    revalidateTag(CACHE_TAGS.EXPEDITIONS, REVALIDATE_PROFILE)
     revalidateTag(CACHE_TAGS.ORGANIZATIONS, REVALIDATE_PROFILE)
     revalidatePath('/guild-hall/admin')
     revalidatePath('/guild-hall/admin/validations')
