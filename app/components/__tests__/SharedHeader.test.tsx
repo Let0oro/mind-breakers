@@ -73,17 +73,22 @@ describe('SharedHeader', () => {
         const toggleButton = screen.getByLabelText('Toggle menu')
 
         // Initially closed
-        expect(screen.queryByText('Explore')).not.toBeInTheDocument()
+        expect(screen.getAllByText('Login')).toHaveLength(1)
+        expect(screen.getAllByText('Sign Up')).toHaveLength(1)
 
         // Click to open
         fireEvent.click(toggleButton)
 
-        // Should appear now
-        expect(screen.getByText('world-map')).toBeInTheDocument()
-        expect(screen.getByText('archives')).toBeInTheDocument()
+        expect(screen.getAllByText('Login')).toHaveLength(2)
+        expect(screen.getAllByText('Sign Up')).toHaveLength(2)
 
         // Click to close
         fireEvent.click(toggleButton)
+        expect(screen.getAllByText('Login')).toHaveLength(1)
+        expect(screen.getAllByText('Sign Up')).toHaveLength(1)
         expect(screen.queryByText('Explore')).not.toBeInTheDocument()
+        expect(screen.queryByText('Quests')).not.toBeInTheDocument()
+        expect(screen.queryByText('world-map')).not.toBeInTheDocument()
+        expect(screen.queryByText('archives')).not.toBeInTheDocument()
     })
 })
