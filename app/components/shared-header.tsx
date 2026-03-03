@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 export default function SharedHeader() {
     const expeditionname = usePathname()
     const isAuthPage = expeditionname?.startsWith('/login') || expeditionname?.startsWith('/register')
+    const isHomePage = expeditionname?.startsWith('/')
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
@@ -79,7 +80,7 @@ export default function SharedHeader() {
             {mobileMenuOpen && !isAuthPage && (
                 <div className="md:hidden absolute top-full left-0 border-background bg-background dark:border-midnight dark:bg-midnight right-0 border-b shadow-lg">
                     <nav className="flex flex-col p-4 gap-2 items-stretch bg-background dark:bg-midnight text-center">
-                        {MAIN_NAVIGATION.slice(0, 3).map((link) => (
+                        {!isHomePage && MAIN_NAVIGATION.slice(0, 3).map((link) => (
                             <Link
                                 key={link.href}
                                 className="text-muted hover:text-text-main text-sm font-medium transition-colors py-2"
@@ -99,7 +100,7 @@ export default function SharedHeader() {
                             </Link>
                             <Link
                                 href="/register"
-                                className="bg-inverse hover:bg-inverse/90 text-text-main px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
+                                className="bg-inverse hover:bg-inverse/90 text-gold px-4 py-2 rounded-xl font-bold text-sm transition-all text-center"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 Sign Up
