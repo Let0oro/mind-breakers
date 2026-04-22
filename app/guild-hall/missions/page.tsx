@@ -39,23 +39,23 @@ export default async function MissionsPage({ searchParams }: PageProps) {
     ])
 
     const missionsQuery = supabase
-        .from('quest_missions')
+        .from('quest_exercises')
         .select(`
             id,
             title,
             description,
-            quests (id, title)
+            quests (id, title, xp_reward)
         `)
         .in('quest_id', Array.from(relevantQuestIds))
 
     const { data: missions } = await missionsQuery
 
     const { data: submissions } = await supabase
-        .from('mission_submissions')
-        .select('mission_id, status, created_at')
+        .from('exercise_submissions')
+        .select('exercise_id, status, created_at')
         .eq('user_id', user.id)
 
-    const submissionMap = new Map(submissions?.map(s => [s.mission_id, s]) || [])
+    const submissionMap = new Map(submissions?.map(s => [s.exercise_id, s]) || [])
 
     const missionList = missions?.map(ex => {
         const submission = submissionMap.get(ex.id)
@@ -72,7 +72,7 @@ export default async function MissionsPage({ searchParams }: PageProps) {
             title: ex.title,
             description: ex.description,
             status,
-            xp_reward: 50,
+            xp_reward: (Array.isArray(ex.quests) ? ex.quests[0]?.xp_reward : (ex.quests as { xp_reward: number } | null)?.xp_reward) ?? 50,
             quest_title: Array.isArray(ex.quests) ? ex.quests[0]?.title : (ex.quests as { title: string })?.title,
             quest_id: Array.isArray(ex.quests) ? ex.quests[0]?.id : (ex.quests as { id: string })?.id,
             submitted_at: submission?.created_at
@@ -107,7 +107,7 @@ export default async function MissionsPage({ searchParams }: PageProps) {
     return (
         <>
             <header className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tight text-text-main mb-1">
+                <h1 className="text-5xl font-header text-foreground tracking-tight mb-1">
                     Missions
                 </h1>
                 <p className="text-muted text-sm">

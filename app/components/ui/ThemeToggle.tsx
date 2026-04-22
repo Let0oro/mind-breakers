@@ -60,10 +60,21 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="cursor-pointer rounded-xs p-2 my-auto align-middle text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
-      aria-label="Toggle theme"
+      className="relative cursor-pointer rounded-xs p-2 my-auto align-middle text-text-main border border-transparent hover:border-border dark:hover:border-border transition-all"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-pressed={isDark}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-    <span className="scale-90 material-symbols-outlined">candle</span>
+      <span className="scale-90 material-symbols-outlined block">
+        candle
+      </span>
+      {/* Overlay superpuesto a la llama para 'apagarla' en light mode */}
+      {!isDark && (
+        <span
+          className="absolute top-[8px] left-1/2 -translate-x-1/2 w-2 h-2 bg-main rounded-full z-10"
+          aria-hidden="true"
+        />
+      )}
     </button>
   )
 }

@@ -4,8 +4,8 @@ import { AdminRequestForm } from './AdminRequestForm'
 import { SettingsForm } from './SettingsForm'
 
 export const metadata = {
-    title: 'Settings - MindBreaker',
-    description: 'Manage your account settings',
+    title: 'Armory - MindBreaker',
+    description: 'Manage your account and preferences',
 }
 
 export default async function SettingsPage() {

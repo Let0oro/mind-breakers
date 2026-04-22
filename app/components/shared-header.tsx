@@ -6,21 +6,20 @@ import { usePathname } from 'next/navigation'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import Image from 'next/image'
 import { MAIN_NAVIGATION, AUTH_LINKS } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
 
 export default function SharedHeader() {
-    const expeditionname = usePathname()
-    const isAuthPage = expeditionname?.startsWith('/login') || expeditionname?.startsWith('/register')
-    const isHomePage = expeditionname?.startsWith('/')
+    const pathname = usePathname()
+    const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/register')
+    const isHomePage = pathname === '/'
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (
-        <header className="sticky top-0 z-50 border-b  backdrop-blur-md px-4 sm:px-6 lg:px-20 py-2">
+        <header className="sticky top-0 z-50 border-b backdrop-blur-md px-4 sm:px-6 lg:px-20 py-2">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center gap-4 sm:gap-8">
                     <Link href={AUTH_LINKS.home} className="flex items-center gap-2 sm:gap-3 text-foreground hover:opacity-80 transition-opacity">
-                        <img src="/icon.png" alt="MindBreaker" width={38} height={38} />
-                        <h2 className="text-foreground text-xl sm:text-2xl font-bold tracking-tight">MindBreaker</h2>
+                        <Image src="/icon.png" alt="MindBreaker logo" width={38} height={38} priority />
+                        <span className="text-foreground text-xl sm:text-2xl font-bold tracking-tight font-sans">MindBreaker</span>
                     </Link>
                 </div>
 
@@ -35,12 +34,12 @@ export default function SharedHeader() {
                             >
                                 Back to Home
                             </Link>
-                            {expeditionname?.startsWith(AUTH_LINKS.login) ? (
-                                <Link href={AUTH_LINKS.register} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-text-main text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
+                            {pathname?.startsWith(AUTH_LINKS.login) ? (
+                                <Link href={AUTH_LINKS.register} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-sm h-9 sm:h-10 px-3 sm:px-4 bg-gold text-midnight text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gold/90 transition-colors">
                                     <span className="truncate">Create account</span>
                                 </Link>
                             ) : (
-                                <Link href={AUTH_LINKS.login} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 sm:h-10 px-3 sm:px-4 bg-brand text-text-main text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-brand/90 transition-colors">
+                                <Link href={AUTH_LINKS.login} className="flex cursor-pointer items-center justify-center overflow-hidden rounded-sm h-9 sm:h-10 px-3 sm:px-4 bg-gold text-midnight text-xs sm:text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gold/90 transition-colors">
                                     <span className="truncate">Login</span>
                                 </Link>
                             )}
@@ -65,7 +64,9 @@ export default function SharedHeader() {
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 className="sm:hidden p-2 text-muted hover:text-text-main transition-colors"
-                                aria-label="Toggle menu"
+                                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                                aria-expanded={mobileMenuOpen}
+                                aria-controls="mobile-menu"
                             >
                                 <span className="material-symbols-outlined">
                                     {mobileMenuOpen ? 'close' : 'menu'}
@@ -78,8 +79,14 @@ export default function SharedHeader() {
 
             {/* Mobile menu dropdown */}
             {mobileMenuOpen && !isAuthPage && (
-                <div className="md:hidden absolute top-full left-0 border-background bg-background dark:border-midnight dark:bg-midnight right-0 border-b shadow-lg">
-                    <nav className="flex flex-col p-4 gap-2 items-stretch bg-background dark:bg-midnight text-center">
+                <div
+                    id="mobile-menu"
+                    className="md:hidden absolute top-full left-0 border-background bg-background dark:border-midnight dark:bg-midnight right-0 border-b shadow-lg"
+                >
+                    <nav
+                        aria-label="Mobile navigation"
+                        className="flex flex-col p-4 gap-2 items-stretch bg-background dark:bg-midnight text-center"
+                    >
                         {!isHomePage && MAIN_NAVIGATION.slice(0, 3).map((link) => (
                             <Link
                                 key={link.href}

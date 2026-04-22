@@ -6,8 +6,8 @@ import { CardExpedition } from '@/components/ui/CardExpedition'
 import { getUserLibraryData } from '@/lib/queries'
 
 export const metadata = {
-    title: 'Library - MindBreaker',
-    description: 'Your personal learning library',
+    title: 'Archives - MindBreaker',
+    description: 'Your personal learning history and library',
 }
 
 // Section component extracted outside of render
@@ -84,63 +84,77 @@ export default async function LibraryPage() {
         organizations: 12
     })
 
-    const { drafts, quests, expeditions, organizations, savedExpeditionIds, exerciseStats } = libraryData
+    const { drafts, quests, expeditions, organizations, savedExpeditionIds } = libraryData
 
     return (
         <>
-            <header className="mb-10">
-                <h1 className="text-5xl font-header text-foreground tracking-tight mb-1">
-                    Archives
-                </h1>
-                <p className="text-muted text-sm">
-                    Your personal history
-                </p>
+            <header className="mb-10 flex items-end justify-between">
+                <div>
+                    <h1 className="text-5xl font-header text-foreground tracking-tight mb-1">
+                        Archives
+                    </h1>
+                    <p className="text-muted text-sm">
+                        Your personal learning history and library
+                    </p>
+                </div>
             </header>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
                 <div className="border border-border bg-main p-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Quests</p>
                     <p className="text-3xl font-black text-text-main">{quests.length}</p>
                 </div>
                 <div className="border border-border bg-main p-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">expeditions</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Expeditions</p>
                     <p className="text-3xl font-black text-text-main">{expeditions.length}</p>
                 </div>
-                <div className="border border-border bg-main p-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Drafts</p>
+                <div className="border border-border bg-main p-4 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-gold mb-1 flex items-center gap-2">
+                        Pending Drafts
+                        {drafts.length > 0 && <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-gold"></span></span>}
+                    </p>
                     <p className="text-3xl font-black text-text-main">{drafts.length}</p>
-                </div>
-                <div className="border border-border bg-main p-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted mb-1">Missions Done</p>
-                    <p className="text-3xl font-black text-text-main">{exerciseStats.completed}/{exerciseStats.total}</p>
                 </div>
             </div>
 
-            {/* Drafts Section */}
-            <Section
-                title="My Drafts"
-                icon="edit_note"
-                href="/guild-hall/drafts"
-                count={drafts.length}
-                emptyMessage="No drafts. Start creating a quest!"
-            >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {drafts.map((draft) => (
-                        <CardQuest
-                            key={draft.id}
-                            id={draft.id}
-                            title={draft.title}
-                            thumbnail_url={draft.thumbnail_url}
-                            xp_reward={draft.xp_reward}
-                            summary={draft.summary || undefined}
-                            status={draft.status}
-                            variant="draft"
-                            href={`/guild-hall/drafts/${draft.id}/edit`}
-                        />
-                    ))}
-                </div>
-            </Section>
+            {/* --- ACTION REQUIRED: DRAFTS --- */}
+            <div className="mb-12 border-b border-border pb-6">
+                <Section
+                    title="Action Required: My Drafts"
+                    icon="edit_note"
+                    href="/guild-hall/drafts"
+                    count={drafts.length}
+                    emptyMessage="No drafts. Everything is published or you haven't started creating yet!"
+                >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {drafts.map((draft) => (
+                            <div key={draft.id} className="relative">
+                                {/* Visual indicator matching sidebar notification */}
+                                <div className="absolute -top-1 -right-1 z-10 animate-pulse w-3 h-3 bg-gold rounded-full border-2 border-main border-solid shadow-[0_0_8px_rgba(212,175,55,0.5)]"></div>
+                                <CardQuest
+                                    id={draft.id}
+                                    title={draft.title}
+                                    thumbnail_url={draft.thumbnail_url}
+                                    xp_reward={draft.xp_reward}
+                                    summary={draft.summary || undefined}
+                                    status={draft.status}
+                                    variant="draft"
+                                    href={`/guild-hall/drafts/${draft.id}/edit`}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </Section>
+            </div>
+
+            <div className="mb-6 flex items-center gap-2 text-muted">
+                <span className="material-symbols-outlined">library_books</span>
+                <h3 className="text-xs font-bold uppercase tracking-widest">Published Library & History</h3>
+            </div>
+
+
 
             {/* Quests Section */}
             <Section
@@ -246,40 +260,7 @@ export default async function LibraryPage() {
                 </div>
             </Section>
 
-            {/* Exercises Quick Link */}
-            <section className="mb-10">
-                <Link
-                    href="/guild-hall/missions"
-                    className="block border border-border bg-main p-6 hover:border-text-main transition-colors group"
-                >
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 border border-border">
-                                <span className="material-symbols-outlined text-2xl text-text-main">assignment</span>
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-text-main group-hover:underline">Missions</h2>
-                                <p className="text-muted text-sm">Practice and apply what you&apos;ve learned</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-6">
-                            <div className="text-right">
-                                <p className="text-2xl font-black text-text-main">{exerciseStats.completed}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest text-muted">Completed</p>
-                            </div>
-                            {exerciseStats.pending > 0 && (
-                                <div className="text-right">
-                                    <p className="text-2xl font-black text-amber-500">{exerciseStats.pending}</p>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-amber-500">Pending</p>
-                                </div>
-                            )}
-                            <span className="material-symbols-outlined text-muted group-hover:text-text-main transition-colors">
-                                arrow_forward
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-            </section>
+
         </>
     )
 }

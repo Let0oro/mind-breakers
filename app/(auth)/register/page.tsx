@@ -125,7 +125,7 @@ export default function RegisterPage() {
 
           {/* Headline */}
           <div className="mb-4">
-            <h2 className="text-black dark:text-text-main text-3xl font-bold mb-2">Create your account</h2>
+            <h2 className="text-black dark:text-text-main text-3xl font-bold mb-2">Create Your Account</h2>
           </div>
 
           {/* Error & Message */}
@@ -170,39 +170,41 @@ export default function RegisterPage() {
 
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <div className="flex justify-between">
-                <label className="text-sm font-bold text-black dark:text-text-main px-1">Password</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between">
+                  <label className="text-sm font-bold text-black dark:text-text-main px-1">Password</label>
+                </div>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xs border border-border dark:border-border bg-main dark:bg-surface text-black dark:text-text-main focus:ring-2 focus:ring-ring focus:border-transparent outline-none"
+                  placeholder="••••••••"
+                />
+                {/* Password Strength Bar */}
+                <div className="flex gap-1 px-1 mt-1">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-midnight dark:bg-gray-700'
+                        }`}
+                    />
+                  ))}
+                </div>
               </div>
-              <input
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-xs border border-border dark:border-border bg-main dark:bg-surface text-black dark:text-text-main focus:ring-2 focus:ring-ring focus:border-transparent outline-none"
-                placeholder="••••••••"
-              />
-              {/* Password Strength Bar */}
-              <div className="flex gap-1 px-1 mt-1">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColors[passwordStrength] : 'bg-midnight dark:bg-gray-700'
-                      }`}
-                  />
-                ))}
-              </div>
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-bold text-black dark:text-text-main px-1">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full h-12 px-4 rounded-xs border border-border dark:border-border bg-main dark:bg-surface text-black dark:text-text-main focus:ring-2 focus:ring-ring focus:border-transparent outline-none"
-                placeholder="••••••••"
-              />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-bold text-black dark:text-text-main px-1">Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xs border border-border dark:border-border bg-main dark:bg-surface text-black dark:text-text-main focus:ring-2 focus:ring-ring focus:border-transparent outline-none"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
 

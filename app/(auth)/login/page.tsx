@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState({ google: false, github: false, email: false })
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
 
@@ -104,7 +105,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-6">
           {/* Error Message */}
           {error && (
-            <div className="rounded-xs bg-red-500/20 border border-red-500/30 p-4">
+            <div role="alert" aria-live="assertive" className="rounded-xs bg-red-500/20 border border-red-500/30 p-4">
               <p className="text-red-500 text-sm font-medium">{error}</p>
             </div>
           )}
@@ -127,26 +128,34 @@ export default function LoginPage() {
           {/* Password Field */}
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center mb-1">
-              <p className="text-text-main text-sm font-medium leading-normal">Password</p>
+              <label htmlFor="password" className="text-text-main text-sm font-medium leading-normal">Password</label>
               <a className="text-text-main text-sm font-semibold hover:underline" href="/forgot-password">Forgot password?</a>
             </div>
-            <label className="flex flex-col">
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted dark:text-muted w-5 h-5" >
-                  lock
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-muted w-5 h-5">
+                lock
+              </span>
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xs text-text-main focus:outline-0 focus:ring-2 focus:ring-ring/50 border border-border bg-surface dark:bg-main h-14 placeholder:text-muted pl-12 pr-12 text-base font-normal leading-normal"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-text-main transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {showPassword ? 'visibility_off' : 'visibility'}
                 </span>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xs text-text-main dark:text-text-main focus:outline-0 focus:ring-2 focus:ring-ring/50 border border-border dark:border-border bg-surface dark:bg-main h-14 placeholder:text-muted dark:placeholder:text-muted pl-12 pr-4 text-base font-normal leading-normal"
-                />
-              </div>
-            </label>
+              </button>
+            </div>
           </div>
 
           {/* Remember Me */}
@@ -156,7 +165,7 @@ export default function LoginPage() {
               type="checkbox"
               checked={rememberMe}
               onChange={handleRememberMeChange}
-              className="w-5 h-5 rounded border-border dark:border-border text-brand focus:ring-ring dark:bg-main"
+              className="w-5 h-5 rounded border-border dark:border-border text-gold focus:ring-ring dark:bg-main"
             />
             <label className="text-sm text-muted dark:text-muted font-medium cursor-pointer" htmlFor="remember">Remember me for 30 days</label>
           </div>
@@ -165,7 +174,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading.email || loading.google || loading.github}
-            className="w-full h-auto py-3 bg-inverse hover:bg-inverse/90 text-main-alt disabled:opacity-50 disabled:cursor-not-allowed rounded-xs font-bold text-lg transition-all active:scale-[0.98] flex items-center justify-center"
+            className="w-full h-auto py-3 bg-gold hover:bg-gold/90 text-midnight disabled:opacity-50 disabled:cursor-not-allowed rounded-xs font-bold text-lg transition-all active:scale-[0.98] flex items-center justify-center"
           >
             {loading.email ? (
               <div className="animate-spin rounded-full h-3 w-3 border-2 border-current border-t-transparent" />
@@ -227,7 +236,7 @@ export default function LoginPage() {
         <div className="mt-10 text-center">
           <p className="text-muted dark:text-muted text-sm">
             {"Don't have an account yet?"}
-            <a className="text-brand font-bold hover:underline ml-1" href="/register">Join the community</a>
+            <a className="text-gold font-bold hover:underline ml-1" href="/register">Join the community</a>
           </p>
         </div>
       </div>

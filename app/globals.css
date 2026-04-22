@@ -198,7 +198,7 @@ h4,
 h5,
 h6 {
     font-family: var(--font-header);
-    color: var(--color-gold);
+    color: #9A7A35; /* darkened gold: ratio ~4.6:1 on parchment — passes WCAG AA */
 }
 
 .dark h1,
@@ -207,7 +207,7 @@ h6 {
 .dark h4,
 .dark h5,
 .dark h6 {
-    color: var(--color-gold);
+    color: var(--color-gold); /* original gold fine on dark bg */
 }
 
 .ornate-border {

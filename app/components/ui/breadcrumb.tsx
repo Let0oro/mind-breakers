@@ -11,17 +11,22 @@ interface BreadcrumbProps {
 
 // Mapeo de segmentos de URL a etiquetas legibles
 const SEGMENT_LABELS: Record<string, string> = {
-    dashboard: 'Dashboard',
-    quests: 'Quests',
-    expeditions: 'Expeditions',
-    missions: 'Missions',
-    organizations: 'Orgs',
-    leaderboard: 'Leaderboard',
-    admin: 'Admin',
-    submissions: 'Submissions',
-    new: 'New',
-    edit: 'Edit',
-    submit: 'Submit',
+    'guild-hall': 'Guild Hall',
+    'world-map': 'World Map',
+    'archives': 'Archives',
+    'armory': 'Armory',
+    'dashboard': 'Dashboard',
+    'quests': 'Quests',
+    'expeditions': 'Expeditions',
+    'missions': 'Missions',
+    'organizations': 'Organizations',
+    'leaderboard': 'Leaderboard',
+    'admin': 'Admin',
+    'submissions': 'Submissions',
+    'drafts': 'Drafts',
+    'new': 'New',
+    'edit': 'Edit',
+    'submit': 'Submit',
 }
 
 export default function Breadcrumb({ items, autoGenerate = true }: BreadcrumbProps) {
@@ -81,7 +86,7 @@ function BreadcrumbNav({ items }: { items: BreadcrumbItem[] }) {
     if (!items || items.length === 0) return null
 
     return (
-        <nav className="flex items-center gap-2 text-sm/6 font-thin md:font-medium mb-2 md:mb-6 md:text-sm">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm/6 font-thin md:font-medium mb-2 md:mb-6 md:text-sm">
             {items.map((item, index) => {
                 const isLast = index === items.length - 1
 

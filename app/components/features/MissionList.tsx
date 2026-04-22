@@ -31,7 +31,7 @@ export function MissionList({ missions }: { missions: Mission[] }) {
             {missions.map((mission) => (
                 <div
                     key={mission.id}
-                    className="group bg-main  border border-border dark:border-border p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-brand/50 transition-all"
+                    className="group bg-main  border border-border dark:border-border p-6 flex flex-col md:flex-row gap-6 md:items-center hover:border-gold/50 transition-all"
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
@@ -49,7 +49,7 @@ export function MissionList({ missions }: { missions: Mission[] }) {
                             )}
                         </div>
 
-                        <h3 className="text-text-main dark:text-text-main font-bold text-lg mb-2 group-hover:text-brand transition-colors">
+                        <h3 className="text-text-main dark:text-text-main font-bold text-lg mb-2 group-hover:text-gold transition-colors">
                             {mission.title}
                         </h3>
 
@@ -62,7 +62,7 @@ export function MissionList({ missions }: { missions: Mission[] }) {
 
                     <div className="flex items-center gap-4 md:border-l md:border-border dark:border-border md:pl-6">
                         {mission.xp_reward && (
-                            <div className="flex items-center gap-1 text-brand font-bold whitespace-nowrap">
+                            <div className="flex items-center gap-1 text-gold font-bold whitespace-nowrap">
                                 <span className="material-symbols-outlined text-sm">star</span>
                                 <span>{mission.xp_reward} XP</span>
                             </div>
@@ -70,9 +70,9 @@ export function MissionList({ missions }: { missions: Mission[] }) {
 
                         <Link
                             href={`/guild-hall/missions/${mission.id}/submit`}
-                            className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors whitespace-nowrap ${mission.status === 'completed' || mission.status === 'pending_review'
+                            className={`px-4 py-2 rounded-sm font-bold text-sm transition-colors whitespace-nowrap ${mission.status === 'completed' || mission.status === 'pending_review'
                                 ? 'bg-surface-dark text-text-main dark:text-text-main hover:bg-border'
-                                : 'bg-brand text-text-main dark:text-text-main hover:bg-brand/80'
+                                : 'bg-gold text-midnight hover:bg-gold/80'
                                 }`}
                         >
                             {mission.status === 'completed' ? 'View Submission' :

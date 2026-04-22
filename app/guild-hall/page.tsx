@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { CardQuest } from '@/components/ui/CardQuest'
 import { CardExpedition } from '@/components/ui/CardExpedition'
 import Recommendations from '@/components/features/Recommendations'
-import { getLevelProgress } from '@/lib/gamification'
 import type { ExpeditionListItem, UserQuestProgress } from '@/lib/types'
 import {
   getUserProgressCached,
@@ -92,7 +91,10 @@ export default async function DashboardPage() {
     <div className="flex-1 overflow-y-auto px-4 py-8 md:px-12 md:py-8 scroll-smooth">
       {/* Header Section */}
       <header className="flex flex-wrap justify-between items-end gap-6 mb-10">
-        <h1 className="text-5xl font-header text-foreground tracking-tight">Guild Hall</h1>
+        <div>
+          <h1 className="text-5xl font-header text-foreground tracking-tight">Guild Hall</h1>
+          <p className="text-muted text-sm mt-1">Your quests and expeditions</p>
+        </div>
         <div className="flex items-center gap-4 mt-2">
           <div className="flex flex-col">
             <span className="text-[10px] uppercase tracking-widest text-muted">Reputation</span>
@@ -118,7 +120,7 @@ export default async function DashboardPage() {
             href="/guild-hall/expeditions"
             className="text-[10px] uppercase tracking-[0.2em] text-muted hover:text-gold transition-colors"
           >
-            Ver Todas las Expediciones →
+            View All Expeditions →
           </Link>
         </div>
 
@@ -152,9 +154,9 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="p-8 border border-dashed border-border text-center bg-background/30">
-            <p className="text-muted italic mb-4">&quot;No expeditions currently charted in your logbook.&quot;</p>
+            <p className="text-muted italic mb-4">No expeditions joined yet. Head to World Map to discover learning paths.</p>
             <Link href="/guild-hall/world-map?tab=expeditions" className="text-gold hover:text-gold/80 text-xs font-bold uppercase tracking-widest border-b border-gold/30 hover:border-gold pb-0.5 transition-all">
-              Chart New Quest →
+              Explore World Map →
             </Link>
           </div>
         )}
@@ -171,7 +173,7 @@ export default async function DashboardPage() {
             href="/guild-hall/quests"
             className="text-[10px] uppercase tracking-[0.2em] text-muted hover:text-gold transition-colors"
           >
-            Ver Todas las Quests →
+            View All Quests →
           </Link>
         </div>
 
@@ -203,12 +205,12 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="border border-dashed border-border p-8 text-center bg-background/30">
-            <p className="text-muted text-sm italic">No active quests in your logbook.</p>
+            <p className="text-muted text-sm italic">No quests enrolled yet. Browse available quests in the World Map.</p>
             <Link
               href="/guild-hall/world-map"
               className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-gold hover:underline"
             >
-              Check Board →
+              Go to World Map →
             </Link>
           </div>
         )}

@@ -190,7 +190,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                 </div>
                 <div className="border border-border p-4">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-bold uppercase tracking-widest text-muted">Level {currentLevel + 1}</p>
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted">Level {currentLevel}</p>
                         <p className="text-xs font-bold text-text-main">{Math.round(progressPercent)}%</p>
                     </div>
                     <div className="h-1 bg-surface-dark w-full">
