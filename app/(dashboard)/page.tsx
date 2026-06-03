@@ -13,10 +13,10 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
           <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-cyan-700/10 rounded-full blur-[80px] pointer-events-none"></div>
 
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-7xl mx-auto flex-col gap-16 justify-center text-center items-center">
 
             {/* Left Copy */}
-            <div className="space-y-8 z-10">
+            <div className="space-y-8 z-10 flex flex-col items-center">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border text-xs font-bold tracking-widest uppercase text-gold">
                 <span className="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
                 The Gamified Learning Tracker
@@ -25,7 +25,7 @@ export default function DashboardPage() {
                 Forge Your <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-amber-200">Knowledge Arsenal</span>
               </h1>
-              <p className="text-muted text-lg md:text-xl max-w-xl leading-relaxed">
+              <p className="text-muted text-lg md:text-xl max-w-xl  leading-relaxed">
                 MindBreaker transforms your coding courses, tutorials, and articles into epic Expeditions and Quests. Track your mastery, complete missions, and level up your professional skills in an RPG-inspired environment.
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
@@ -45,7 +45,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Right Visual / Widget */}
-            <div className="relative z-10">
+          {/* <div className="relative z-10">
               <div className="absolute -inset-1 bg-gradient-to-r from-gold/20 to-transparent rounded-xs blur-lg"></div>
               <div className="relative dark:bg-surface-dark bg-surface/80 backdrop-blur-xl border border-white/10 rounded-xs p-8 shadow-2xl overflow-hidden group">
                 <div className="space-y-6 mb-8">
@@ -67,7 +67,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="pt-4 grid grid-cols-3 gap-4 text-center">
+                 <div className="pt-4 grid grid-cols-3 gap-4 text-center">
                     <div className="bg-main/50 p-3 rounded-xs border border-border">
                       <p className="text-xl font-bold text-text-main">14</p>
                       <p className="text-[9px] uppercase tracking-widest text-muted mt-1">Quests</p>
@@ -83,11 +83,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </section>
 
-        {/* Features / App Explanation */}
+       {/* Features / App Explanation */}
         <section className="py-24 px-6 lg:px-20 bg-surface/30 border-y border-border">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16 space-y-4">
